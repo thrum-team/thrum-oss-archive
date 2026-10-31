@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Troubleshooting Identity Issues — Thrum</title>
+  <meta name="description" content="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Troubleshooting Identity Issues — Thrum">
+  <meta property="og:description" content="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">
+  <meta property="og:url" content="https://thrum.team/docs/troubleshooting-identity.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Troubleshooting Identity Issues — Thrum">
+  <meta name="twitter:description" content="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/troubleshooting-identity.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Troubleshooting Identity Issues","description":"Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.","url":"https://thrum.team/docs/troubleshooting-identity.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link active" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Troubleshooting Identity Issues</h2>
+<h3>How to use this page</h3>
+<p>Paste your error string into your browser&#39;s Find (Cmd-F / Ctrl-F). Jump to the
+matching section. Each section starts with the verbatim error text, explains
+what the daemon was protecting against, and gives the fix.</p>
+<p>If you&#39;ve never seen identity guards before, start with the
+<a href="identity.html#identity-guards">Identity Guards</a> section in the main identity doc
+for the conceptual model. This page is purely operational — cause and fix for
+each error, nothing more.</p>
+<hr>
+<h3><code>cross_worktree</code> — pid_mismatch</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;cross_worktree&quot; fired: pid_mismatch
+  expected agent: furiosa
+  detected agent: coord_main
+  expected pid: 98412
+  caller pid: 12050
+  caller cwd: /Users/leon/.workspaces/thrum/coord
+  remediation: cd to the correct worktree or run &#x27;thrum prime&#x27; to re-claim</code></pre>
+<h4>What happened</h4>
+<p>This is the most common guard. Before the RPC went out, Thrum walked your
+calling process&#39;s ancestor PID chain looking for the agent PID recorded in the
+identity file. The PID wasn&#39;t there. Your shell is inside one worktree but the
+identity it resolved belongs to a different one — the two names in the error
+message are the expected owner versus the agent your CWD actually belongs to.</p>
+<p>This used to be a silent misattribution: the send or write went through under
+the wrong agent&#39;s name. Now it&#39;s a loud error you can act on.</p>
+<h4>Fix</h4>
+<ol>
+<li>Check which worktree you&#39;re in: <code>pwd</code> and compare to the <code>caller cwd</code> in the
+error.</li>
+<li><code>cd</code> to the correct worktree for the agent you meant to act as.</li>
+<li>Retry the command.</li>
+</ol>
+<p>If you genuinely want to act as the agent in your current worktree (not the one
+in <code>expected agent</code>), run <code>thrum prime</code> from your current directory to
+re-register identity here.</p>
+<p>If you&#39;re running a script that <code>cd</code>s between worktrees mid-session, set
+<code>THRUM_HOME</code> to pin the repo path:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">export</span> THRUM_HOME=/path/to/your/repo</code></pre>
+<hr>
+<h3><code>unauthenticated_rpc</code> — identity_mismatch (peercred path)</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;unauthenticated_rpc&quot; fired: identity_mismatch
+  expected agent: furiosa
+  detected agent: coord_main
+  remediation: your current directory is inside &quot;coord_main&quot;&#x27;s worktree. cd into &quot;furiosa&quot;&#x27;s worktree and retry, or drop the identity claim to act as &quot;coord_main&quot;.</code></pre>
+<h4>What happened</h4>
+<p>The daemon connected to your process via <code>SO_PEERCRED</code> (on Linux) or
+<code>LOCAL_PEERPID</code> (on macOS) and got a kernel-verified identity. That identity
+doesn&#39;t match the <code>CallerAgentID</code> your client sent in the RPC frame. This is a
+forgery detection — the daemon refuses to trust a client-supplied claim that
+contradicts what the kernel says.</p>
+<p>Most of the time this isn&#39;t intentional forgery. It&#39;s a stale credential: a tool
+or wrapper sent an old <code>CallerAgentID</code> from a previous session.</p>
+<h4>Fix</h4>
+<ol>
+<li>If you didn&#39;t set <code>CallerAgentID</code> manually, the offending tool is sending
+stale credentials. Restart it.</li>
+<li>If you&#39;re writing a client, stop sending a hardcoded <code>CallerAgentID</code>. Let the
+daemon resolve identity from peercred.</li>
+<li>To act as <code>coord_main</code> (the agent your CWD actually belongs to), drop the
+explicit identity claim entirely and retry from your current directory.</li>
+</ol>
+<p><strong>Config mode doesn&#39;t help.</strong> Setting <code>unauthenticated_rpc</code> to <code>warn</code> or <code>off</code>
+has no effect on <code>identity_mismatch</code> — forgery rejection is foundational. See
+<a href="#guard-mode-downgrade-incident-diagnosis">Guard mode downgrade</a> for what you
+can and can&#39;t configure.</p>
+<p><strong>Narrow exception — shared-worktree claim trust.</strong> If the worktree hosts
+multiple registered agents (e.g. Playwright E2E harness, multi-agent test
+scenarios), and your claimed agent is also registered in the peercred-resolved
+worktree, the daemon trusts the claim and skips the mismatch. You won&#39;t see this
+error in that case. It only fires when peercred puts you in worktree A and the
+claimed agent lives in worktree B — that&#39;s still forgery.</p>
+<hr>
+<h3><code>unauthenticated_rpc</code> — identity_mismatch (ancestor-chain path)</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;unauthenticated_rpc&quot; fired: identity_mismatch
+  expected agent: furiosa
+  detected agent: coord_main
+  remediation: your process ancestor chain belongs to &quot;coord_main&quot;. retry from &quot;coord_main&quot;&#x27;s worktree or tmux pane, or drop the identity claim to act as &quot;coord_main&quot;.</code></pre>
+<h4>What happened</h4>
+<p>CWD-based peercred didn&#39;t match any registered worktree, so the daemon walked
+your process&#39;s ancestor chain instead. It found a registered agent PID in that
+chain — but it was <code>coord_main</code>, not the <code>furiosa</code> your client claimed. Same
+outcome as the peercred path: kernel-level evidence contradicts the claim.</p>
+<p>This usually happens when you&#39;ve changed directory into another worktree during
+a session and then issued a thrum command without re-priming.</p>
+<h4>Fix</h4>
+<ol>
+<li><code>cd</code> back to the worktree you intended to act from and retry.</li>
+<li>Or drop the <code>CallerAgentID</code> claim and let the daemon use <code>coord_main</code> — the
+agent your ancestor chain actually belongs to.</li>
+</ol>
+<p><strong>Config mode doesn&#39;t help here either.</strong> Note that the shared-worktree claim
+trust from the previous section does NOT apply to the ancestor-chain path — it
+only fires when peercred CWD didn&#39;t match a registered worktree at all, so
+there&#39;s no worktree to check the claim against.</p>
+<hr>
+<h3><code>unauthenticated_rpc</code> — anonymous_mutating_rpc</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;unauthenticated_rpc&quot; fired: anonymous_mutating_rpc
+  remediation: cd into a registered agent worktree and retry</code></pre>
+<h4>What happened</h4>
+<p>Peercred ran and resolved your PID. Your CWD didn&#39;t map to any registered
+agent&#39;s worktree, and the ancestor-chain walk also came up empty. You&#39;re calling
+a mutating RPC from outside any known agent context — typically from <code>~</code> or a
+directory that has no <code>.thrum/identities/</code> associated with it.</p>
+<p>Since v0.9.1, this error only fires when the daemon <em>provably</em> classified you as
+anonymous — it walked your CWD to a git root and that git root wasn&#39;t in
+<code>session_refs</code>. If peercred introspection itself failed (the daemon couldn&#39;t
+extract your PID, or gopsutil couldn&#39;t read your CWD), the daemon falls through
+to legacy client-asserted identity instead of rejecting. That distinction
+matters when debugging: this error means &quot;you are outside every registered
+worktree,&quot; not &quot;I couldn&#39;t tell where you are.&quot;</p>
+<h4>Fix</h4>
+<ol>
+<li><p><code>cd</code> into a worktree that has a registered agent:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">cd</span> /path/to/your/repo
+thrum quickstart --name myagent --role implementer --module mymodule</code></pre>
+</li>
+<li><p>Retry your original command.</p>
+</li>
+</ol>
+<p>If you&#39;re starting fresh in a new repo, run <code>thrum init</code> first to initialize the
+<code>.thrum/</code> directory, then <code>thrum quickstart</code> to register.</p>
+<h4>Still seeing it from inside a registered worktree?</h4>
+<p>If you hit this error from a path you believe <em>is</em> registered, the daemon&#39;s view
+disagrees with yours. Grep the daemon log for the peercred resolve warnings to
+see what it saw:</p>
+<pre><code class="language-bash hljs">thrum daemon logs --lines 1000 | grep <span class="hljs-string">&#x27;peercred.resolve step=&#x27;</span></code></pre>
+<p>Three things can surface:</p>
+<ul>
+<li><code>step=pid failed</code> — kernel refused peer credentials, or the peercred library
+couldn&#39;t extract a PID. On v0.9.1+ this falls through to legacy behavior
+rather than rejecting, so if you see this <em>and</em> an anonymous-rejection error,
+you&#39;re on a pre-v0.9.1 daemon — upgrade.</li>
+<li><code>step=cwd failed</code> — gopsutil couldn&#39;t read the CWD for your PID. Usually a
+short-lived subprocess race (especially claude-code Bash tool calls on macOS).
+Same fallthrough behavior on v0.9.1+; if you&#39;re still being rejected after
+upgrading, confirm the daemon is actually running the new binary
+(<code>thrum daemon status</code> for version).</li>
+<li><code>step=git_root: no git root found</code> or
+<code>step=match: no registered worktree matched</code> — the daemon did classify you as
+anonymous. Either <code>thrum quickstart</code> in this directory hasn&#39;t been run, or the
+git root the daemon saw after <code>filepath.EvalSymlinks</code> doesn&#39;t match what&#39;s in
+<code>session_refs</code> (macOS <code>/var</code> vs <code>/private/var</code> style mismatch, for example).
+Run <code>thrum agent list --json</code> and compare the <code>worktree</code> field to your
+<code>pwd -P</code> output.</li>
+</ul>
+<hr>
+<h3><code>unauthenticated_rpc</code> — no_caller_agent_id</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;unauthenticated_rpc&quot; fired: no_caller_agent_id
+  remediation: run &#x27;thrum quickstart&#x27; to register an identity; CLI callers must forward CallerAgentID on every RPC</code></pre>
+<h4>What happened</h4>
+<p>You&#39;re on a non-peercred transport — typically a WebSocket client or a
+browser-based tool — and the RPC payload didn&#39;t include <code>CallerAgentID</code>.
+Peercred isn&#39;t available on these transports, so G3 falls back to trusting the
+<code>CallerAgentID</code> field. Without it, there&#39;s nothing to trust.</p>
+<h4>Fix</h4>
+<ol>
+<li><p>If you&#39;re using the CLI, this shouldn&#39;t happen. Run <code>thrum quickstart</code> in the
+current directory to register an agent and retry:</p>
+<pre><code class="language-bash hljs">thrum quickstart --name myagent --role implementer --module mymodule</code></pre>
+</li>
+<li><p>If you&#39;re a client developer sending RPCs over WebSocket, include a non-empty
+<code>CallerAgentID</code> in every mutating RPC frame.</p>
+</li>
+</ol>
+<hr>
+<h3><code>non_git_bootstrap</code> — not_a_git_repo</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;non_git_bootstrap&quot; fired: not_a_git_repo
+  caller cwd: /Users/leon
+  remediation: run from a git-anchored directory, or pass --force for ephemeral non-anchored use</code></pre>
+<h4>What happened</h4>
+<p>You ran <code>thrum daemon start</code> or <code>thrum init</code> from a directory with no <code>.git</code>
+ancestor. Thrum walks up from your CWD looking for <code>.git</code> — if it doesn&#39;t find
+one, G2 refuses to bootstrap. Identity files derive their repo scope and
+supervisor slugs from git state. Without a git root, those fields are
+meaningless.</p>
+<p>Before v0.9.0, this silently created a <code>.thrum/</code> with nonsense values in <code>~</code> or
+wherever you happened to be. Now it fails loudly.</p>
+<h4>Fix</h4>
+<ol>
+<li><p><code>cd</code> to your git repo first, then run the command:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">cd</span> /path/to/your/repo
+thrum daemon start</code></pre>
+</li>
+<li><p>If you genuinely need a non-git bootstrap (ephemeral testing, one-off
+tooling), pass <code>--force</code>:</p>
+<pre><code class="language-bash hljs">thrum daemon start --force</code></pre>
+<p>This is rare and usually a mistake. Prefer using a git-anchored directory.</p>
+</li>
+</ol>
+<hr>
+<h3><code>daemon_writer_liveness</code> — subject_pid_dead</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;daemon_writer_liveness&quot; fired: subject_pid_dead
+  expected pid: 98412
+  remediation: daemon refusing to write to dead agent&#x27;s identity file</code></pre>
+<h4>What happened</h4>
+<p>The daemon was about to write to an identity file on behalf of an agent whose
+PID is no longer running. G4 blocks the write. This prevents ghost state: a
+crashed agent&#39;s stale RPC shouldn&#39;t be able to update the identity file after
+the agent has already exited.</p>
+<p>In normal operation this auto-heals: on the next daemon boot the dead-PID
+auto-reclaim path fires and cleans up the stale file. You&#39;ll see this in logs
+after a crashed runtime restarts.</p>
+<h4>Fix</h4>
+<p>If it persists after a daemon restart:</p>
+<pre><code class="language-bash hljs">thrum daemon restart</code></pre>
+<p>If the stale file is blocking a fresh registration and the daemon restart didn&#39;t
+clear it, manually retire the file:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">mv</span> .thrum/identities/&lt;agentname&gt;.json .thrum/identities/&lt;agentname&gt;.json.deleted</code></pre>
+<p>Then run <code>thrum quickstart</code> again to register fresh. The <code>.deleted</code> file is left
+on disk but ignored by all guard scans.</p>
+<hr>
+<h3><code>prime_ownership</code> — caller_not_topmost_runtime</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;prime_ownership&quot; fired: caller_not_topmost_runtime
+  expected pid: 20981
+  caller pid: 21049
+  remediation: you appear to be running inside a sub-agent; the parent runtime owns this identity — run prime from the top-level runtime instead</code></pre>
+<h4>What happened</h4>
+<p>You called <code>thrum prime</code> from inside a sub-agent — a tool call running under a
+Claude Code session that already has a different runtime as the outermost
+process. G5 checks whether your closest runtime ancestor matches the PID
+recorded in the identity file. If it doesn&#39;t, the guard refuses because the
+sub-agent doesn&#39;t own this identity.</p>
+<p>The typical scenario: a coordinator&#39;s tool call tries to run <code>thrum prime</code> to
+orient itself. The coordinator&#39;s parent Claude process owns the identity. The
+tool call&#39;s process tree is a descendant, not the owner.</p>
+<h4>Fix</h4>
+<p>Run <code>thrum prime</code> from the top-level runtime — the actual <code>claude</code> or <code>codex</code>
+process that owns the session — not from a tool call inside it.</p>
+<p>If you&#39;re building automation that needs to prime inside a sub-agent, use
+<code>--force</code> to bypass G5:</p>
+<pre><code class="language-bash hljs">thrum prime --force</code></pre>
+<p>Use <code>--force</code> only when you&#39;re sure the sub-agent is intentionally taking over
+the session, not just checking context mid-task.</p>
+<hr>
+<h3><code>quickstart_self_rename</code> — caller_already_owns_identity</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;quickstart_self_rename&quot; fired: caller_already_owns_identity
+  expected agent: furiosa
+  caller pid: 12050
+  remediation: use --force to rename the existing identity to .deleted and register fresh</code></pre>
+<h4>What happened</h4>
+<p>You called <code>thrum quickstart --name &lt;new-name&gt;</code> but your ancestor PID chain
+already owns an identity file in this directory — registered under the name
+<code>furiosa</code>. G1a refuses to silently rename the existing identity (drop the old
+name, adopt a new one) because that would abandon the existing identity without
+any record.</p>
+<blockquote>
+<p><strong>Same-name re-register is allowed</strong> (since v0.10.2). Calling
+<code>thrum quickstart --name furiosa</code> while you already own <code>furiosa</code> is a no-op
+idempotent re-register and passes through without firing G1a. The guard only
+fires when you request a <strong>different</strong> name (a real rename).</p>
+</blockquote>
+<p>This often happens when an orchestrator calls <code>thrum quickstart</code> multiple times
+with different <code>--name</code> values, rotating agent names.</p>
+<h4>Fix</h4>
+<p>If you want to rename (replace the old identity with a fresh one):</p>
+<pre><code class="language-bash hljs">thrum quickstart --force --name &lt;newname&gt; --role &lt;role&gt; --module &lt;module&gt;</code></pre>
+<p><code>--force</code> renames the old identity file to <code>.deleted</code> first, then registers
+fresh. The old file is retained on disk as a <code>.deleted</code> sidekick in case you
+need to inspect it.</p>
+<p>If you want to keep the existing identity and just re-prime, run:</p>
+<pre><code class="language-bash hljs">thrum prime</code></pre>
+<hr>
+<h3><code>quickstart_name_collision</code> — name_held_by_live_foreign_pid</h3>
+<h4>Error</h4>
+<pre><code class="language-text hljs">identity guard &quot;quickstart_name_collision&quot; fired: name_held_by_live_foreign_pid
+  expected agent: nux
+  expected pid: 33812
+  caller pid: 34001
+  remediation: choose another --name or pass --force to displace the existing identity</code></pre>
+<h4>What happened</h4>
+<p>The name you passed to <code>--name</code> is already registered to a different process
+that&#39;s still alive. G1b refuses because overwriting a live agent&#39;s identity file
+is a data-integrity problem — that other agent is still running and owns the
+file.</p>
+<p>Before v0.9.0 this was a silent overwrite. Now it fails so you can decide what
+to do.</p>
+<h4>Fix</h4>
+<p><strong>Option A — wait.</strong> If the other process exits on its own, the next
+<code>thrum quickstart</code> attempt will auto-reclaim the name. Dead agent files are
+reclaimable without <code>--force</code>.</p>
+<p><strong>Option B — pick a different name:</strong></p>
+<pre><code class="language-bash hljs">thrum quickstart --name &lt;differentname&gt; --role &lt;role&gt; --module &lt;module&gt;</code></pre>
+<p><strong>Option C — force-displace</strong> (only if you&#39;re certain the other process is hung
+and won&#39;t recover):</p>
+<pre><code class="language-bash hljs">thrum quickstart --force --name nux --role &lt;role&gt; --module &lt;module&gt;</code></pre>
+<p><code>--force</code> renames the existing file to <code>.deleted</code> and takes the name. If the
+other process was still alive and recovers after this, it&#39;ll get a
+<code>cross_worktree</code> error on its next RPC — it will need to re-register.</p>
+<hr>
+<h2>Guard mode downgrade (incident diagnosis)</h2>
+<p>Each guard is independently configurable in <code>.thrum/config.json</code> under the
+<code>identity_guard</code> block. Three modes are available:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>strict</code></td>
+<td>Guard fires and the RPC or command fails. This is the default for all guards.</td>
+</tr>
+<tr>
+<td><code>warn</code></td>
+<td>Guard fires, logs a structured <code>identity_guard_fire</code> event, and allows the operation through.</td>
+</tr>
+<tr>
+<td><code>off</code></td>
+<td>Guard is skipped entirely.</td>
+</tr>
+</tbody></table>
+<p>Example — downgrade <code>cross_worktree</code> to <code>warn</code> for incident diagnosis:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;identity_guard&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;cross_worktree&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;warn&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;non_git_bootstrap&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p>Any guard you don&#39;t list keeps the strict default. The full set of config keys:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;identity_guard&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;cross_worktree&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dead_pid_auto_reclaim&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;quickstart_self_rename&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;quickstart_name_collision&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;non_git_bootstrap&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;unauthenticated_rpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;daemon_writer_liveness&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;prime_ownership&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strict&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p>For runtime overrides without a repo commit, write to
+<code>.thrum/var/guard-daemon.json</code> instead. The daemon checks this file every cycle
+and merges it on top of the repo config. This lets you temporarily loosen a
+guard on a running daemon without touching the committed config.</p>
+<p><strong><code>unauthenticated_rpc</code> / <code>identity_mismatch</code> cannot be downgraded via config.</strong>
+The forgery rejection — where a client-asserted <code>CallerAgentID</code> contradicts the
+kernel-verified identity — ignores the <code>unauthenticated_rpc</code> mode setting. This
+is a deliberate security decision. Disabling it would re-open the v0.8.x
+impersonation hole where any caller could claim any agent&#39;s identity. Every
+other guard is configurable; this one isn&#39;t.</p>
+<p>The one runtime exception (not a config knob) is the <strong>shared-worktree claim
+trust</strong> described under the
+<a href="#unauthenticated_rpc--identity_mismatch-peercred-path">peercred path</a> above: a
+claim for an agent co-located in the peercred-resolved worktree is honored
+because it&#39;s kernel-verified to belong to the same worktree. This is narrower
+than a mode downgrade — it applies only when <code>state.IsAgentInWorktree</code> confirms
+the claim.</p>
+<hr>
+<h2>auto_reclaim: dead_pid_auto_reclaim (informational)</h2>
+<p>Not an error. When <code>thrum quickstart</code> or the cross_worktree check encounters a
+name or identity file registered to a PID that is no longer alive, it
+auto-reclaims: overwrites the stale file with the new caller&#39;s registration and
+logs a <code>warn</code>-level <code>identity_guard_fire</code> event with <code>outcome=auto_reclaimed</code>.</p>
+<p>You&#39;ll see this in daemon logs after a crashed runtime restarts and re-registers
+in the same worktree. The reclaim is silent on success in strict mode; in warn
+mode it logs and then proceeds.</p>
+<p>If you want to monitor for reclaim events in your logging pipeline, bind on:</p>
+<pre><code class="language-text hljs">identity_guard_fire where guard=dead_pid_auto_reclaim and outcome=auto_reclaimed</code></pre>
+<p>The <code>dead_pid_auto_reclaim</code> guard mode in config controls the reclaim path
+independently from the main <code>cross_worktree</code> check. Setting it to <code>off</code> disables
+auto-reclaim, which means dead-PID mismatches always fall through to the
+<code>cross_worktree</code> strict/warn handling instead of self-healing. Leave it at
+<code>strict</code> (the default) unless you have a specific reason not to.</p>
+<hr>
+<h2>See also</h2>
+<ul>
+<li><a href="identity.html">Identity</a> — conceptual model for identity files, PID resolution,
+and what identity guards are</li>
+<li><a href="configuration.html">Configuration</a> — full <code>identity_guard</code> config block schema
+and the daemon-override precedence order</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

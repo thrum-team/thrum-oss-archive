@@ -1,0 +1,32 @@
+{
+  "name": "thrum-docs-website",
+  "version": "1.0.0",
+  "description": "Documentation website for Thrum - Git-backed messaging for AI agent coordination",
+  "scripts": {
+    "build": "npm run build-docs && npm run build-blog && npm run build-sitemap",
+    "build-docs": "node scripts/build-docs.js",
+    "build-blog": "node scripts/build-blog.js",
+    "build-sitemap": "node scripts/build-sitemap.js",
+    "serve": "npx http-server . -p 8140 -o",
+    "dev": "concurrently -k \"chokidar 'docs/**/*.md' -c 'node scripts/build-docs.js' -d 500 --initial\" \"chokidar 'blog/**/*.md' -c 'node scripts/build-blog.js' -d 500 --initial\" \"npx http-server . -p 8140 -o\"",
+    "deploy": "npm run build && echo 'Ready for deployment'"
+  },
+  "keywords": [
+    "thrum",
+    "documentation",
+    "ai-agents",
+    "git",
+    "messaging"
+  ],
+  "author": "Leon Letto",
+  "license": "MIT",
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.2.1",
+    "fs-extra": "^11.3.0",
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
+    "marked": "^16.1.1",
+    "minisearch": "^7.2.0"
+  }
+}

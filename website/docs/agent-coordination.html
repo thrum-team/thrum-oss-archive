@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Agent Coordination — Thrum</title>
+  <meta name="description" content="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Agent Coordination — Thrum">
+  <meta property="og:description" content="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">
+  <meta property="og:url" content="https://thrum.team/docs/agent-coordination.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Agent Coordination — Thrum">
+  <meta name="twitter:description" content="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/agent-coordination.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Agent Coordination","description":"Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams","url":"https://thrum.team/docs/agent-coordination.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link active" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Agent Coordination</h2>
+<p>You run agents in parallel. This page covers the practical patterns: how they
+message each other, how Beads and Thrum work together, and what a typical
+session looks like start to finish.</p>
+<blockquote>
+<p>For the philosophy behind this approach — why you direct the work instead of
+handing it off — see <a href="philosophy.html">Why Thrum Exists</a>.</p>
+</blockquote>
+<h2>Coordination Methods</h2>
+<h3>CLI (Primary)</h3>
+<p>Thrum is CLI-first. Every agent that can run shell commands can use Thrum.</p>
+<pre><code class="language-bash hljs">thrum send <span class="hljs-string">&quot;Starting work on task X&quot;</span> --to @coord_main
+thrum inbox --unread
+thrum sent --unread
+thrum message <span class="hljs-built_in">read</span> --all       <span class="hljs-comment"># Mark all messages as read</span>
+thrum reply &lt;msg-id&gt; <span class="hljs-string">&quot;Here&#x27;s my update&quot;</span></code></pre>
+<h3>MCP Server (Optional)</h3>
+<p>If your environment supports MCP, Thrum has an MCP server with native tool
+integration. See <a href="mcp-server.html">MCP Server</a> for configuration.</p>
+<blockquote>
+<p><strong>Note:</strong> Use agent names (e.g., <code>@coord_main</code>), not role names (e.g.,
+<code>@coordinator</code>). Sending to a role fans out to ALL agents with that role. Run
+<code>thrum team</code> to see agent names.</p>
+</blockquote>
+<h2>Common Workflows</h2>
+<h3>Planner-Implementer Coordination</h3>
+<p>The most common setup: a planner assigns work, an implementer executes it.</p>
+<p><strong>Planner:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Register as planner</span>
+thrum quickstart --name planner1 --role planner --module website \
+  --intent <span class="hljs-string">&quot;Coordinating website development&quot;</span>
+
+<span class="hljs-comment"># Assign task via message (use agent name, not role)</span>
+thrum send <span class="hljs-string">&quot;Please implement build script (task thrum-235d.3). \
+  Design spec in dev-docs/plans/. Check beads for details.&quot;</span> \
+  --to @impl1
+
+<span class="hljs-comment"># Check for updates</span>
+thrum inbox
+thrum sent --to @impl1</code></pre>
+<p><strong>Implementer:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Register</span>
+thrum quickstart --name impl1 --role implementer --module website \
+  --intent <span class="hljs-string">&quot;Implementing website features&quot;</span>
+
+<span class="hljs-comment"># Check inbox for assignments</span>
+thrum inbox --unread
+
+<span class="hljs-comment"># Check sent items after responding</span>
+thrum sent --to @planner1
+
+<span class="hljs-comment"># Acknowledge and work</span>
+thrum reply &lt;msg-id&gt; <span class="hljs-string">&quot;Claimed task. Starting implementation.&quot;</span>
+
+<span class="hljs-comment"># Send completion update (use agent name from thrum team)</span>
+thrum send <span class="hljs-string">&quot;Build script complete. Tests passing. Ready for review.&quot;</span> \
+  --to @planner1</code></pre>
+<h3>Peer Collaboration</h3>
+<p>Two agents working in overlapping areas need to stay out of each other&#39;s way.</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Agent A: Announce work area</span>
+thrum send <span class="hljs-string">&quot;Starting work on auth module&quot;</span> --to @everyone
+
+<span class="hljs-comment"># Agent B: Check file ownership before editing</span>
+thrum who-has src/auth/login.ts
+<span class="hljs-comment"># Output: @agent_a is editing src/auth/login.ts</span>
+
+<span class="hljs-comment"># Agent B: Coordinate via message</span>
+thrum send <span class="hljs-string">&quot;Need to edit login.ts for validation. ETA?&quot;</span> --to @agent_a</code></pre>
+<h3>Code Review</h3>
+<p>Pass review requests through messages. The implementer sends the commit hash and
+what to look at; the reviewer responds with findings.</p>
+<p><strong>Implementer:</strong></p>
+<pre><code class="language-bash hljs">thrum send <span class="hljs-string">&quot;Build script complete (commit abc123). Please review:
+- Markdown processing
+- Search index generation
+- Error handling
+
+Tests passing. Beads task: thrum-235d.3&quot;</span> --to @reviewer</code></pre>
+<p><strong>Reviewer:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check inbox</span>
+thrum inbox --unread
+
+<span class="hljs-comment"># Review the code, then respond</span>
+thrum reply &lt;msg-id&gt; <span class="hljs-string">&quot;Reviewed. Found 2 issues:
+1. Missing error handling in parseMarkdown()
+2. Search index doesn&#x27;t handle compound terms
+
+See beads: thrum-abc (bug filed). Otherwise looks good.&quot;</span></code></pre>
+<h3>Multi-Worktree Coordination</h3>
+<p>Agents in different git worktrees share the same daemon and message store — you
+set up a redirect once and they all connect through it. For the full setup
+walkthrough, architecture diagram, and running-multiple-agents examples, see
+<a href="multi-agent.html#multi-worktree-coordination">Multi-Agent Support</a>.</p>
+<h2>Message-Listener Pattern</h2>
+<p>For async message handling, spawn a background sub-agent to wait for incoming
+messages and notify the main agent when they arrive.</p>
+<h3>How It Works</h3>
+<ol>
+<li>The main agent spawns a message-listener as a background task</li>
+<li>The listener runs <code>thrum wait</code> — it blocks until a message arrives or times
+out</li>
+<li>When a message arrives, the listener returns immediately with the content</li>
+<li>The main agent processes the message; the listener keeps looping
+automatically (no re-arming needed)</li>
+<li>A cron watchdog respawns the listener every 30 min if it stops</li>
+</ol>
+<p><strong>Use <code>thrum wait</code></strong> — it&#39;s more efficient than polling loops with sleep. Use
+<code>--after -15s</code> to catch messages sent up to 15 seconds ago (<code>--after</code> negative
+value = &quot;N ago&quot;). Omit <code>--after</code> to receive only messages that arrive after the
+wait starts.</p>
+<p><strong>Cron watchdog:</strong> Set up a cron job to auto-respawn the listener if it stops:</p>
+<pre><code class="language-text hljs">CronCreate(cron=&quot;*/30 * * * *&quot;,
+  prompt=&quot;If there is no background message listener running, spawn one now:
+    Task(subagent_type=&#x27;message-listener&#x27;, model=&#x27;haiku&#x27;, run_in_background=true,
+      prompt=&#x27;Listen for Thrum messages. WAIT_CMD=cd /path/to/repo &amp;&amp; thrum wait --timeout 8m --after -15s --json&#x27;)&quot;)</code></pre>
+<h3>Return Format</h3>
+<p>When messages are received:</p>
+<pre><code class="language-text hljs">MESSAGES_RECEIVED
+---
+FROM: [sender]
+CONTENT: [message content]
+TIMESTAMP: [timestamp]
+---</code></pre>
+<p>When timeout occurs with no messages:</p>
+<pre><code class="language-text hljs">NO_MESSAGES_TIMEOUT</code></pre>
+<h3>Context Management</h3>
+<ul>
+<li>The listener runs for up to 4 hours (30 cycles of ~8 min each), then stops;
+the cron watchdog respawns it</li>
+<li>After 5 consecutive timeouts with no pending work, send a status update to the
+coordinator and stop</li>
+<li>The listener is read-only — it never sends messages</li>
+</ul>
+<h2>Beads Integration</h2>
+<p>Run Thrum and <a href="https://github.com/steveyegge/beads">Beads</a> together. Thrum
+handles real-time messaging; Beads tracks the work. Neither tries to do the
+other&#39;s job:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Tool</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Real-time communication</td>
+<td>Thrum</td>
+<td>Messages, status updates, review requests</td>
+</tr>
+<tr>
+<td>Task management</td>
+<td>Beads</td>
+<td>Issues, dependencies, work discovery</td>
+</tr>
+<tr>
+<td>Progress tracking</td>
+<td>Beads</td>
+<td>Status fields, close with reason</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>Thrum</td>
+<td>Alert team to progress or blockers</td>
+</tr>
+</tbody></table>
+<h3>Unified Workflow</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># 1. Register in Thrum</span>
+thrum quickstart --name impl_auth --role implementer --module auth \
+  --intent <span class="hljs-string">&quot;Implementing auth system&quot;</span>
+
+<span class="hljs-comment"># 2. Find work in Beads</span>
+bd ready
+
+<span class="hljs-comment"># 3. Claim in Beads</span>
+bd update bd-123 -s in_progress
+
+<span class="hljs-comment"># 4. Announce via Thrum (use agent name, not role)</span>
+thrum send <span class="hljs-string">&quot;Starting bd-123: JWT authentication&quot;</span> --to @coord_main
+
+<span class="hljs-comment"># 5. Work on implementation...</span>
+
+<span class="hljs-comment"># 6. Discover issues -&gt; file in Beads</span>
+bd create --title=<span class="hljs-string">&quot;Found validation bug&quot;</span> --<span class="hljs-built_in">type</span>=bug --priority=1
+
+<span class="hljs-comment"># 7. Update coordinator via Thrum</span>
+thrum send <span class="hljs-string">&quot;Progress: JWT working, found validation bug (filed bd-456)&quot;</span> \
+  --to @coord_main
+
+<span class="hljs-comment"># 8. Complete in Beads</span>
+bd close bd-123 --reason=<span class="hljs-string">&quot;JWT auth complete with tests&quot;</span>
+
+<span class="hljs-comment"># 9. Announce via Thrum</span>
+thrum send <span class="hljs-string">&quot;Completed bd-123. Ready for review.&quot;</span> \
+  --to @reviewer1
+
+<span class="hljs-comment"># 10. Sync both</span>
+bd <span class="hljs-built_in">sync</span>
+thrum <span class="hljs-built_in">sync</span> force</code></pre>
+<h3>Mapping Convention</h3>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Beads</th>
+<th>Thrum</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Task ID</td>
+<td><code>bd-123</code></td>
+<td>Include in message: &quot;Working on bd-123&quot;</td>
+</tr>
+<tr>
+<td>Status</td>
+<td><code>bd update -s</code></td>
+<td>Send message with update</td>
+</tr>
+<tr>
+<td>Assignment</td>
+<td><code>bd update --assignee</code></td>
+<td>Send message to specific agent</td>
+</tr>
+<tr>
+<td>Completion</td>
+<td><code>bd close</code></td>
+<td>Send completion message</td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td><code>bd create</code></td>
+<td>Notify via message</td>
+</tr>
+</tbody></table>
+<h2>Session Workflow Template</h2>
+<p>Use this template for every agent session:</p>
+<blockquote>
+<p><strong>Note:</strong> If you were launched via <code>thrum tmux quickstart</code> (or
+<code>thrum tmux create</code> with <code>--name</code>/<code>--role</code>/<code>--module</code> flags), you&#39;re already
+registered — skip step 1. The coordinator&#39;s launch command handles
+registration before your session boots.</p>
+</blockquote>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># === START OF SESSION ===</span>
+
+<span class="hljs-comment"># 1. Register and start session</span>
+<span class="hljs-comment"># Skip this if launched via thrum tmux quickstart — already registered</span>
+thrum quickstart --name &lt;name&gt; --role &lt;role&gt; --module &lt;module&gt; \
+  --intent <span class="hljs-string">&quot;&lt;description&gt;&quot;</span>
+
+<span class="hljs-comment"># 2. Check inbox for any urgent messages</span>
+thrum inbox --unread
+
+<span class="hljs-comment"># 3. Find work (Beads)</span>
+bd ready
+
+<span class="hljs-comment"># 4. Claim task (Beads)</span>
+bd update &lt;<span class="hljs-built_in">id</span>&gt; -s in_progress
+
+<span class="hljs-comment"># 5. Announce start (Thrum) — use agent name from `thrum team`</span>
+thrum send <span class="hljs-string">&quot;Starting work on &lt;id&gt;: &lt;description&gt;&quot;</span> --to @&lt;coordinator-name&gt;
+
+<span class="hljs-comment"># === DURING SESSION ===</span>
+
+<span class="hljs-comment"># 6. Send periodic status updates</span>
+thrum send <span class="hljs-string">&quot;Progress: &lt;status&gt;&quot;</span> --to @&lt;coordinator-name&gt;
+
+<span class="hljs-comment"># 7. Handle incoming messages</span>
+thrum inbox --unread
+
+<span class="hljs-comment"># 8. Coordinate on blockers</span>
+thrum send <span class="hljs-string">&quot;Blocked: &lt;description&gt;&quot;</span> --to @&lt;coordinator-name&gt;
+
+<span class="hljs-comment"># === END OF SESSION ===</span>
+
+<span class="hljs-comment"># 9. Complete work (Beads)</span>
+bd close &lt;<span class="hljs-built_in">id</span>&gt; --reason <span class="hljs-string">&quot;Complete&quot;</span>
+bd <span class="hljs-built_in">sync</span>
+
+<span class="hljs-comment"># 10. Announce completion (Thrum) — use agent name from `thrum team`</span>
+thrum send <span class="hljs-string">&quot;Completed &lt;id&gt;. Tests passing. Ready for review.&quot;</span> \
+  --to @&lt;reviewer-name&gt;
+
+<span class="hljs-comment"># 11. End session</span>
+thrum session end</code></pre>
+<h2>Best Practices</h2>
+<h3>Do</h3>
+<ul>
+<li><strong>Register at session start</strong> -- always use <code>thrum quickstart</code></li>
+<li><strong>Use CLI commands</strong> -- they work everywhere, including sub-agents</li>
+<li><strong>Send status updates</strong> -- keep the team informed</li>
+<li><strong>Use @mentions</strong> -- reference agents by name</li>
+<li><strong>Include context</strong> -- Beads IDs, file paths, commit hashes</li>
+<li><strong>End sessions cleanly</strong> -- run <code>thrum session end</code> when done</li>
+<li><strong>Set clear intents</strong> -- describe what you&#39;re working on</li>
+<li><strong>Broadcast milestones</strong> -- share important progress with the team</li>
+</ul>
+<h3>Don&#39;t</h3>
+<ul>
+<li><strong>Don&#39;t use Thrum for task management</strong> -- use Beads for that</li>
+<li><strong>Don&#39;t spam messages</strong> -- batch updates when possible</li>
+<li><strong>Don&#39;t skip the cron watchdog</strong> -- it auto-respawns the listener if it stops</li>
+<li><strong>Don&#39;t ignore critical messages</strong> -- stop work and respond</li>
+<li><strong>Don&#39;t skip registration</strong> -- the system won&#39;t route messages correctly (the
+integrated <code>thrum tmux quickstart</code> path handles this automatically when the
+coordinator launches you)</li>
+<li><strong>Don&#39;t leave sessions open</strong> -- end them when done to avoid stale status</li>
+<li><strong>Don&#39;t use vague intents</strong> -- be specific about current work</li>
+</ul>
+<h2>Troubleshooting</h2>
+<h3>Not receiving messages</h3>
+<p><strong>Diagnosis:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check registration</span>
+thrum overview
+
+<span class="hljs-comment"># Check daemon</span>
+thrum daemon status
+
+<span class="hljs-comment"># Check inbox manually</span>
+thrum inbox</code></pre>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li><strong>Not registered</strong> -- run <code>thrum quickstart</code></li>
+<li><strong>Daemon not running</strong> -- run <code>thrum daemon start</code></li>
+<li><strong>Wrong agent name</strong> -- check <code>THRUM_NAME</code> env var</li>
+<li><strong>Sync issues</strong> -- run <code>thrum sync force</code> to pull latest messages</li>
+</ol>
+<h3>Messages not syncing</h3>
+<p><strong>Diagnosis:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check sync status</span>
+thrum <span class="hljs-built_in">sync</span> status
+
+<span class="hljs-comment"># Check git remote</span>
+git remote -v</code></pre>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li><strong>No remote</strong> -- add a git remote</li>
+<li><strong>Not committed</strong> -- daemon auto-commits after 60s, or run <code>thrum sync force</code></li>
+<li><strong>Not pushed</strong> -- run <code>thrum sync force</code> to push</li>
+<li><strong>Branch diverged</strong> -- pull and retry</li>
+</ol>
+<h3>Multiple agents with same name</h3>
+<p><strong>Diagnosis:</strong></p>
+<pre><code class="language-bash hljs">thrum agent list</code></pre>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li><strong>Use unique names</strong> -- each agent needs a unique name</li>
+<li><strong>Delete duplicates</strong> -- <code>thrum agent delete &lt;name&gt;</code></li>
+<li><strong>Use THRUM_NAME</strong> -- set different names per worktree</li>
+</ol>
+<h3>Context recovery after compaction</h3>
+<p>After conversation compaction, agents can recover context:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check inbox for recent messages</span>
+thrum inbox --unread
+
+<span class="hljs-comment"># Check what others are working on</span>
+thrum agent list --context
+
+<span class="hljs-comment"># Check Beads for task state</span>
+bd ready
+bd list --status=in_progress</code></pre>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="workflow-templates.html">Workflow Templates</a> — pre-built skill pipelines for
+the full research → plan → implement → review cycle</li>
+<li><a href="multi-agent.html">Multi-Agent Support</a> — agent groups, runtime presets, and
+session recovery with <code>thrum prime</code></li>
+<li><a href="messaging.html">Messaging</a> — full send/receive/reply reference including
+threads, scopes, mentions, and groups</li>
+<li><a href="mcp-server.html">MCP Server</a> — optional native tool integration for MCP-capable
+environments</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

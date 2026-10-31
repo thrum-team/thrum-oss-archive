@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Daemon Architecture — Thrum</title>
+  <meta name="description" content="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Daemon Architecture — Thrum">
+  <meta property="og:description" content="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">
+  <meta property="og:url" content="https://thrum.team/docs/daemon.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Daemon Architecture — Thrum">
+  <meta name="twitter:description" content="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/daemon.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Daemon Architecture","description":"Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port","url":"https://thrum.team/docs/daemon.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link active" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Thrum Daemon Architecture</h2>
+<blockquote>
+<p><strong>TL;DR:</strong> The daemon is the one process everything talks to. Start it with
+<code>thrum init</code> (auto-starts) or <code>thrum daemon start</code>. It handles messaging,
+sync, the web UI, and real-time notifications — all on one port. You rarely
+interact with it directly.</p>
+<p><strong>See also:</strong> <a href="overview.html">System Overview</a> for how the daemon fits into the
+larger Thrum ecosystem.</p>
+</blockquote>
+<h2>Overview</h2>
+<p>The Thrum daemon is a background service that manages the <code>.thrum/</code> directory
+and the sync worktree (at <code>.git/thrum-sync/a-sync/</code> on the <code>a-sync</code> orphan
+branch), handles client connections via Unix socket and WebSocket, serves the
+embedded web UI, and coordinates message synchronization with Git. It serves as
+the central coordinator for all Thrum clients (CLI, Web UI, and MCP server).</p>
+<h2>Architecture</h2>
+<pre><code class="language-go hljs">┌─────────────┐  ┌──────────────┐  ┌──────────────┐
+│   CLI       │  │   Web UI     │  │  MCP Server  │
+│  (client)   │  │  (browser)   │  │ (thrum mcp)  │
+└──────┬──────┘  └──────┬───────┘  └──────┬───────┘
+       │ Unix socket     │ WebSocket       │ Unix socket
+       │ JSON-RPC <span class="hljs-number">2.0</span>    │ JSON-RPC <span class="hljs-number">2.0</span>    │ JSON-RPC <span class="hljs-number">2.0</span>
+       ▼                 ▼                 ▼
+┌──────────────────────────────────────────────────┐
+│                     Daemon                        │
+├──────────────────────────────────────────────────┤
+│ • Unix Socket Server    (.thrum/<span class="hljs-keyword">var</span>/thrum.sock)   │
+│ • WebSocket + SPA       (localhost:<span class="hljs-number">9999</span>)           │
+│ • Lifecycle (flock, JSON PID, <span class="hljs-keyword">defer</span> cleanup)       │
+│ • RPC Handlers          (agent, message, sync)     │
+│ • Sync Loop             (<span class="hljs-number">60</span>s interval)             │
+│ • Stale Context Cleanup                            │
+└──────────────────┬───────────────────────────────┘
+                   │
+                   ▼
+  .git/thrum-sync/a-sync/    (worktree on a-sync branch)
+  ├── events.jsonl           (agent lifecycle events)
+  └── messages/              (per-agent message logs)
+      └── {agent_name}.jsonl
+
+  .thrum/
+  ├── config.json            (daemon configuration + identity block)
+  ├── config.json.pre-identity-bak  (one-time backup on first daemon_id rotation)
+  ├── <span class="hljs-keyword">var</span>/
+  │   ├── thrum.sock         (Unix socket)
+  │   ├── thrum.pid          (JSON PID file)
+  │   ├── thrum.lock         (flock <span class="hljs-keyword">for</span> SIGKILL resilience)
+  │   ├── ws.port            (WebSocket port number)
+  │   ├── sync.lock          (sync loop file lock)
+  │   └── messages.db        (SQLite projection)
+  ├── identities/            (per-worktree agent identity files)
+  │   └── {agent_name}.json
+  └── redirect               (feature worktrees only)</code></pre>
+<h2>Components</h2>
+<h3>1. Unix Socket Server</h3>
+<p><strong>Location:</strong> <code>internal/daemon/server.go</code></p>
+<p>The socket server implements JSON-RPC 2.0 protocol for client-daemon
+communication.</p>
+<p><strong>Key features:</strong></p>
+<ul>
+<li>Listens on <code>.thrum/var/thrum.sock</code></li>
+<li>Accepts multiple concurrent connections</li>
+<li>Dispatches requests to registered handlers</li>
+<li>Handles JSON-RPC 2.0 protocol correctly</li>
+<li>Sets socket permissions to 0600 (owner-only)</li>
+<li>Detects and removes stale sockets from dead daemons</li>
+</ul>
+<p><strong>JSON-RPC 2.0 format:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-comment">// Request</span>
+<span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;method&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;health&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;params&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span>
+
+<span class="hljs-comment">// Response (success)</span>
+<span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;result&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ok&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span>
+
+<span class="hljs-comment">// Response (error)</span>
+<span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-32601</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Method not found&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>2. PID File Management</h3>
+<p><strong>Location:</strong> <code>internal/daemon/pidfile.go</code></p>
+<p>Manages process ID file with JSON metadata for daemon lifecycle.</p>
+<p><strong>JSON PID format:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;pid&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12345</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;repo_path&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/Users/leon/dev/myproject&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;started_at&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-02-08T12:00:00Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;socket_path&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/Users/leon/dev/myproject/.thrum/var/thrum.sock&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p><strong>Functions:</strong></p>
+<ul>
+<li><code>WritePIDFileJSON(path, info)</code> - Write JSON PID with metadata</li>
+<li><code>ReadPIDFileJSON(path)</code> - Read JSON PID (falls back to plain integer format
+for backward compatibility)</li>
+<li><code>CheckPIDFileJSON(path)</code> - Check if process is running and return PID info</li>
+<li><code>ValidatePIDRepo(info, repoPath)</code> - Verify PID belongs to the same repository</li>
+<li><code>RemovePIDFile(path)</code> - Clean up PID file</li>
+</ul>
+<p><strong>PID file location:</strong> <code>.thrum/var/thrum.pid</code></p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>JSON format with repository affinity (repo path, socket path, start time)</li>
+<li>Backward-compatible reader supports plain integer format</li>
+<li>Pre-startup duplicate detection prevents multiple daemons per repo</li>
+<li>Automatic cleanup on shutdown</li>
+</ul>
+<h3>3. File Locking (flock)</h3>
+<p><strong>Location:</strong> <code>internal/daemon/flock.go</code>, <code>internal/daemon/flock_unix.go</code>,
+<code>internal/daemon/flock_other.go</code></p>
+<p>Provides SIGKILL-resilient daemon process detection using OS-level file locking.</p>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Uses <code>syscall.Flock()</code> with <code>LOCK_EX|LOCK_NB</code> for exclusive non-blocking lock</li>
+<li>Lock is held on <code>.thrum/var/thrum.lock</code> for the daemon&#39;s entire lifetime</li>
+<li>The OS automatically releases the lock when the process dies, even on SIGKILL</li>
+<li>Non-unix platforms have no-op stubs (lock detection falls back to PID file
+only)</li>
+</ul>
+<p><strong>Key functions:</strong></p>
+<ul>
+<li><code>AcquireLock(path)</code> - Try to acquire exclusive lock, returns error if held</li>
+<li><code>FileLock.Release()</code> - Release lock and remove lock file (idempotent,
+nil-safe)</li>
+<li><code>IsLocked(path)</code> - Check if lock is currently held (unix only)</li>
+</ul>
+<h3>4. Lifecycle Management</h3>
+<p><strong>Location:</strong> <code>internal/daemon/lifecycle.go</code></p>
+<p>Manages daemon startup, signal handling, and graceful shutdown with
+defense-in-depth cleanup.</p>
+<p><strong>Startup sequence (<code>Lifecycle.Run()</code>):</strong></p>
+<ol>
+<li>Acquire file lock (flock) for SIGKILL resilience</li>
+<li>Pre-startup validation: check for existing daemon (repo affinity)</li>
+<li>Write JSON PID file with metadata</li>
+<li>Register defer safety net (catches panics, early returns)</li>
+<li><code>identity.Bootstrap(thrumDir, repoPath)</code> — load or create the daemon&#39;s
+persistent identity (ULID-based <code>daemon_id</code>, repo metadata); atomically
+rewrites <code>.thrum/config.json</code>; writes <code>.thrum/config.json.pre-identity-bak</code>
+on first rotation (backup-once, never overwritten)</li>
+<li>Populate <code>daemon_identity</code> SQLite table via <code>state.NewState</code> — single-row
+mirror of the <code>config.json</code> identity block; written on every startup via
+<code>INSERT OR REPLACE</code></li>
+<li>Register <code>@supervisor_&lt;project&gt;</code> pseudo-agent (idempotent)</li>
+<li><code>ReloadOnBoot</code> — re-enqueue any pending permission nudges that survived a
+daemon restart</li>
+<li>Backfill <code>runtime</code> field in all identity files where it is missing</li>
+<li>Start Unix socket server</li>
+<li>Start WebSocket server (if configured), write port file</li>
+<li>Start monitor supervisor (respawns persisted monitor jobs from DB)</li>
+<li><code>ConnectAll</code> peers, then <code>ReconcileAll</code> (2-second settling window, up to 4
+peers in parallel) — attempts <code>peer.repair</code> for any peer whose address may
+have drifted since last shutdown</li>
+<li>Start signal handler goroutine</li>
+<li>Wait for shutdown signal</li>
+</ol>
+<p><strong>Signal handling:</strong></p>
+<ul>
+<li><code>SIGTERM</code> - Graceful shutdown</li>
+<li><code>SIGINT</code> - Graceful shutdown</li>
+<li><code>SIGHUP</code> - Reserved for config reload (future)</li>
+</ul>
+<p><strong>Shutdown sequence:</strong></p>
+<ol>
+<li>Stop WebSocket server, remove port file</li>
+<li>Stop Unix socket server (waits up to 5s for in-flight requests), remove
+socket</li>
+<li>Remove PID file</li>
+<li>Release file lock</li>
+</ol>
+<p><strong>Defer cleanup safety net:</strong></p>
+<ul>
+<li>A <code>defer</code> block in <code>Run()</code> catches any exit path (panic, early return,
+unexpected error)</li>
+<li>Uses <code>atomic.Bool</code> to prevent double cleanup with the normal shutdown path</li>
+<li>All cleanup operations are idempotent (safe to run twice)</li>
+</ul>
+<h3>5. RPC Handlers</h3>
+<p><strong>Location:</strong> <code>internal/daemon/rpc/</code></p>
+<p>RPC method handlers implement daemon functionality. All handlers are registered
+on both the Unix socket and WebSocket servers unless noted.</p>
+<p><strong>Registered handlers:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Methods</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Health</strong></td>
+<td><code>health</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Agent</strong></td>
+<td><code>agent.register</code>, <code>agent.list</code>, <code>agent.whoami</code>, <code>agent.listContext</code>, <code>agent.delete</code>, <code>agent.cleanup</code></td>
+<td><code>delete</code> and <code>cleanup</code> are Unix socket only</td>
+</tr>
+<tr>
+<td><strong>Session</strong></td>
+<td><code>session.start</code>, <code>session.end</code>, <code>session.list</code>, <code>session.heartbeat</code>, <code>session.setIntent</code>, <code>session.setTask</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Message</strong></td>
+<td><code>message.send</code>, <code>message.get</code>, <code>message.list</code>, <code>message.edit</code>, <code>message.delete</code>, <code>message.markRead</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Sync</strong></td>
+<td><code>sync.force</code>, <code>sync.status</code></td>
+<td>Both Unix socket and WebSocket</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td><code>user.register</code>, <code>user.identify</code></td>
+<td><code>user.register</code> restricted to WebSocket transport</td>
+</tr>
+<tr>
+<td><strong>Monitor</strong></td>
+<td><code>monitor.start</code>, <code>monitor.list</code>, <code>monitor.show</code>, <code>monitor.stop</code>, <code>monitor.logs</code>, <code>monitor.restart</code></td>
+<td>Unix socket only — absent from peer/Telegram dispatchers</td>
+</tr>
+</tbody></table>
+<p>See <a href="rpc-api.html">RPC API Reference</a> for full documentation.</p>
+<p><strong>Caller Identity Enforcement (v0.9.0):</strong></p>
+<p>Every RPC request on the Unix socket goes through a two-stage identity check:</p>
+<ol>
+<li><p><strong>Peercred resolution</strong> — the accept loop extracts the connecting process&#39;s
+kernel-verified PID via <code>SO_PEERCRED</code> (Linux) or <code>LOCAL_PEERPID</code> (macOS),
+resolves the PID&#39;s working directory, walks to the git root, and matches
+against registered agent worktrees. Matched callers get a verified identity;
+callers whose CWD resolves to a git root that doesn&#39;t match any registered
+worktree are classified as <strong>anonymous</strong>. Since v0.9.1, callers whose
+introspection failed outright (kernel refused peer creds, gopsutil.Cwd
+errored on a short-lived subprocess) are <em>not</em> classified as anonymous — the
+resolver returns a raw error and the daemon falls through to legacy
+client-asserted identity. <code>slog.Warn</code> at <code>step=pid failed</code> or
+<code>step=cwd failed</code> captures the introspection failure for diagnostics.</p>
+</li>
+<li><p><strong>Anonymous allowlist</strong> — anonymous callers may only invoke a hardcoded set
+of ~30 read-only methods (observability, team/session/message queries, tmux
+status reads, and the bootstrap RPCs <code>agent.register</code>, <code>session.start</code>,
+<code>session.setIntent</code>). All mutating RPCs are rejected before the handler runs.
+Since v0.9.1 this rejection applies only to <em>provably</em> anonymous callers; see
+<a href="security-model.html">Security Model</a> for the full allowlist.</p>
+</li>
+</ol>
+<p>The G4 liveness gate additionally guards all daemon-side writes to identity
+files: if the target agent&#39;s PID is no longer alive, the write is refused and an
+<code>identity_guard_fire</code> slog event is emitted. See below for the event schema.</p>
+<p><strong>Health check response:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ok&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;uptime_ms&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12345</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.10.6&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;repo_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;abc123&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;sync_state&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;synced&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>6. WebSocket Server and Embedded SPA</h3>
+<p><strong>Location:</strong> <code>internal/websocket/</code>, <code>internal/web/</code></p>
+<p>The WebSocket server provides real-time communication and serves the embedded
+web UI on a single port.</p>
+<p><strong>Key features:</strong></p>
+<ul>
+<li>Full JSON-RPC 2.0 support (same protocol as Unix socket)</li>
+<li>Real-time <code>notification.message</code> push events to connected sessions</li>
+<li>Client registry for tracking connections by session_id</li>
+<li>Default port: 9999 (configurable via <code>THRUM_WS_PORT</code>)</li>
+<li>Embedded React SPA served from the same port</li>
+</ul>
+<p><strong>Route layout (with UI):</strong></p>
+<ul>
+<li><code>/ws</code> - WebSocket upgrade handler</li>
+<li><code>/assets/</code> - Static file server (with immutable cache headers)</li>
+<li><code>/</code> - SPA fallback (serves <code>index.html</code> for all other paths)</li>
+</ul>
+<p><strong>Route layout (without UI):</strong></p>
+<ul>
+<li><code>/</code> - WebSocket handler (backward compatible)</li>
+</ul>
+<p><strong>Embedded SPA (<code>internal/web/embed.go</code>):</strong></p>
+<ul>
+<li>Uses <code>//go:embed all:dist</code> to bundle the React UI into the Go binary</li>
+<li>Build pipeline: <code>pnpm build</code> -&gt; copy to <code>internal/web/dist/</code> -&gt; <code>go build</code></li>
+<li>Dev mode: set <code>THRUM_UI_DEV=./ui/packages/web-app/dist</code> to serve from disk</li>
+</ul>
+<p><strong>WebSocket Origin Restriction (v0.9.0):</strong></p>
+<p>The WebSocket upgrade handler validates the browser <code>Origin</code> header against a
+localhost allowlist before completing the handshake:</p>
+<ul>
+<li><code>http://localhost:&lt;port&gt;</code> and <code>ws://localhost:&lt;port&gt;</code></li>
+<li><code>http://127.0.0.1:&lt;port&gt;</code> and <code>ws://127.0.0.1:&lt;port&gt;</code></li>
+</ul>
+<p>Connections from any other origin receive <code>HTTP 403 Forbidden</code> at the upgrade
+handshake and are dropped before any RPC can execute. This prevents cross-origin
+WebSocket hijacking (CSRF via a remote page). Pre-v0.9.0 the <code>CheckOrigin</code>
+callback returned <code>true</code> unconditionally. See
+<a href="security-model.html">Security Model</a> for the full local trust stack.</p>
+<p><strong>Browser auto-registration:</strong></p>
+<ul>
+<li><code>user.identify</code> RPC extracts git config <code>user.name</code> and <code>user.email</code> for the
+repo</li>
+<li><code>user.register</code> RPC (WebSocket-only) registers browser users with
+<code>kind=&quot;user&quot;</code></li>
+<li>Idempotent: returns existing user info if already registered</li>
+</ul>
+<p><strong>Components:</strong></p>
+<ul>
+<li><code>server.go</code> - HTTP server with mux routing, WebSocket upgrade, SPA handler</li>
+<li><code>connection.go</code> - Per-connection read/write loops</li>
+<li><code>handler.go</code> - Handler registry interface</li>
+<li><code>client_registry.go</code> - Tracks connected clients by session_id</li>
+</ul>
+<h3>7. Sync Loop Integration</h3>
+<p><strong>Location:</strong> <code>internal/sync/loop.go</code>, <code>internal/daemon/rpc/sync_rpc.go</code></p>
+<p>The sync loop runs within the daemon, synchronizing JSONL data via Git. As of
+v0.10.6, routine sync is notify-driven — a push wakes peers when something
+changes. The old fixed 60-second <code>sync_interval</code> poll was removed; legacy
+<code>sync_interval</code> config keys are silently ignored.</p>
+<p><strong>Key features:</strong></p>
+<ul>
+<li>Notify-driven sync, with a periodic safety-net scheduler that catches missed
+notifications (every 5 minutes; 15 seconds when Tailscale peers are connected)</li>
+<li>Sync worktree at <code>.git/thrum-sync/a-sync/</code> (uses <code>git-common-dir</code> for nested
+worktree support)</li>
+<li>File lock (<code>sync.lock</code>) prevents concurrent sync operations</li>
+<li>Manual sync via <code>sync.force</code> RPC method</li>
+</ul>
+<p><strong>Sync cycle:</strong></p>
+<ol>
+<li>Acquire sync lock (<code>.thrum/var/sync.lock</code>)</li>
+<li>Fetch remote (<code>git fetch</code> in sync worktree)</li>
+<li>Merge all JSONL files (<code>events.jsonl</code> + <code>messages/*.jsonl</code>) with dedup</li>
+<li>Apply new events to SQLite projection</li>
+<li>Push merged changes back to remote</li>
+<li>Release lock</li>
+</ol>
+<p><strong>RPC methods:</strong></p>
+<ul>
+<li><code>sync.force</code> - Trigger manual sync (non-blocking), returns current status</li>
+<li><code>sync.status</code> - Return current sync state (<code>stopped</code>, <code>idle</code>, <code>synced</code>,
+<code>error</code>)</li>
+</ul>
+<h3>8. Agent Work Context (Live Git State)</h3>
+<p><strong>Location:</strong> <code>internal/gitctx/</code>, <code>internal/daemon/cleanup/</code></p>
+<p>Tracks what each agent is working on in real-time by extracting Git state on
+heartbeat.</p>
+<p><strong><code>internal/gitctx/</code> package:</strong></p>
+<p>Extracts git-derived work context from a worktree path:</p>
+<ul>
+<li><code>WorkContext</code> struct: branch, worktree path, unmerged commits, uncommitted
+files, changed files, extraction timestamp</li>
+<li><code>CommitSummary</code> struct: SHA, message (first line), list of changed files</li>
+<li><code>ExtractWorkContext(worktreePath)</code> - Runs git commands to gather state (~80ms)<ul>
+<li><code>git branch --show-current</code> - Current branch</li>
+<li><code>git log --oneline base..HEAD</code> - Unmerged commits vs origin/main or
+origin/master</li>
+<li><code>git diff --name-only base...HEAD</code> - Changed files vs base branch</li>
+<li><code>git status --porcelain</code> - Uncommitted/staged files</li>
+</ul>
+</li>
+</ul>
+<p><strong>RPC methods:</strong></p>
+<ul>
+<li><code>session.heartbeat</code> - Extracts and stores git context automatically</li>
+<li><code>session.setIntent</code> - Agent sets work intent (free text)</li>
+<li><code>session.setTask</code> - Agent sets current task description</li>
+<li><code>agent.listContext</code> - Query all agent work contexts (filterable by agent_id)</li>
+</ul>
+<p><strong>Cleanup logic (<code>internal/daemon/cleanup/</code>):</strong></p>
+<ul>
+<li><code>CleanupStaleContexts(db, now)</code> - Removes stale work contexts from SQLite<ul>
+<li>Rule 1: Contexts &gt; 24h old with no unmerged commits</li>
+<li>Rule 2: Contexts from sessions ended &gt; 7 days ago</li>
+<li>Rule 3: Contexts where git data was never collected</li>
+</ul>
+</li>
+<li><code>FilterStaleContexts(contexts, now)</code> - In-memory filter (same rules, for sync)</li>
+<li>Runs at daemon startup and before sync</li>
+</ul>
+<h2>Observability</h2>
+<h3><code>identity_guard_fire</code> Slog Event</h3>
+<p>Every identity guard outcome (whether the guard fires and denies, fires and
+allows, auto-reclaims, or is skipped) emits a structured slog event with the key
+<code>identity_guard_fire</code>. Operators and monitoring pipelines can subscribe to this
+event for identity violation alerts.</p>
+<p><strong>Event fields:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guard</code></td>
+<td>string</td>
+<td>Guard key that fired (e.g., <code>cross_worktree</code>, <code>daemon_writer_liveness</code>, <code>unauthenticated_rpc</code>)</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>string</td>
+<td>Enforcement mode at fire time: <code>strict</code>, <code>warn</code>, or <code>off</code></td>
+</tr>
+<tr>
+<td><code>outcome</code></td>
+<td>string</td>
+<td><code>denied</code>, <code>allowed</code>, <code>auto_reclaimed</code>, or <code>skipped</code></td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>Machine-readable reason code (e.g., <code>subject_pid_dead</code>, <code>identity_mismatch</code>)</td>
+</tr>
+<tr>
+<td><code>caller_pid</code></td>
+<td>integer</td>
+<td>PID of the connecting process (when available via peercred)</td>
+</tr>
+<tr>
+<td><code>target_pid</code></td>
+<td>integer</td>
+<td>PID of the identity file&#39;s recorded <code>agent_pid</code> (when relevant)</td>
+</tr>
+</tbody></table>
+<p>The <code>identity_guard_fire</code> event is emitted on every outcome — including
+successful passes — so operators can audit both denials and auto-reclaims
+without separate event types.</p>
+<h2>Local-Only Mode</h2>
+<p>When your repository is public, the daemon&#39;s sync loop pushes the <code>a-sync</code>
+branch to <code>origin</code>, which would expose private agent messages. Local-only mode
+disables all remote git operations while keeping everything else working.</p>
+<h3>Enable local-only mode</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Via CLI flag</span>
+thrum daemon start --<span class="hljs-built_in">local</span>
+
+<span class="hljs-comment"># Via environment variable</span>
+THRUM_LOCAL=1 thrum daemon start</code></pre>
+<p>The setting persists in <code>.thrum/config.json</code>:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;daemon&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;local_only&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span> <span class="hljs-punctuation">}</span></code></pre>
+<p><strong>Priority order:</strong> CLI flag &gt; environment variable &gt; config file &gt; default
+(<code>true</code> via <code>thrum init</code>).</p>
+<h3>What changes in local-only mode</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Normal mode</th>
+<th>Local-only mode</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Messaging</td>
+<td>Works</td>
+<td>Works</td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>Works</td>
+<td>Works</td>
+</tr>
+<tr>
+<td>SQLite projection</td>
+<td>Works</td>
+<td>Works</td>
+</tr>
+<tr>
+<td>WebSocket / MCP</td>
+<td>Works</td>
+<td>Works</td>
+</tr>
+<tr>
+<td><code>git push origin a-sync</code></td>
+<td>Every 60s</td>
+<td><strong>Skipped</strong></td>
+</tr>
+<tr>
+<td><code>git fetch origin a-sync</code></td>
+<td>Every 60s</td>
+<td><strong>Skipped</strong></td>
+</tr>
+<tr>
+<td>Remote branch setup</td>
+<td>Automatic</td>
+<td><strong>Skipped</strong></td>
+</tr>
+</tbody></table>
+<h3>Check if local-only mode is active</h3>
+<pre><code class="language-bash hljs">thrum <span class="hljs-built_in">sync</span> status
+<span class="hljs-comment"># Shows &quot;Mode: local-only&quot; or &quot;Mode: normal&quot;</span>
+
+thrum <span class="hljs-built_in">sync</span> force
+<span class="hljs-comment"># Shows &quot;local-only (remote sync disabled)&quot; when active</span></code></pre>
+<h3>9. State Management</h3>
+<p><strong>Location:</strong> <code>internal/daemon/state/</code></p>
+<p>The <code>State</code> struct manages the daemon&#39;s persistent state: JSONL event logs and
+SQLite projection.</p>
+<p><strong>Constructor:</strong> <code>NewState(thrumDir, syncDir, repoID)</code> splits paths:</p>
+<ul>
+<li><code>thrumDir</code> (<code>/path/to/.thrum/</code>) - Runtime files: <code>var/messages.db</code>,
+<code>var/thrum.sock</code>, etc.</li>
+<li><code>syncDir</code> (<code>/path/to/.git/thrum-sync/a-sync/</code>) - JSONL data: <code>events.jsonl</code>,
+<code>messages/*.jsonl</code></li>
+</ul>
+<p><strong>Event routing (per-agent JSONL sharding):</strong></p>
+<ul>
+<li><code>message.*</code> events -&gt; <code>messages/{agent_name}.jsonl</code> (per-agent file, keyed by
+message author)</li>
+<li>All other events -&gt; <code>events.jsonl</code> (agent lifecycle, threads, sessions)</li>
+<li><code>WriteEvent()</code> auto-generates <code>event_id</code> (ULID) and <code>v</code> (version) fields</li>
+</ul>
+<p><strong>On initialization:</strong></p>
+<ol>
+<li>Opens/migrates SQLite database</li>
+<li>Runs JSONL sharding migration (monolithic <code>messages.jsonl</code> -&gt; per-agent
+files) if needed</li>
+<li>Backfills <code>event_id</code> for events that lack it</li>
+<li>Creates writers for <code>events.jsonl</code> and lazy-creates per-agent message writers</li>
+</ol>
+<p><strong>Exported methods:</strong></p>
+<ul>
+<li><code>WriteEvent(event)</code> - Write to JSONL + apply to SQLite projection</li>
+<li><code>DB()</code> - Returns SQLite connection for queries</li>
+<li><code>RepoID()</code>, <code>RepoPath()</code>, <code>SyncDir()</code> - Path accessors</li>
+<li><code>Lock()/Unlock()</code>, <code>RLock()/RUnlock()</code> - Read/write mutex for agent/session
+operations</li>
+<li><code>Projector()</code> - Returns the projection engine</li>
+<li><code>Close()</code> - Closes all JSONL writers and SQLite connection</li>
+</ul>
+<h3>10. Timeout Enforcement (v0.4.3)</h3>
+<p>All I/O paths enforce timeouts to prevent indefinite hangs:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Timeout</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CLI dial</td>
+<td>5s</td>
+<td>net.DialTimeout</td>
+</tr>
+<tr>
+<td>RPC call</td>
+<td>10s</td>
+<td>context.WithTimeout</td>
+</tr>
+<tr>
+<td>Server per-request</td>
+<td>10s</td>
+<td>http.TimeoutHandler</td>
+</tr>
+<tr>
+<td>WebSocket handshake</td>
+<td>10s</td>
+<td>websocket.Upgrader</td>
+</tr>
+<tr>
+<td>Git commands</td>
+<td>5s/10s</td>
+<td>safecmd wrapper</td>
+</tr>
+<tr>
+<td>SQLite queries</td>
+<td>context-scoped</td>
+<td>safedb wrapper</td>
+</tr>
+</tbody></table>
+<p>The <code>safedb</code> and <code>safecmd</code> packages wrap all database and command operations
+with context-aware timeouts. All DB operations go through <code>safedb</code> wrappers and
+all command executions go through <code>safecmd</code> wrappers for context-aware timeout
+enforcement.</p>
+<p>Lock scope has been reduced in v0.4.3 — no mutex is held during I/O, git, or
+WebSocket dispatch operations.</p>
+<h3>11. Monitor Supervisor</h3>
+<p><strong>Location:</strong> <code>internal/daemon/monitor/</code></p>
+<p>The monitor supervisor manages the full lifecycle of monitor jobs — spawning
+child processes, reading their output, filtering lines against a regex, and
+delivering matching lines as synthetic Thrum messages.</p>
+<p><strong>Key behaviors:</strong></p>
+<ul>
+<li>Spawns child processes via <code>exec.Command</code> — no shell, ever. The argv is passed
+directly.</li>
+<li>Reads stdout and stderr line-by-line. Lines longer than 2KB are truncated with
+a <code>[truncated]</code> marker.</li>
+<li>Applies the configured Go RE2 regex to each line. Matching lines are forwarded
+to the delivery layer.</li>
+<li>Debounce (leading-edge): the first match in a window delivers immediately.
+Subsequent matches are suppressed until the window closes. When it closes, a
+trailing summary is sent if any matches were suppressed. Default window: 60s,
+minimum: 30s.</li>
+<li>Synthetic sender format: <code>monitor:&lt;name&gt;</code>. Appears as <code>@monitor:&lt;name&gt;</code> in
+recipient inboxes.</li>
+<li>On child exit: sends an exit notification with the last 500 bytes of output
+and a <code>thrum monitor restart</code> hint. Does not auto-respawn.</li>
+<li>On daemon restart: loads all monitor specs from the <code>monitors</code> table (schema
+v20) and respawns each one from scratch.</li>
+<li>Graceful shutdown: SIGTERM → 5s grace → SIGKILL.</li>
+<li>Max 100 concurrent monitors. Child processes run with a minimal env whitelist
+(<code>HOME</code>, <code>USER</code>, <code>LANG</code>, <code>TZ</code>) plus user-supplied <code>--env</code> vars.</li>
+</ul>
+<p><strong>Packages:</strong></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>job.go</code></td>
+<td>Monitor job struct, state machine</td>
+</tr>
+<tr>
+<td><code>runner.go</code></td>
+<td>Child process spawn, env setup</td>
+</tr>
+<tr>
+<td><code>linereader.go</code></td>
+<td>Buffered line reader with 2KB limit</td>
+</tr>
+<tr>
+<td><code>debounce.go</code></td>
+<td>Leading-edge debounce with trailing summary</td>
+</tr>
+<tr>
+<td><code>delivery.go</code></td>
+<td>Synthetic message delivery to recipient</td>
+</tr>
+<tr>
+<td><code>supervisor.go</code></td>
+<td>Lifecycle coordination, DB persistence</td>
+</tr>
+</tbody></table>
+<p>See <a href="monitor-jobs.html">Monitor Jobs</a> for user-facing documentation.</p>
+<h3>12. Client Library</h3>
+<p><strong>Location:</strong> <code>internal/daemon/client.go</code></p>
+<p>Client library for connecting to the daemon.</p>
+<p><strong>Key functions:</strong></p>
+<ul>
+<li><code>NewClient(socketPath)</code> - Connect to daemon</li>
+<li><code>Call(method, params)</code> - Make RPC call</li>
+<li><code>EnsureDaemon(repoPath)</code> - Auto-start daemon if needed</li>
+</ul>
+<p><strong>Auto-start logic:</strong></p>
+<ol>
+<li>Try to connect to existing daemon</li>
+<li>If not running, start daemon in background</li>
+<li>Wait for socket to become available (10s timeout)</li>
+<li>Return connected client</li>
+</ol>
+<h2>Daemon Lifecycle</h2>
+<p>For setup instructions, see <a href="quickstart.html">Quickstart Guide</a>.</p>
+<h3>Daemon States</h3>
+<pre><code class="language-text hljs"> NOT RUNNING
+     │
+     ▼
+ STARTING ────────┐
+     │            │ (error)
+     ▼            ▼
+ RUNNING ──────▶ ERROR
+     │
+     ▼
+ SHUTTING DOWN
+     │
+     ▼
+ STOPPED</code></pre>
+<h3>Checking Status</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check if daemon is running (shows repo path from JSON PID)</span>
+thrum daemon status</code></pre>
+<h3>Stopping the Daemon</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Graceful stop</span>
+thrum daemon stop
+
+<span class="hljs-comment"># Force stop (if graceful fails)</span>
+<span class="hljs-built_in">kill</span> &lt;pid&gt;
+<span class="hljs-comment"># flock auto-released by OS; PID file cleaned up on next start</span></code></pre>
+<h2>Directory Structure</h2>
+<pre><code class="language-go hljs">.git/thrum-sync/a-sync/          # Sync worktree on a-sync orphan branch
+├── events.jsonl                # Agent lifecycle events (source of truth)
+└── messages/                   # Per-agent message logs (source of truth)
+    └── {agent_name}.jsonl
+
+.thrum/                         # Gitignored entirely
+├── config.json                 # Daemon configuration (includes identity block)
+├── config.json.pre-identity-bak  # One-time backup created on first daemon_id rotation
+│                               #   (backup-once: never overwritten after creation)
+├── <span class="hljs-keyword">var</span>/                        # Runtime files
+│   ├── thrum.sock              # Unix socket <span class="hljs-keyword">for</span> CLI/RPC
+│   ├── thrum.pid               # JSON PID file (PID, RepoPath, StartedAt, SocketPath)
+│   ├── thrum.lock              # flock file <span class="hljs-keyword">for</span> SIGKILL resilience
+│   ├── ws.port                 # WebSocket port number
+│   ├── sync.lock               # Sync loop file lock
+│   └── messages.db             # SQLite projection (query cache)
+├── identities/                 # Per-worktree agent identity files
+│   └── {agent_name}.json
+└── redirect                    # (feature worktrees only) points to main .thrum/</code></pre>
+<p><strong>Key files:</strong></p>
+<ul>
+<li><code>.git/thrum-sync/a-sync/events.jsonl</code> and <code>messages/*.jsonl</code>: Append-only
+JSONL event logs on the <code>a-sync</code> branch, synced via the worktree. Per-agent
+sharding means each agent&#39;s messages go to a separate JSONL file.</li>
+<li><code>var/messages.db</code>: SQLite database rebuilt from JSONL, stores all queryable
+state including <code>agent_work_contexts</code> table</li>
+<li><code>var/thrum.pid</code>: JSON format with PID, repo path, start time, and socket path.
+Enables repo-affinity checks to prevent conflicts.</li>
+<li><code>var/thrum.lock</code>: Held via <code>flock()</code> for the daemon&#39;s lifetime. OS releases on
+process death (even SIGKILL).</li>
+<li><code>var/ws.port</code>: Contains the WebSocket port for UI clients to discover</li>
+<li><code>redirect</code>: Present only in feature worktrees; points to the main worktree&#39;s
+<code>.thrum/</code> so all worktrees share one daemon</li>
+</ul>
+<h2>Development</h2>
+<h3>Running Tests</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># All daemon tests</span>
+go <span class="hljs-built_in">test</span> ./internal/daemon/...
+
+<span class="hljs-comment"># With coverage</span>
+go <span class="hljs-built_in">test</span> -cover ./internal/daemon/...
+
+<span class="hljs-comment"># With race detector</span>
+go <span class="hljs-built_in">test</span> -race ./internal/daemon/...</code></pre>
+<h3>Adding New RPC Methods</h3>
+<ol>
+<li>Create handler in <code>internal/daemon/rpc/</code></li>
+<li>Implement <code>Handle(ctx, params)</code> method</li>
+<li>Register in daemon startup (<code>cmd/thrum/main.go</code>)</li>
+<li>Add tests in corresponding <code>_test.go</code> file</li>
+</ol>
+<p>Example:</p>
+<pre><code class="language-go hljs"><span class="hljs-comment">// internal/daemon/rpc/mymethod.go</span>
+<span class="hljs-keyword">type</span> MyMethodHandler <span class="hljs-keyword">struct</span> {
+    <span class="hljs-comment">// dependencies</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *MyMethodHandler)</span></span> Handle(ctx context.Context, params json.RawMessage) (any, <span class="hljs-type">error</span>) {
+    <span class="hljs-comment">// implementation</span>
+    <span class="hljs-keyword">return</span> response, <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// Register in daemon (cmd/thrum/main.go)</span>
+server.RegisterHandler(<span class="hljs-string">&quot;mymethod&quot;</span>, myMethodHandler.Handle)</code></pre>
+<h2>Troubleshooting</h2>
+<h3>Daemon won&#39;t start</h3>
+<p>Check:</p>
+<ol>
+<li>Is <code>.thrum/var/</code> directory writable?</li>
+<li>Is socket path too long? (Unix sockets have 104-char limit)</li>
+<li>Is another daemon already running?</li>
+</ol>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check JSON PID file</span>
+<span class="hljs-built_in">cat</span> .thrum/var/thrum.pid
+
+<span class="hljs-comment"># Check if flock is held</span>
+<span class="hljs-comment"># (if daemon died via SIGKILL, flock is released but PID file may remain)</span>
+
+<span class="hljs-comment"># Check if process is running</span>
+ps aux | grep thrum
+
+<span class="hljs-comment"># Remove stale PID file (only if process is definitely not running)</span>
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.pid</code></pre>
+<h3>Socket connection errors</h3>
+<p>Check:</p>
+<ol>
+<li>Is daemon running?</li>
+<li>Socket permissions correct (should be 0600)</li>
+<li>Socket file exists?</li>
+</ol>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check socket</span>
+<span class="hljs-built_in">ls</span> -l .thrum/var/thrum.sock
+
+<span class="hljs-comment"># Test connection</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;health&quot;,&quot;id&quot;:1}&#x27;</span> | nc -U .thrum/var/thrum.sock</code></pre>
+<h3>Graceful shutdown hangs</h3>
+<p>The daemon waits up to 5 seconds for in-flight requests to complete. If shutdown
+hangs longer:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Send SIGKILL (flock auto-released by OS)</span>
+<span class="hljs-built_in">kill</span> -9 &lt;pid&gt;
+
+<span class="hljs-comment"># Stale files are cleaned up automatically on next daemon start</span>
+<span class="hljs-comment"># Manual cleanup if needed:</span>
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.sock
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.pid</code></pre>
+<h2>Implemented Features</h2>
+<table>
+<thead>
+<tr>
+<th>Epic</th>
+<th>Feature</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Epic 2</td>
+<td>Daemon core (Unix socket, JSON-RPC)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 3</td>
+<td>Agent &amp; session management</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 4</td>
+<td>Message send/receive</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 5</td>
+<td>Git sync protocol</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 6</td>
+<td>Subscription &amp; notifications</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 8</td>
+<td>WebSocket server</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic F</td>
+<td>Embedded SPA (single port)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Epic 21</td>
+<td>Agent Work Context (live git state)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>DLH</td>
+<td>Daemon Lifecycle Hardening (flock, JSON PID, defer cleanup)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>MCP Server (<code>thrum mcp serve</code>)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>JSONL Sharding</td>
+<td>Per-agent JSONL files, event_id, naming, cleanup</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Sync WT</td>
+<td>Sync worktree at <code>.git/thrum-sync/a-sync/</code></td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Agent Naming</td>
+<td>Human-readable agent names (<code>--name</code>, <code>THRUM_NAME</code>)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Agent Cleanup</td>
+<td><code>agent.delete</code>, <code>agent.cleanup</code> (orphan detection)</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Browser Auth</td>
+<td>Browser auto-registration via git config</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Local-Only Mode</td>
+<td>Disable remote sync for public repos</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Backup/Restore</td>
+<td>JSONL export, SQLite snapshot, GFS rotation, plugin hooks</td>
+<td>Complete</td>
+</tr>
+<tr>
+<td>Monitor Jobs v1</td>
+<td>Process watcher, regex filter, debounce, synthetic delivery</td>
+<td>Complete</td>
+</tr>
+</tbody></table>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="architecture.html">Architecture</a> — the full system architecture showing how
+daemon, CLI, MCP server, and Web UI fit together</li>
+<li><a href="rpc-api.html">RPC API Reference</a> — every RPC method the daemon exposes over
+Unix socket and WebSocket</li>
+<li><a href="sync.html">Sync Protocol</a> — how the daemon&#39;s sync loop fetches, merges, and
+pushes the <code>a-sync</code> branch</li>
+<li><a href="development.html">Development Guide</a> — how to add new RPC handlers and run the
+daemon test suite</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

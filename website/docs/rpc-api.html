@@ -1,0 +1,4204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>RPC API — Thrum</title>
+  <meta name="description" content="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="RPC API — Thrum">
+  <meta property="og:description" content="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">
+  <meta property="og:url" content="https://thrum.team/docs/rpc-api.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RPC API — Thrum">
+  <meta name="twitter:description" content="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/rpc-api.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"RPC API","description":"Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats","url":"https://thrum.team/docs/rpc-api.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link active" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Thrum Daemon RPC API</h2>
+<blockquote>
+<p><strong>TL;DR:</strong> 50+ RPC methods over JSON-RPC 2.0, available on a Unix socket or
+WebSocket. Most users never need this — the CLI wraps all of it. This
+reference is for building custom integrations or understanding what&#39;s
+happening under the hood.</p>
+</blockquote>
+<h2>Overview</h2>
+<p>The Thrum daemon exposes a JSON-RPC 2.0 API over Unix socket
+(<code>.thrum/var/thrum.sock</code>) and WebSocket (<code>ws://localhost:9999</code>). This document
+describes every available RPC method.</p>
+<h2>Protocol</h2>
+<h3>JSON-RPC 2.0</h3>
+<p>All requests and responses follow the JSON-RPC 2.0 specification.</p>
+<p><strong>Request format:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;method&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;method_name&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;params&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p><strong>Success response:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;result&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-comment">/* method-specific result */</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p><strong>Error response:</strong></p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;jsonrpc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-32000</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Error description&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Additional error info&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>Standard Error Codes</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-32700</td>
+<td>Parse error</td>
+<td>Invalid JSON</td>
+</tr>
+<tr>
+<td>-32600</td>
+<td>Invalid request</td>
+<td>Not a valid JSON-RPC 2.0 request</td>
+</tr>
+<tr>
+<td>-32601</td>
+<td>Method not found</td>
+<td>Method doesn&#39;t exist</td>
+</tr>
+<tr>
+<td>-32602</td>
+<td>Invalid params</td>
+<td>Invalid method parameters</td>
+</tr>
+<tr>
+<td>-32603</td>
+<td>Internal error</td>
+<td>Internal JSON-RPC error</td>
+</tr>
+<tr>
+<td>-32000</td>
+<td>Server error</td>
+<td>Generic server error</td>
+</tr>
+<tr>
+<td>-32001</td>
+<td>Transport error</td>
+<td>Wrong transport for this method</td>
+</tr>
+</tbody></table>
+<h3>Transports</h3>
+<p>Both Unix socket and WebSocket expose the same set of methods, with one
+exception:</p>
+<ul>
+<li><code>user.register</code> is only available over WebSocket (returns <code>-32001</code> on Unix
+socket)</li>
+</ul>
+<h3>Caller Identity</h3>
+<p>Most RPC fields in this document include a <code>caller_agent_id</code> parameter. Its
+semantics depend on the transport:</p>
+<ul>
+<li><strong>Unix socket (v0.9.0+):</strong> The daemon resolves caller identity via kernel peer
+credentials (<code>SO_PEERCRED</code> on Linux, <code>LOCAL_PEERPID</code> on macOS). If
+<code>caller_agent_id</code> is also provided, the daemon cross-checks it against the
+kernel-verified identity. A mismatch returns
+<code>unauthenticated_rpc/identity_mismatch</code>. Forged claims cannot succeed.
+<strong>Shared-worktree fallback:</strong> when peercred resolves to a worktree hosting
+multiple co-located agents and the claimed <code>caller_agent_id</code> is also
+registered in that same worktree, the claim is trusted (the CLI plumbs
+<code>caller_agent_id</code> from <code>THRUM_NAME</code> / the local identity file on every
+mutating call, including <code>message.delete</code>). Cross-worktree claims still fail.
+See <a href="security-model.html">Security Model</a> for the full trust stack.</li>
+<li><strong>WebSocket:</strong> Peercred is not available. Mutating RPCs require a non-empty
+<code>caller_agent_id</code>. Strict mode returns
+<code>unauthenticated_rpc/no_caller_agent_id</code> when it is absent. See
+<a href="troubleshooting-identity.html">Troubleshooting Identity</a> for remediation steps.</li>
+</ul>
+<p><strong>Anonymous callers</strong> (callers whose CWD does not resolve to a registered agent
+worktree) may only invoke a hardcoded read-only allowlist of ~30 methods.
+Mutating RPCs are rejected at the dispatcher before the handler runs. See
+<a href="security-model.html">Security Model</a> for the full allowlist.</p>
+<h2>Method Reference</h2>
+<h3>health</h3>
+<p>Health check and daemon status.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(none)</em></td>
+<td></td>
+<td></td>
+<td>Empty object or omit params</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;ok&quot;</code> or <code>&quot;degraded&quot;</code></td>
+</tr>
+<tr>
+<td><code>uptime_ms</code></td>
+<td>integer</td>
+<td>Daemon uptime in milliseconds</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>string</td>
+<td>Daemon version (e.g., <code>&quot;0.10.6&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>repo_id</code></td>
+<td>string</td>
+<td>Repository identifier</td>
+</tr>
+<tr>
+<td><code>sync_state</code></td>
+<td>string</td>
+<td><code>&quot;synced&quot;</code>, <code>&quot;pending&quot;</code>, or <code>&quot;error&quot;</code> (requires active sync loop)</td>
+</tr>
+<tr>
+<td><code>identity</code></td>
+<td>object</td>
+<td>Daemon identity fields (omitted when identity is not initialized)</td>
+</tr>
+<tr>
+<td><code>identity.daemon_id</code></td>
+<td>string</td>
+<td>ULID-based daemon identifier (e.g., <code>&quot;d_01J...&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>identity.repo_name</code></td>
+<td>string</td>
+<td>Repository name (e.g., <code>&quot;falcon-backend&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>identity.hostname</code></td>
+<td>string</td>
+<td>Machine hostname</td>
+</tr>
+<tr>
+<td><code>identity.repo_path</code></td>
+<td>string</td>
+<td>Absolute path to the repository root</td>
+</tr>
+<tr>
+<td><code>identity.git_origin_url</code></td>
+<td>string</td>
+<td>Git remote URL (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>identity.init_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp when this daemon_id was first generated</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li>No method-specific errors.</li>
+</ul>
+<h3>agent.register</h3>
+<p>Register or update an agent identity.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Human-readable agent name (e.g., <code>&quot;furiosa&quot;</code>). Must match <code>[a-z0-9_]+</code>. Reserved: <code>daemon</code>, <code>system</code>, <code>thrum</code>, <code>all</code>, <code>broadcast</code>.</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent role (e.g., <code>&quot;implementer&quot;</code>, <code>&quot;reviewer&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Module/component responsibility (e.g., <code>&quot;auth&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td>string</td>
+<td>no</td>
+<td>Human-readable display name</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Override existing registration by a different agent</td>
+</tr>
+<tr>
+<td><code>re_register</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Same agent returning (re-register after identity loss)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>Generated agent ID (e.g., <code>&quot;agent:implementer:ABC123&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;registered&quot;</code>, <code>&quot;updated&quot;</code>, or <code>&quot;conflict&quot;</code></td>
+</tr>
+<tr>
+<td><code>conflict</code></td>
+<td>object</td>
+<td>Present only when <code>status</code> is <code>&quot;conflict&quot;</code></td>
+</tr>
+<tr>
+<td><code>conflict.existing_agent_id</code></td>
+<td>string</td>
+<td>ID of the conflicting agent</td>
+</tr>
+<tr>
+<td><code>conflict.registered_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of conflicting registration</td>
+</tr>
+<tr>
+<td><code>conflict.last_seen_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last activity</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid request</code>: Malformed JSON params</li>
+<li><code>role is required</code>: Missing <code>role</code> field</li>
+<li><code>module is required</code>: Missing <code>module</code> field</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>The role+module conflict check is scoped to the <strong>local daemon only</strong>. Agents
+that were registered on a remote daemon and synced into the local DB via
+<code>origin_daemon</code> are not treated as conflicts — two daemons in a peer mesh can
+have agents with identical role+module without triggering this error. This
+fixes the cross-daemon force-delete bug tracked as thrum-mm3l.</li>
+</ul>
+<h3>agent.list</h3>
+<p>List registered agents with optional filters.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>role</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by role</td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by module</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agents</code></td>
+<td>array</td>
+<td>List of agent objects</td>
+</tr>
+<tr>
+<td><code>agents[].agent_id</code></td>
+<td>string</td>
+<td>Agent ID</td>
+</tr>
+<tr>
+<td><code>agents[].kind</code></td>
+<td>string</td>
+<td><code>&quot;agent&quot;</code> or <code>&quot;user&quot;</code></td>
+</tr>
+<tr>
+<td><code>agents[].role</code></td>
+<td>string</td>
+<td>Agent role</td>
+</tr>
+<tr>
+<td><code>agents[].module</code></td>
+<td>string</td>
+<td>Agent module</td>
+</tr>
+<tr>
+<td><code>agents[].display</code></td>
+<td>string</td>
+<td>Display name</td>
+</tr>
+<tr>
+<td><code>agents[].registered_at</code></td>
+<td>string</td>
+<td>ISO 8601 registration timestamp</td>
+</tr>
+<tr>
+<td><code>agents[].last_seen_at</code></td>
+<td>string</td>
+<td>ISO 8601 last activity timestamp (may be empty)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid request</code>: Malformed JSON params</li>
+</ul>
+<h3>agent.whoami</h3>
+<p>Get current agent identity and active session.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(none)</em></td>
+<td></td>
+<td></td>
+<td>Empty object or omit params</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>Current agent ID</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>string</td>
+<td>Agent role</td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td>string</td>
+<td>Agent module</td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td>string</td>
+<td>Display name</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>string</td>
+<td>Identity source: <code>&quot;environment&quot;</code>, <code>&quot;flags&quot;</code>, or <code>&quot;identity_file&quot;</code></td>
+</tr>
+<tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>Active session ID (empty if no active session)</td>
+</tr>
+<tr>
+<td><code>session_start</code></td>
+<td>string</td>
+<td>ISO 8601 session start time (empty if no active session)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>resolve identity</code>: Could not determine agent identity from environment or
+identity file</li>
+</ul>
+<h3>agent.listContext</h3>
+<p>List agent work contexts (branch, commits, files, intent, task).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by specific agent ID</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by branch name</td>
+</tr>
+<tr>
+<td><code>file</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by file path (matches changed or uncommitted files)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>contexts</code></td>
+<td>array</td>
+<td>List of work context objects</td>
+</tr>
+<tr>
+<td><code>contexts[].session_id</code></td>
+<td>string</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>contexts[].agent_id</code></td>
+<td>string</td>
+<td>Agent ID</td>
+</tr>
+<tr>
+<td><code>contexts[].branch</code></td>
+<td>string</td>
+<td>Current Git branch (may be empty)</td>
+</tr>
+<tr>
+<td><code>contexts[].worktree_path</code></td>
+<td>string</td>
+<td>Worktree filesystem path (may be empty)</td>
+</tr>
+<tr>
+<td><code>contexts[].unmerged_commits</code></td>
+<td>array</td>
+<td>List of commit summaries not on main</td>
+</tr>
+<tr>
+<td><code>contexts[].unmerged_commits[].hash</code></td>
+<td>string</td>
+<td>Commit hash</td>
+</tr>
+<tr>
+<td><code>contexts[].unmerged_commits[].subject</code></td>
+<td>string</td>
+<td>Commit subject line</td>
+</tr>
+<tr>
+<td><code>contexts[].uncommitted_files</code></td>
+<td>array</td>
+<td>List of uncommitted file paths</td>
+</tr>
+<tr>
+<td><code>contexts[].changed_files</code></td>
+<td>array</td>
+<td>List of all changed file paths</td>
+</tr>
+<tr>
+<td><code>contexts[].git_updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last git context extraction</td>
+</tr>
+<tr>
+<td><code>contexts[].current_task</code></td>
+<td>string</td>
+<td>Current task identifier (may be empty)</td>
+</tr>
+<tr>
+<td><code>contexts[].task_updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last task update</td>
+</tr>
+<tr>
+<td><code>contexts[].intent</code></td>
+<td>string</td>
+<td>Free-text intent description (may be empty)</td>
+</tr>
+<tr>
+<td><code>contexts[].intent_updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last intent update</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid request</code>: Malformed JSON params</li>
+</ul>
+<h3>agent.delete</h3>
+<p>Delete an agent by name. Removes the identity file, per-agent JSONL message
+file, and SQLite record. Emits an <code>agent.cleanup</code> event.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent name to delete (must match <code>[a-z0-9_]+</code>)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>Deleted agent ID</td>
+</tr>
+<tr>
+<td><code>deleted</code></td>
+<td>boolean</td>
+<td><code>true</code> if the agent was deleted</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>Human-readable confirmation message</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>agent name is required</code>: Missing <code>name</code> field</li>
+<li><code>invalid agent name</code>: Name does not match validation regex</li>
+<li><code>agent not found</code>: No agent with given name</li>
+</ul>
+<h3>agent.cleanup</h3>
+<p>Detect and optionally remove orphaned agents. An agent is considered orphaned if
+its identity file is missing, its worktree no longer exists, or it has been
+inactive beyond the threshold.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dry_run</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Preview orphans without deleting</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Delete all orphans without prompting</td>
+</tr>
+<tr>
+<td><code>threshold</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Days since last seen to consider stale</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>orphans</code></td>
+<td>array</td>
+<td>List of orphaned agent objects</td>
+</tr>
+<tr>
+<td><code>orphans[].agent_id</code></td>
+<td>string</td>
+<td>Agent ID</td>
+</tr>
+<tr>
+<td><code>orphans[].role</code></td>
+<td>string</td>
+<td>Agent role</td>
+</tr>
+<tr>
+<td><code>orphans[].module</code></td>
+<td>string</td>
+<td>Agent module</td>
+</tr>
+<tr>
+<td><code>orphans[].worktree</code></td>
+<td>string</td>
+<td>Worktree name (may be empty)</td>
+</tr>
+<tr>
+<td><code>orphans[].branch</code></td>
+<td>string</td>
+<td>Branch name (may be empty)</td>
+</tr>
+<tr>
+<td><code>orphans[].last_seen_at</code></td>
+<td>string</td>
+<td>ISO 8601 last activity timestamp</td>
+</tr>
+<tr>
+<td><code>orphans[].worktree_missing</code></td>
+<td>boolean</td>
+<td>Whether the agent&#39;s worktree no longer exists</td>
+</tr>
+<tr>
+<td><code>orphans[].branch_missing</code></td>
+<td>boolean</td>
+<td>Whether the agent&#39;s branch no longer exists</td>
+</tr>
+<tr>
+<td><code>orphans[].days_since_last_seen</code></td>
+<td>integer</td>
+<td>Days since last activity</td>
+</tr>
+<tr>
+<td><code>orphans[].message_count</code></td>
+<td>integer</td>
+<td>Number of messages from this agent</td>
+</tr>
+<tr>
+<td><code>deleted</code></td>
+<td>array</td>
+<td>List of deleted agent ID strings (empty in dry-run mode)</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td>boolean</td>
+<td>Whether this was a dry-run</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>Summary message</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid request</code>: Malformed JSON params</li>
+</ul>
+<h3>session.start</h3>
+<p>Start a new work session for an agent. Automatically recovers any orphaned
+sessions for the same agent.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Which agent is starting the session</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td>array</td>
+<td>no</td>
+<td>Initial session scopes (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+<tr>
+<td><code>refs</code></td>
+<td>array</td>
+<td>no</td>
+<td>Initial session refs (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>New session ID (e.g., <code>&quot;ses_01HXE...&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>Agent ID that owns this session</td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>string</td>
+<td>ISO 8601 session start timestamp</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>agent_id is required</code>: Missing <code>agent_id</code> field</li>
+<li><code>agent not found</code>: Agent with given ID is not registered</li>
+</ul>
+<h3>session.end</h3>
+<p>End an active work session. Syncs work contexts to JSONL on end.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session ID to end</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>no</td>
+<td>End reason: <code>&quot;normal&quot;</code> (default), <code>&quot;crash&quot;</code>, <code>&quot;superseded&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>Ended session ID</td>
+</tr>
+<tr>
+<td><code>ended_at</code></td>
+<td>string</td>
+<td>ISO 8601 end timestamp</td>
+</tr>
+<tr>
+<td><code>duration_ms</code></td>
+<td>integer</td>
+<td>Session duration in milliseconds</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>session_id is required</code>: Missing <code>session_id</code> field</li>
+<li><code>get session</code>: Session ID not found</li>
+</ul>
+<h3>session.heartbeat</h3>
+<p>Update session activity timestamp. Optionally add/remove scopes and refs.
+Extracts git work context if a <code>worktree</code> ref is set.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>add_scopes</code></td>
+<td>array</td>
+<td>no</td>
+<td>Scopes to add (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+<tr>
+<td><code>remove_scopes</code></td>
+<td>array</td>
+<td>no</td>
+<td>Scopes to remove</td>
+</tr>
+<tr>
+<td><code>add_refs</code></td>
+<td>array</td>
+<td>no</td>
+<td>Refs to add (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+<tr>
+<td><code>remove_refs</code></td>
+<td>array</td>
+<td>no</td>
+<td>Refs to remove</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>last_seen_at</code></td>
+<td>string</td>
+<td>ISO 8601 updated last-seen timestamp</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td>string</td>
+<td>Current git branch name; omitted if no <code>worktree</code> ref is set or git extraction fails</td>
+</tr>
+<tr>
+<td><code>unmerged_commits</code></td>
+<td>integer</td>
+<td>Count of commits on the current branch not yet merged to the default branch; omitted if no git context</td>
+</tr>
+<tr>
+<td><code>file_changes</code></td>
+<td>array</td>
+<td>List of changed files: <code>[{&quot;path&quot;: &quot;...&quot;, &quot;last_modified&quot;: &quot;...&quot;, &quot;additions&quot;: N, &quot;deletions&quot;: N, &quot;status&quot;: &quot;...&quot;}]</code>; omitted if no git context</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>session_id is required</code>: Missing <code>session_id</code> field</li>
+<li><code>session not found</code>: Session ID does not exist</li>
+<li><code>session has already ended</code>: Session was previously ended</li>
+</ul>
+<h3>session.setIntent</h3>
+<p>Set a free-text intent describing what the agent is working on.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>intent</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Free-text intent (e.g., <code>&quot;Refactoring auth flow&quot;</code>). Empty string clears it.</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>intent</code></td>
+<td>string</td>
+<td>The intent that was set</td>
+</tr>
+<tr>
+<td><code>intent_updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of the update</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>session_id is required</code>: Missing <code>session_id</code> field</li>
+<li><code>session not found</code>: Session ID does not exist</li>
+<li><code>session has already ended</code>: Session was previously ended</li>
+</ul>
+<h3>session.setTask</h3>
+<p>Set the current task identifier for the session.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>current_task</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Task identifier (e.g., <code>&quot;beads:thrum-xyz&quot;</code>). Empty string clears it.</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session_id</code></td>
+<td>string</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>current_task</code></td>
+<td>string</td>
+<td>The task that was set</td>
+</tr>
+<tr>
+<td><code>task_updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of the update</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>session_id is required</code>: Missing <code>session_id</code> field</li>
+<li><code>session not found</code>: Session ID does not exist</li>
+<li><code>session has already ended</code>: Session was previously ended</li>
+</ul>
+<h3>session.list</h3>
+<p>List sessions with optional filters.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by agent ID</td>
+</tr>
+<tr>
+<td><code>active_only</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Only return active (non-ended) sessions</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sessions</code></td>
+<td>array</td>
+<td>List of session objects</td>
+</tr>
+<tr>
+<td><code>sessions[].session_id</code></td>
+<td>string</td>
+<td>Session ID</td>
+</tr>
+<tr>
+<td><code>sessions[].agent_id</code></td>
+<td>string</td>
+<td>Agent ID</td>
+</tr>
+<tr>
+<td><code>sessions[].started_at</code></td>
+<td>string</td>
+<td>ISO 8601 start timestamp</td>
+</tr>
+<tr>
+<td><code>sessions[].ended_at</code></td>
+<td>string</td>
+<td>ISO 8601 end timestamp (empty if active)</td>
+</tr>
+<tr>
+<td><code>sessions[].end_reason</code></td>
+<td>string</td>
+<td>End reason (empty if active)</td>
+</tr>
+<tr>
+<td><code>sessions[].last_seen_at</code></td>
+<td>string</td>
+<td>ISO 8601 last heartbeat timestamp</td>
+</tr>
+<tr>
+<td><code>sessions[].intent</code></td>
+<td>string</td>
+<td>Free-text intent (empty if not set)</td>
+</tr>
+<tr>
+<td><code>sessions[].status</code></td>
+<td>string</td>
+<td><code>&quot;active&quot;</code> or <code>&quot;ended&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid request</code>: Malformed JSON params</li>
+</ul>
+<h3>message.send</h3>
+<p>Send a message to the messaging system.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>content</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Message body text</td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td>string</td>
+<td>no</td>
+<td><code>&quot;markdown&quot;</code> (default), <code>&quot;plain&quot;</code>, or <code>&quot;json&quot;</code></td>
+</tr>
+<tr>
+<td><code>structured</code></td>
+<td>object</td>
+<td>no</td>
+<td>Typed JSON payload</td>
+</tr>
+<tr>
+<td><code>thread_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Thread identifier (deprecated in v0.4.0). Use <code>reply_to</code> instead — replying to a message automatically creates or joins a thread, and the resulting <code>thread_id</code> is returned in the response.</td>
+</tr>
+<tr>
+<td><code>reply_to</code></td>
+<td>string</td>
+<td>no</td>
+<td>Message ID to reply to. Triggers implicit auto-threading: a <code>thread_id</code> is automatically created (for the first reply) or joined (for subsequent replies), and returned in the response.</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td>array</td>
+<td>no</td>
+<td>Message scopes (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+<tr>
+<td><code>refs</code></td>
+<td>array</td>
+<td>no</td>
+<td>Message references (<code>[{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}]</code>)</td>
+</tr>
+<tr>
+<td><code>mentions</code></td>
+<td>array</td>
+<td>no</td>
+<td>Mention tokens recorded on the message (no notification dispatch — listings and search only)</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>array</td>
+<td>no</td>
+<td>Message tags</td>
+</tr>
+<tr>
+<td><code>acting_as</code></td>
+<td>string</td>
+<td>no</td>
+<td>Impersonate this agent ID (users only)</td>
+</tr>
+<tr>
+<td><code>disclose</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Show <code>[via user:X]</code> tag when impersonating</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>Generated message ID (e.g., <code>&quot;msg_01HXE...&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>thread_id</code></td>
+<td>string</td>
+<td>Thread ID if the message was sent with <code>reply_to</code> (auto-created or joined); omitted otherwise</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>string</td>
+<td>ISO 8601 creation timestamp</td>
+</tr>
+<tr>
+<td><code>resolved_to</code></td>
+<td>integer</td>
+<td>Number of <code>mentions</code> that were resolved to known agents</td>
+</tr>
+<tr>
+<td><code>warnings</code></td>
+<td>array</td>
+<td>Informational warning strings (e.g., unresolvable mentions); omitted when empty</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>content is required</code>: Missing <code>content</code> field</li>
+<li><code>invalid format</code>: Format not one of <code>markdown</code>, <code>plain</code>, <code>json</code></li>
+<li><code>no active session found</code>: Agent does not have an active session</li>
+<li><code>only users can impersonate agents</code>: Non-user tried to use <code>acting_as</code></li>
+<li><code>target agent does not exist</code>: <code>acting_as</code> references nonexistent agent</li>
+</ul>
+<h3>message.get</h3>
+<p>Retrieve a single message by ID with full details.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Message ID to retrieve</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message</code></td>
+<td>object</td>
+<td>Full message detail</td>
+</tr>
+<tr>
+<td><code>message.message_id</code></td>
+<td>string</td>
+<td>Message ID</td>
+</tr>
+<tr>
+<td><code>message.author</code></td>
+<td>object</td>
+<td>Author information</td>
+</tr>
+<tr>
+<td><code>message.author.agent_id</code></td>
+<td>string</td>
+<td>Author agent ID</td>
+</tr>
+<tr>
+<td><code>message.author.session_id</code></td>
+<td>string</td>
+<td>Session ID that created the message</td>
+</tr>
+<tr>
+<td><code>message.body</code></td>
+<td>object</td>
+<td>Message body</td>
+</tr>
+<tr>
+<td><code>message.body.format</code></td>
+<td>string</td>
+<td><code>&quot;markdown&quot;</code>, <code>&quot;plain&quot;</code>, or <code>&quot;json&quot;</code></td>
+</tr>
+<tr>
+<td><code>message.body.content</code></td>
+<td>string</td>
+<td>Message text</td>
+</tr>
+<tr>
+<td><code>message.body.structured</code></td>
+<td>string</td>
+<td>JSON string of structured data (empty if none)</td>
+</tr>
+<tr>
+<td><code>message.scopes</code></td>
+<td>array</td>
+<td>Message scopes</td>
+</tr>
+<tr>
+<td><code>message.refs</code></td>
+<td>array</td>
+<td>Message refs</td>
+</tr>
+<tr>
+<td><code>message.metadata</code></td>
+<td>object</td>
+<td>Deletion metadata</td>
+</tr>
+<tr>
+<td><code>message.metadata.deleted_at</code></td>
+<td>string</td>
+<td>ISO 8601 deletion timestamp (empty if not deleted)</td>
+</tr>
+<tr>
+<td><code>message.metadata.delete_reason</code></td>
+<td>string</td>
+<td>Deletion reason (empty if not deleted)</td>
+</tr>
+<tr>
+<td><code>message.created_at</code></td>
+<td>string</td>
+<td>ISO 8601 creation timestamp</td>
+</tr>
+<tr>
+<td><code>message.updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 last edit timestamp (empty if never edited)</td>
+</tr>
+<tr>
+<td><code>message.deleted</code></td>
+<td>boolean</td>
+<td>Whether the message is deleted</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>message_id is required</code>: Missing <code>message_id</code> field</li>
+<li><code>message not found</code>: No message with given ID</li>
+</ul>
+<h3>message.list</h3>
+<p>List messages with filtering, pagination, and sorting.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>scope</code></td>
+<td>object</td>
+<td>no</td>
+<td>Filter by scope (<code>{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}</code>)</td>
+</tr>
+<tr>
+<td><code>ref</code></td>
+<td>object</td>
+<td>no</td>
+<td>Filter by ref (<code>{&quot;type&quot;: &quot;...&quot;, &quot;value&quot;: &quot;...&quot;}</code>)</td>
+</tr>
+<tr>
+<td><code>thread_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by thread ID</td>
+</tr>
+<tr>
+<td><code>author_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter by author agent ID</td>
+</tr>
+<tr>
+<td><code>mentions</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Only messages mentioning current agent (resolved from config)</td>
+</tr>
+<tr>
+<td><code>unread</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Only unread messages (resolved from config)</td>
+</tr>
+<tr>
+<td><code>mention_role</code></td>
+<td>string</td>
+<td>no</td>
+<td>Explicit filter: messages with mention ref matching this role (for remote callers like MCP server)</td>
+</tr>
+<tr>
+<td><code>unread_for_agent</code></td>
+<td>string</td>
+<td>no</td>
+<td>Explicit filter: messages unread by this agent ID (for remote callers like MCP server)</td>
+</tr>
+<tr>
+<td><code>exclude_self</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Exclude messages authored by current agent (inbox mode)</td>
+</tr>
+<tr>
+<td><code>caller_agent_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>For worktree callers to pass their agent ID</td>
+</tr>
+<tr>
+<td><code>caller_mention_role</code></td>
+<td>string</td>
+<td>no</td>
+<td>For worktree callers to pass their role for mentions filter</td>
+</tr>
+<tr>
+<td><code>for_agent</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter for messages addressed to this agent name (mentions + broadcasts)</td>
+</tr>
+<tr>
+<td><code>for_agent_role</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filter for messages addressed to this agent role (mentions + broadcasts)</td>
+</tr>
+<tr>
+<td><code>page_size</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Items per page (default: 10, max: 100)</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Page number (default: 1)</td>
+</tr>
+<tr>
+<td><code>sort_by</code></td>
+<td>string</td>
+<td>no</td>
+<td><code>&quot;created_at&quot;</code> (default) or <code>&quot;updated_at&quot;</code></td>
+</tr>
+<tr>
+<td><code>sort_order</code></td>
+<td>string</td>
+<td>no</td>
+<td><code>&quot;asc&quot;</code> or <code>&quot;desc&quot;</code> (default)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>messages</code></td>
+<td>array</td>
+<td>List of message summaries</td>
+</tr>
+<tr>
+<td><code>messages[].message_id</code></td>
+<td>string</td>
+<td>Message ID</td>
+</tr>
+<tr>
+<td><code>messages[].agent_id</code></td>
+<td>string</td>
+<td>Author agent ID</td>
+</tr>
+<tr>
+<td><code>messages[].body</code></td>
+<td>object</td>
+<td>Message body (format, content, structured)</td>
+</tr>
+<tr>
+<td><code>messages[].created_at</code></td>
+<td>string</td>
+<td>ISO 8601 creation timestamp</td>
+</tr>
+<tr>
+<td><code>messages[].deleted</code></td>
+<td>boolean</td>
+<td>Whether the message is deleted</td>
+</tr>
+<tr>
+<td><code>messages[].is_read</code></td>
+<td>boolean</td>
+<td>Whether the message has been read by current agent/session</td>
+</tr>
+<tr>
+<td><code>total</code></td>
+<td>integer</td>
+<td>Total matching messages</td>
+</tr>
+<tr>
+<td><code>unread</code></td>
+<td>integer</td>
+<td>Count of unread messages</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>integer</td>
+<td>Current page number</td>
+</tr>
+<tr>
+<td><code>page_size</code></td>
+<td>integer</td>
+<td>Items per page</td>
+</tr>
+<tr>
+<td><code>total_pages</code></td>
+<td>integer</td>
+<td>Total number of pages</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid sort_by</code>: Must be <code>&quot;created_at&quot;</code> or <code>&quot;updated_at&quot;</code></li>
+<li><code>invalid sort_order</code>: Must be <code>&quot;asc&quot;</code> or <code>&quot;desc&quot;</code></li>
+</ul>
+<h3>message.edit</h3>
+<p>Edit a message&#39;s content or structured data. Only the original author can edit.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Message ID to edit</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>string</td>
+<td>no</td>
+<td>New content (at least one of <code>content</code> or <code>structured</code> required)</td>
+</tr>
+<tr>
+<td><code>structured</code></td>
+<td>object</td>
+<td>no</td>
+<td>New structured data (at least one of <code>content</code> or <code>structured</code> required)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>Edited message ID</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>string</td>
+<td>ISO 8601 edit timestamp</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>integer</td>
+<td>Edit count (total number of edits for this message)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>message_id is required</code>: Missing <code>message_id</code> field</li>
+<li><code>at least one of content or structured must be provided</code>: Neither field given</li>
+<li><code>message not found</code>: No message with given ID</li>
+<li><code>cannot edit deleted message</code>: Message was soft-deleted</li>
+<li><code>only message author can edit</code>: Current agent is not the message author</li>
+<li><code>no active session found</code>: Agent does not have an active session</li>
+</ul>
+<h3>message.delete</h3>
+<p>Soft-delete a message. The message remains in the database and JSONL log but is
+marked as deleted.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Message ID to delete</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>no</td>
+<td>Reason for deletion</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_id</code></td>
+<td>string</td>
+<td>Deleted message ID</td>
+</tr>
+<tr>
+<td><code>deleted_at</code></td>
+<td>string</td>
+<td>ISO 8601 deletion timestamp</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>message_id is required</code>: Missing <code>message_id</code> field</li>
+<li><code>message not found</code>: No message with given ID</li>
+<li><code>message already deleted</code>: Message was already soft-deleted</li>
+<li><code>only message author can delete</code>: Caller is not the message author; only the
+agent that sent the message may delete it. Non-author callers receive this
+error regardless of transport.</li>
+</ul>
+<h3>message.markRead</h3>
+<p>Batch mark messages as read for the current agent and session. Returns
+collaboration info (other agents who also read the messages).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message_ids</code></td>
+<td>array</td>
+<td>yes</td>
+<td>List of message ID strings</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>marked_count</code></td>
+<td>integer</td>
+<td>Number of messages successfully marked as read</td>
+</tr>
+<tr>
+<td><code>also_read_by</code></td>
+<td>object</td>
+<td>Map of message ID to list of other agent IDs that also read it (omitted if empty)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>message_ids is required and must not be empty</code>: Missing or empty
+<code>message_ids</code> array</li>
+<li><code>no active session found</code>: Agent does not have an active session</li>
+</ul>
+<h3>message.deleteByAgent</h3>
+<p>Hard-delete all messages authored by a specific agent. The caller must be the
+same agent as the target — this method cannot be used to delete another agent&#39;s
+messages.</p>
+<p><strong>Unix socket only.</strong> Not available over WebSocket (structural guard prevents
+registration on the WebSocket transport).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent ID whose messages to delete</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>deleted_count</code></td>
+<td>integer</td>
+<td>Number of messages hard-deleted</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>agent_id is required</code>: Missing <code>agent_id</code> field</li>
+<li><code>unauthorized</code>: Caller identity does not match the target <code>agent_id</code>. Only the
+agent itself may invoke this method.</li>
+</ul>
+<h3>message.deleteByScope</h3>
+<blockquote>
+<p><strong>Daemon-internal only.</strong> This method is not callable from external clients —
+not from the CLI, WebSocket connections, or external unix-socket callers. It
+is reserved for internal daemon housekeeping operations. The method is not
+registered on the WebSocket transport at all.</p>
+</blockquote>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>-32601</code> (Method not found): Returned to any external caller attempting to
+invoke this method.</li>
+</ul>
+<h3>user.register</h3>
+<p>Register a human user identity. Only available over WebSocket.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>username</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Username (alphanumeric, underscore, or hyphen; 1-32 chars)</td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td>string</td>
+<td>no</td>
+<td>Display name</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user_id</code></td>
+<td>string</td>
+<td>Generated user ID (e.g., <code>&quot;user:leon&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td>string</td>
+<td>The registered username</td>
+</tr>
+<tr>
+<td><code>display_name</code></td>
+<td>string</td>
+<td>Display name (if provided)</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>string</td>
+<td>Session token for reconnection</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;registered&quot;</code> or <code>&quot;existing&quot;</code> (idempotent re-registration)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>-32001</code> (Transport error): Method called over Unix socket instead of
+WebSocket</li>
+<li><code>username is required</code>: Missing <code>username</code> field</li>
+<li><code>username cannot start with &#39;agent:&#39; prefix</code>: Namespace conflict</li>
+<li><code>invalid username format</code>: Does not match <code>[a-zA-Z0-9_-]{1,32}</code></li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Registration is idempotent: if the user already exists, returns the existing
+info with a fresh token and status <code>&quot;existing&quot;</code>.</li>
+</ul>
+<h3>user.identify</h3>
+<p>Get the current user&#39;s identity from git config. Used for browser
+auto-registration.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(none)</em></td>
+<td></td>
+<td></td>
+<td>Empty object or omit params</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>username</code></td>
+<td>string</td>
+<td>Sanitized git <code>user.name</code> (lowercased, spaces replaced with hyphens)</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>string</td>
+<td>Git <code>user.email</code></td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td>string</td>
+<td>Raw git <code>user.name</code></td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>git config user.name not set</code>: Git user.name is not configured in the
+repository</li>
+</ul>
+<h2>Sync Methods</h2>
+<h3>sync.status</h3>
+<p>Get current sync loop status and health. Available when the sync loop is active
+(requires a remote origin).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(none)</em></td>
+<td></td>
+<td></td>
+<td>Empty object or omit params</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>running</code></td>
+<td>boolean</td>
+<td>Whether the sync loop is running</td>
+</tr>
+<tr>
+<td><code>last_sync_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last successful sync</td>
+</tr>
+<tr>
+<td><code>last_error</code></td>
+<td>string</td>
+<td>Last error message (empty if no error)</td>
+</tr>
+<tr>
+<td><code>sync_state</code></td>
+<td>string</td>
+<td><code>&quot;stopped&quot;</code>, <code>&quot;idle&quot;</code>, <code>&quot;synced&quot;</code>, or <code>&quot;error&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>This method is only registered when the sync loop is initialized (i.e., the
+repository has a remote origin). Returns method-not-found (<code>-32601</code>)
+otherwise.</li>
+</ul>
+<h3>sync.force</h3>
+<p>Trigger an immediate sync (non-blocking). Available when the sync loop is active
+(requires a remote origin).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(none)</em></td>
+<td></td>
+<td></td>
+<td>Empty object or omit params</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>triggered</code></td>
+<td>boolean</td>
+<td>Whether sync was triggered</td>
+</tr>
+<tr>
+<td><code>last_sync_at</code></td>
+<td>string</td>
+<td>ISO 8601 timestamp of last sync</td>
+</tr>
+<tr>
+<td><code>sync_state</code></td>
+<td>string</td>
+<td>Current sync state</td>
+</tr>
+</tbody></table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>This method is only registered when the sync loop is initialized (i.e., the
+repository has a remote origin). Returns method-not-found (<code>-32601</code>)
+otherwise.</li>
+<li>The sync loop runs every 60 seconds by default (configurable via
+<code>--sync-interval</code>).</li>
+</ul>
+<h2>Peer Methods (v0.7.0)</h2>
+<h3>peer.start_pairing</h3>
+<p>Start a pairing session. Returns a code and address for the joining peer.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>timeout_seconds</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Pairing timeout (default: 300)</td>
+</tr>
+<tr>
+<td><code>auth_key</code></td>
+<td>string</td>
+<td>no</td>
+<td>Tailscale auth key for tsnet startup</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code</code></td>
+<td>string</td>
+<td>Pairing code to share</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>Local tsnet address (e.g., <code>100.x.x.x:9100</code>)</td>
+</tr>
+</tbody></table>
+<h3>peer.wait_pairing</h3>
+<p>Block until the active pairing session completes or times out. Long-poll method.</p>
+<p><strong>Request:</strong> <em>(none)</em></p>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;paired&quot;</code>, <code>&quot;timeout&quot;</code>, or <code>&quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>peer_name</code></td>
+<td>string</td>
+<td>Name of the paired peer (on success)</td>
+</tr>
+<tr>
+<td><code>peer_address</code></td>
+<td>string</td>
+<td>Address of the paired peer (on success)</td>
+</tr>
+<tr>
+<td><code>peer_daemon_id</code></td>
+<td>string</td>
+<td>Daemon ID of the paired peer (on success)</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>Human-readable status message</td>
+</tr>
+</tbody></table>
+<h3>pair.request</h3>
+<p>Low-level handshake RPC invoked by the joining peer against the listener during
+<code>thrum peer join</code>. Both sides exchange identity metadata at pairing time so the
+remote&#39;s repo name, hostname, repo path, and git origin URL are stored in
+<code>peers.json</code> for future routing.</p>
+<p>All four identity fields are <code>omitempty</code> — an older peer that does not send them
+produces empty strings in the remote registry. No re-pairing is required for
+existing peers.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code</code></td>
+<td>string</td>
+<td>yes</td>
+<td>16-digit numeric pairing code</td>
+</tr>
+<tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Caller&#39;s daemon ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s repo name (used as peer name)</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s <code>ip:port</code></td>
+</tr>
+<tr>
+<td><code>repo_name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s repository name</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s machine hostname</td>
+</tr>
+<tr>
+<td><code>repo_path</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s absolute repo path</td>
+</tr>
+<tr>
+<td><code>git_origin_url</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s git remote URL</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;paired&quot;</code></td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>string</td>
+<td>Long-lived shared auth token stored in <code>peers.json</code></td>
+</tr>
+<tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>Listener&#39;s daemon ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Listener&#39;s peer name</td>
+</tr>
+<tr>
+<td><code>repo_name</code></td>
+<td>string</td>
+<td>Listener&#39;s repo name (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td>string</td>
+<td>Listener&#39;s machine hostname (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>repo_path</code></td>
+<td>string</td>
+<td>Listener&#39;s absolute repo path (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>git_origin_url</code></td>
+<td>string</td>
+<td>Listener&#39;s git remote URL (omitted when not set)</td>
+</tr>
+</tbody></table>
+<h3>peer.join</h3>
+<p>Connect to a remote peer using a pairing code.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Remote peer&#39;s tsnet address</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Pairing code from <code>peer.start_pairing</code></td>
+</tr>
+<tr>
+<td><code>repo_path</code></td>
+<td>string</td>
+<td>no</td>
+<td>Filesystem path (sets transport to <code>&quot;local&quot;</code>)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;paired&quot;</code> or <code>&quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>peer_name</code></td>
+<td>string</td>
+<td>Name of the paired peer</td>
+</tr>
+<tr>
+<td><code>peer_daemon_id</code></td>
+<td>string</td>
+<td>Daemon ID of the paired peer</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>Human-readable status message</td>
+</tr>
+</tbody></table>
+<h3>peer.list</h3>
+<p>List all known peers.</p>
+<p><strong>Request:</strong> <em>(none)</em></p>
+<p><strong>Response:</strong> Array of peer objects:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>Peer daemon ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Peer name</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>Peer address</td>
+</tr>
+<tr>
+<td><code>last_sync</code></td>
+<td>string</td>
+<td>Relative last sync time</td>
+</tr>
+<tr>
+<td><code>last_synced_seq</code></td>
+<td>integer</td>
+<td>Last synced sequence number</td>
+</tr>
+</tbody></table>
+<h3>peer.status</h3>
+<p>Detailed per-peer health including authentication status.</p>
+<p><strong>Request:</strong> <em>(none)</em></p>
+<p><strong>Response:</strong> Array of peer status objects:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>Peer daemon ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Peer name</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>Peer address</td>
+</tr>
+<tr>
+<td><code>has_token</code></td>
+<td>boolean</td>
+<td>Whether a shared token is stored</td>
+</tr>
+<tr>
+<td><code>paired_at</code></td>
+<td>string</td>
+<td>ISO 8601 pairing timestamp</td>
+</tr>
+<tr>
+<td><code>last_sync</code></td>
+<td>string</td>
+<td>Relative last sync time</td>
+</tr>
+<tr>
+<td><code>last_synced_seq</code></td>
+<td>integer</td>
+<td>Last synced sequence number</td>
+</tr>
+</tbody></table>
+<h3>peer.remove</h3>
+<p>Remove a peer by name or daemon ID.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Peer name (one of <code>name</code> or <code>daemon_id</code>)</td>
+</tr>
+<tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>no</td>
+<td>Peer daemon ID</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;ok&quot;</code></td>
+</tr>
+</tbody></table>
+<h3>peer.configure</h3>
+<p>Add or remove proxy agents for a peer.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>peer_name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Name of the peer</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>string</td>
+<td>yes</td>
+<td><code>&quot;add-agent&quot;</code> or <code>&quot;remove-agent&quot;</code></td>
+</tr>
+<tr>
+<td><code>agent_name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent name to add/remove as proxy</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ok</code></td>
+<td>boolean</td>
+<td>Success indicator</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>string</td>
+<td><code>&quot;added&quot;</code> or <code>&quot;removed&quot;</code></td>
+</tr>
+<tr>
+<td><code>agent</code></td>
+<td>string</td>
+<td>The agent name that was acted on</td>
+</tr>
+</tbody></table>
+<h3>peer.address_changed</h3>
+<p>Notify this daemon that a remote peer&#39;s address has changed.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>peer_token</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Shared peer token</td>
+</tr>
+<tr>
+<td><code>new_ip</code></td>
+<td>string</td>
+<td>yes</td>
+<td>New IP address</td>
+</tr>
+<tr>
+<td><code>new_port</code></td>
+<td>string</td>
+<td>yes</td>
+<td>New port</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ok</code></td>
+<td>boolean</td>
+<td>Success indicator</td>
+</tr>
+</tbody></table>
+<h3>peer.repair</h3>
+<p>Re-establish a known peer relationship after address drift, without re-pairing.
+Uses the stored bearer token from <code>peers.json</code> as the trust anchor — no new
+peercode is required. This RPC is distinct from <code>pair.request</code>: it does not mint
+a new token and does not require an active pairing session.</p>
+<p>Invoked automatically by the <code>reconcile</code> package on boot (<code>ReconcileAll</code>) and
+inline on dial failure (<code>OnDialError</code>). Can also be triggered manually via
+<code>thrum peer join --type repair &lt;name&gt;</code>.</p>
+<p><strong>Auth:</strong> Bearer token in the <code>token</code> field (from the stored <code>peers.json</code>
+entry). Distinct from the peercode used in <code>pair.request</code>.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>token</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Stored bearer token from <code>peers.json</code></td>
+</tr>
+<tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Caller&#39;s current daemon ID</td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s current <code>ip:port</code></td>
+</tr>
+<tr>
+<td><code>repo_name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s repository name</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s machine hostname</td>
+</tr>
+<tr>
+<td><code>repo_path</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s absolute repo path</td>
+</tr>
+<tr>
+<td><code>git_origin_url</code></td>
+<td>string</td>
+<td>no</td>
+<td>Caller&#39;s git remote URL</td>
+</tr>
+</tbody></table>
+<p><strong>Response</strong> (<code>RepairResponse</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;repaired&quot;</code></td>
+</tr>
+<tr>
+<td><code>daemon_id</code></td>
+<td>string</td>
+<td>Listener&#39;s current daemon ID (used to detect daemon_id rotation)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Peer name (never rotated — stable across daemon_id changes)</td>
+</tr>
+<tr>
+<td><code>repo_name</code></td>
+<td>string</td>
+<td>Listener&#39;s repo name (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td>string</td>
+<td>Listener&#39;s machine hostname (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>repo_path</code></td>
+<td>string</td>
+<td>Listener&#39;s absolute repo path (omitted when not set)</td>
+</tr>
+<tr>
+<td><code>git_origin_url</code></td>
+<td>string</td>
+<td>Listener&#39;s git remote URL (omitted when not set)</td>
+</tr>
+</tbody></table>
+<p><strong>Error codes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Token not found in registry</td>
+<td><code>CatTokenRejected</code></td>
+<td>No peer entry matches the presented token; re-pair required</td>
+</tr>
+<tr>
+<td>Empty <code>daemon_id</code> in response</td>
+<td><code>CatOther</code></td>
+<td>Response is malformed; reconcile manager does not re-key registry</td>
+</tr>
+</tbody></table>
+<p><strong>When to use:</strong> After a peer&#39;s address drifts (IP change, port reassignment,
+daemon restart on a different port) and automatic reconciliation has failed. Use
+<code>thrum peer join --type repair &lt;name&gt;</code> to trigger manually. This RPC is <strong>not</strong>
+valid for <code>peer add</code> — only for <code>peer join</code>.</p>
+<h2>Agent Methods (v0.8.0)</h2>
+<h3>agent.set-status</h3>
+<p>Set an agent&#39;s operational status. The daemon locates the agent&#39;s identity file
+(including across worktrees) and writes the status directly.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent name</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>yes</td>
+<td><code>&quot;working&quot;</code>, <code>&quot;idle&quot;</code>, or <code>&quot;blocked&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent</code></td>
+<td>string</td>
+<td>Agent name</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>The status that was set</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>invalid status &quot;&lt;value&gt;&quot;: must be working, idle, or blocked</code>: Invalid status
+value</li>
+</ul>
+<h2>Tmux Methods (v0.7.1)</h2>
+<h3>tmux.create</h3>
+<p>Create a tmux session for an agent with a clean environment and
+<code>monitor-silence</code> hooks. Also accepts quickstart fields to register an agent
+identity in the same call (equivalent to running <code>thrum tmux quickstart</code>).</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>cwd</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Working directory for the session</td>
+</tr>
+<tr>
+<td><code>agent_name</code></td>
+<td>string</td>
+<td>no</td>
+<td>Register agent with this name (quickstart: sets <code>--name</code>)</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>string</td>
+<td>no</td>
+<td>Agent role (quickstart: sets <code>--role</code>)</td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td>string</td>
+<td>no</td>
+<td>Agent module (quickstart: sets <code>--module</code>)</td>
+</tr>
+<tr>
+<td><code>intent</code></td>
+<td>string</td>
+<td>no</td>
+<td>Initial agent intent (quickstart: sets <code>--intent</code>)</td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td>string</td>
+<td>no</td>
+<td>Runtime to launch after creation (<code>claude</code>, <code>opencode</code>, <code>shell</code>) — skips launch step if omitted</td>
+</tr>
+<tr>
+<td><code>no_agent</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Create the session without registering an agent identity</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Override an existing identity at this path</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>Created session name</td>
+</tr>
+<tr>
+<td><code>identity</code></td>
+<td>object</td>
+<td>Agent identity file if found at cwd (nullable)</td>
+</tr>
+</tbody></table>
+<h3>tmux.launch</h3>
+<p>Start an AI tool inside an existing tmux session. Writes <code>tmux_session</code> and
+<code>runtime</code> to the agent&#39;s identity file.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td>string</td>
+<td>no</td>
+<td>Runtime to launch (<code>claude</code>, <code>opencode</code>, <code>shell</code>) — default: <code>claude</code></td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td>string</td>
+<td>Runtime that launched</td>
+</tr>
+</tbody></table>
+<h3>tmux.status</h3>
+<p>List all tmux-managed sessions with agent info and liveness state. Scans
+identity files in <code>.thrum/identities/</code> for agents with <code>tmux_session</code> set, then
+checks session existence and PID liveness.</p>
+<p><strong>Request:</strong> <em>(none)</em></p>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sessions</code></td>
+<td>array</td>
+<td>List of session info objects</td>
+</tr>
+<tr>
+<td><code>sessions[].name</code></td>
+<td>string</td>
+<td>Tmux session name</td>
+</tr>
+<tr>
+<td><code>sessions[].agent</code></td>
+<td>string</td>
+<td>Agent name</td>
+</tr>
+<tr>
+<td><code>sessions[].role</code></td>
+<td>string</td>
+<td>Agent role</td>
+</tr>
+<tr>
+<td><code>sessions[].module</code></td>
+<td>string</td>
+<td>Agent module</td>
+</tr>
+<tr>
+<td><code>sessions[].state</code></td>
+<td>string</td>
+<td><code>alive</code>, <code>stale</code>, <code>dead</code></td>
+</tr>
+<tr>
+<td><code>sessions[].runtime</code></td>
+<td>string</td>
+<td>Runtime (<code>claude</code>, <code>opencode</code>, etc.)</td>
+</tr>
+<tr>
+<td><code>sessions[].branch</code></td>
+<td>string</td>
+<td>Current git branch</td>
+</tr>
+</tbody></table>
+<h3>tmux.kill</h3>
+<p>Tear down a tmux session and clear <code>tmux_session</code> from all matching identity
+files.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong> <code>null</code></p>
+<h3>tmux.send</h3>
+<p>Send text into a tmux session via <code>send-keys</code>.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Text to send</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong> <code>null</code></p>
+<h3>tmux.capture</h3>
+<p>Capture the visible content of a tmux pane.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>lines</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Lines to capture (default: 50)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>content</code></td>
+<td>string</td>
+<td>Captured pane output</td>
+</tr>
+</tbody></table>
+<h3>tmux.check-pane</h3>
+<p>Check a tmux pane state. The daemon&#39;s <code>SessionPoller</code> calls this internally
+every ~10 seconds (2-hash stability window) to classify pane state. Direct
+invocation is supported but unusual — most callers rely on the poller result
+rather than invoking this RPC manually.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>string</td>
+<td>no</td>
+<td>Captured pane content (last 5 lines). When omitted the daemon captures it itself.</td>
+</tr>
+</tbody></table>
+<p><strong>Note:</strong> The <code>reason</code> field accepted by older clients is now daemon-computed,
+not client-supplied. Clients that send <code>reason</code> will have it ignored.</p>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>string</td>
+<td>Detected state: <code>idle</code>, <code>permission</code>, <code>working</code>, <code>command_completed</code>, or <code>working_but_idle</code></td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>Human-readable reason string computed by the daemon</td>
+</tr>
+</tbody></table>
+<p><strong>State values:</strong></p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>idle</code></td>
+<td>Pane is at a shell prompt, no active process</td>
+</tr>
+<tr>
+<td><code>permission</code></td>
+<td>A permission prompt was detected (awaiting user approval)</td>
+</tr>
+<tr>
+<td><code>working</code></td>
+<td>AI runtime is actively generating output</td>
+</tr>
+<tr>
+<td><code>command_completed</code></td>
+<td>A queued command has completed</td>
+</tr>
+<tr>
+<td><code>working_but_idle</code></td>
+<td>Pane is technically idle but heuristics suggest work in progress</td>
+</tr>
+</tbody></table>
+<h3>tmux.restart</h3>
+<p>Restart a tmux-managed agent session with a context snapshot. The daemon picks
+between two flows based on <code>force</code>:</p>
+<ul>
+<li><strong>Graceful (default)</strong> — sends an <code>@system</code> message asking the agent to save
+its own snapshot, nudges the pane, and polls for the snapshot file up to
+<code>restart.graceful_timeout</code> seconds. Falls back to JSONL extraction on timeout.</li>
+<li><strong>Force (<code>force: true</code>)</strong> — skips the graceful prompt and extracts directly
+from the JSONL conversation transcript. Only works for Claude Code (other
+runtimes don&#39;t use the same JSONL format).</li>
+</ul>
+<p>Either way, the daemon kills the session, creates a new one, and relaunches.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Skip graceful save prompt, extract from JSONL (default: <code>false</code>)</td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td>string</td>
+<td>no</td>
+<td>Runtime override (default: same as before)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>New session name</td>
+</tr>
+<tr>
+<td><code>snapshot_lines</code></td>
+<td>integer</td>
+<td>Lines in the saved snapshot</td>
+</tr>
+</tbody></table>
+<h2>Queue Methods (v0.8.0)</h2>
+<h3>tmux.queue</h3>
+<p>Submit a command to a tmux session&#39;s queue. Commands are dispatched FIFO — one
+at a time. The daemon sends the command to the pane when it goes silent, detects
+completion via the next silence event, captures output, and optionally sends an
+<code>@system</code> inbox message to the requester.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Tmux session name</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Command text to send</td>
+</tr>
+<tr>
+<td><code>requester</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Agent name of the requester (for <code>@system</code> notifications)</td>
+</tr>
+<tr>
+<td><code>timeout_ms</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Command timeout in ms (default: 120000)</td>
+</tr>
+<tr>
+<td><code>silence_ms</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Silence threshold in ms (default: 5000)</td>
+</tr>
+<tr>
+<td><code>notify_on_complete</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Send <code>@system</code> inbox message on completion (default: <code>true</code>)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>command_id</code></td>
+<td>string</td>
+<td>Command ID (<code>cmd_</code> prefix + ULID)</td>
+</tr>
+<tr>
+<td><code>position</code></td>
+<td>integer</td>
+<td>Queue position</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>session is required</code>: Missing <code>session</code> field</li>
+<li><code>text is required</code>: Missing <code>text</code> field</li>
+<li><code>requester is required</code>: Missing <code>requester</code> field</li>
+</ul>
+<p><strong><code>@system</code> messages:</strong> When <code>notify_on_complete</code> is <code>true</code>, the daemon sends
+inbox messages from agent <code>&quot;system&quot;</code> for completion, timeout, cancellation, and
+interruption events. The message includes the command ID, session name, elapsed
+time, and captured output (last 500 lines). Timeout warnings are sent when the
+command exceeds its timeout but is still running — the message includes a
+<code>thrum tmux cancel</code> hint. On daemon restart, interrupted commands always send
+notifications regardless of <code>notify_on_complete</code>.</p>
+<h3>tmux.queue-wait</h3>
+<p>Long-poll until a queued command reaches a terminal state (<code>completed</code>,
+<code>cancelled</code>, or <code>interrupted</code>). Polls the database every 500ms.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>command_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Command ID to wait on</td>
+</tr>
+<tr>
+<td><code>timeout_ms</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Max wait time in ms (default: 120000)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>command_id</code></td>
+<td>string</td>
+<td>Command ID</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>string</td>
+<td>Terminal state</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>string</td>
+<td>Captured output (only on terminal states)</td>
+</tr>
+<tr>
+<td><code>elapsed_ms</code></td>
+<td>integer</td>
+<td>Elapsed time from send to completion</td>
+</tr>
+</tbody></table>
+<p><strong>States:</strong> <code>queued</code>, <code>sent</code>, <code>completed</code>, <code>timeout_waiting</code>, <code>cancelled</code>,
+<code>interrupted</code>. Terminal states: <code>completed</code>, <code>cancelled</code>, <code>interrupted</code>.</p>
+<h3>tmux.queue-status</h3>
+<p>Show the active command and queued commands for a session.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Tmux session name</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session</code></td>
+<td>string</td>
+<td>Session name</td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>object</td>
+<td>Active command (nullable)</td>
+</tr>
+<tr>
+<td><code>active.id</code></td>
+<td>string</td>
+<td>Command ID</td>
+</tr>
+<tr>
+<td><code>active.text</code></td>
+<td>string</td>
+<td>Command text</td>
+</tr>
+<tr>
+<td><code>active.requester_agent</code></td>
+<td>string</td>
+<td>Requester agent name</td>
+</tr>
+<tr>
+<td><code>active.state</code></td>
+<td>string</td>
+<td>Current state</td>
+</tr>
+<tr>
+<td><code>active.silence_ms</code></td>
+<td>integer</td>
+<td>Silence threshold</td>
+</tr>
+<tr>
+<td><code>active.notify_on_complete</code></td>
+<td>boolean</td>
+<td>Whether notifications are enabled</td>
+</tr>
+<tr>
+<td><code>active.submitted_at</code></td>
+<td>string</td>
+<td>ISO 8601 submission timestamp</td>
+</tr>
+<tr>
+<td><code>active.sent_at</code></td>
+<td>string</td>
+<td>ISO 8601 send timestamp</td>
+</tr>
+<tr>
+<td><code>queued</code></td>
+<td>array</td>
+<td>List of queued command objects (same shape as <code>active</code>)</td>
+</tr>
+</tbody></table>
+<h3>tmux.cancel</h3>
+<p>Cancel a queued or active command.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>command_id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Command ID</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>command_id</code></td>
+<td>string</td>
+<td>Cancelled command ID</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>string</td>
+<td>Final state (<code>cancelled</code>)</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>string</td>
+<td>Partial captured output</td>
+</tr>
+</tbody></table>
+<h2>Monitor Methods (v0.9.0)</h2>
+<p>Monitor methods are <strong>Unix socket only</strong> — they&#39;re not available over WebSocket
+or via peer/Telegram dispatchers.</p>
+<h3>monitor.start</h3>
+<p>Start a new monitor job. Spawns the child process immediately and persists the
+spec to the <code>monitors</code> table so it survives daemon restarts.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Short identifier (used as the synthetic sender: <code>monitor:&lt;name&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>match</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Go RE2 regex. Matching lines are delivered as messages.</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Recipient agent name (without <code>@</code> prefix)</td>
+</tr>
+<tr>
+<td><code>argv</code></td>
+<td>array</td>
+<td>yes</td>
+<td>Command and arguments as a string array (e.g., <code>[&quot;node&quot;, &quot;server.js&quot;, &quot;--watch&quot;]</code>). No shell.</td>
+</tr>
+<tr>
+<td><code>cwd</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Working directory for the child process</td>
+</tr>
+<tr>
+<td><code>debounce</code></td>
+<td>string</td>
+<td>no</td>
+<td>Debounce window as a Go duration string (e.g., <code>&quot;60s&quot;</code>). Min <code>&quot;30s&quot;</code>. Default <code>&quot;60s&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>object</td>
+<td>no</td>
+<td>Extra environment variables for the child process (key/value map). Stored redacted in the DB.</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Monitor ID (<code>m_</code> prefix + ULID)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Monitor name</td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td>integer</td>
+<td>PID of the spawned child process</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>name is required</code>: Missing <code>name</code> field</li>
+<li><code>match is required</code>: Missing <code>match</code> field</li>
+<li><code>to is required</code>: Missing <code>to</code> field</li>
+<li><code>argv is required and must not be empty</code>: Missing or empty <code>argv</code></li>
+<li><code>cwd is required</code>: Missing <code>cwd</code> field</li>
+<li><code>invalid regex</code>: <code>match</code> is not a valid RE2 expression</li>
+<li><code>debounce below minimum (30s)</code>: Debounce window shorter than 30 seconds</li>
+<li><code>max monitors reached</code>: Already at the 100-monitor limit</li>
+<li><code>agent not found</code>: Recipient agent name is not registered</li>
+</ul>
+<hr>
+<h3>monitor.list</h3>
+<p>List monitor jobs.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>all</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Include stopped monitors (default: running only)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>monitors</code></td>
+<td>array</td>
+<td>List of monitor summary objects</td>
+</tr>
+<tr>
+<td><code>monitors[].id</code></td>
+<td>string</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>monitors[].name</code></td>
+<td>string</td>
+<td>Monitor name</td>
+</tr>
+<tr>
+<td><code>monitors[].status</code></td>
+<td>string</td>
+<td><code>&quot;running&quot;</code> or <code>&quot;stopped&quot;</code></td>
+</tr>
+<tr>
+<td><code>monitors[].pid</code></td>
+<td>integer</td>
+<td>Child PID (0 if stopped)</td>
+</tr>
+<tr>
+<td><code>monitors[].uptime</code></td>
+<td>string</td>
+<td>Human-readable uptime (empty if stopped)</td>
+</tr>
+<tr>
+<td><code>monitors[].match</code></td>
+<td>string</td>
+<td>Regex pattern</td>
+</tr>
+<tr>
+<td><code>monitors[].to</code></td>
+<td>string</td>
+<td>Recipient agent name</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>monitor.show</h3>
+<p>Full detail on a single monitor job.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Monitor ID</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Monitor name</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>&quot;running&quot;</code> or <code>&quot;stopped&quot;</code></td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td>integer</td>
+<td>Child PID (0 if stopped)</td>
+</tr>
+<tr>
+<td><code>uptime</code></td>
+<td>string</td>
+<td>Human-readable uptime (empty if stopped)</td>
+</tr>
+<tr>
+<td><code>match</code></td>
+<td>string</td>
+<td>Regex pattern</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>string</td>
+<td>Recipient agent name</td>
+</tr>
+<tr>
+<td><code>argv</code></td>
+<td>array</td>
+<td>Full command argv</td>
+</tr>
+<tr>
+<td><code>cwd</code></td>
+<td>string</td>
+<td>Working directory</td>
+</tr>
+<tr>
+<td><code>debounce</code></td>
+<td>string</td>
+<td>Debounce window duration string</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>object</td>
+<td>Env vars with values redacted as <code>&quot;[redacted]&quot;</code></td>
+</tr>
+<tr>
+<td><code>match_count</code></td>
+<td>integer</td>
+<td>Total lines matched since last start</td>
+</tr>
+<tr>
+<td><code>recent_matches</code></td>
+<td>array</td>
+<td>Last N matched lines (strings)</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>string</td>
+<td>ISO 8601 creation timestamp</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>monitor.stop</h3>
+<p>Stop a running monitor. Sends SIGTERM, waits 5 seconds, sends SIGKILL if still
+running. Removes the spec from persistence — the monitor won&#39;t respawn.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Monitor ID</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>stopped</code></td>
+<td>boolean</td>
+<td><code>true</code> on success</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>monitor not found</code>: No monitor with given ID</li>
+<li><code>monitor already stopped</code>: Monitor is not running</li>
+</ul>
+<hr>
+<h3>monitor.logs</h3>
+<p>Return the last N bytes of captured stdout+stderr from the child process.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td>integer</td>
+<td>no</td>
+<td>Max bytes to return (default: 10000)</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>logs</code></td>
+<td>string</td>
+<td>Captured output (last N bytes)</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>monitor not found</code>: No monitor with given ID</li>
+</ul>
+<hr>
+<h3>monitor.restart</h3>
+<p>Restart a stopped or dead monitor by respawning its child process from the saved
+spec.</p>
+<p><strong>Request:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Monitor ID</td>
+</tr>
+</tbody></table>
+<p><strong>Response:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>Monitor ID</td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td>integer</td>
+<td>PID of the newly spawned child</td>
+</tr>
+</tbody></table>
+<p><strong>Errors:</strong></p>
+<ul>
+<li><code>monitor not found</code>: No monitor with given ID</li>
+<li><code>monitor already running</code>: Monitor is currently active</li>
+</ul>
+<hr>
+<h2>Using the API</h2>
+<h3>From Command Line</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Using netcat (nc)</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;health&quot;,&quot;id&quot;:1}&#x27;</span> | nc -U .thrum/var/thrum.sock
+
+<span class="hljs-comment"># Using curl (requires HTTP-to-Unix-socket proxy)</span>
+<span class="hljs-comment"># Not directly supported without proxy</span></code></pre>
+<h3>From Go Code</h3>
+<pre><code class="language-go hljs"><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;github.com/leonletto/thrum/internal/daemon&quot;</span>
+
+<span class="hljs-comment">// Connect to daemon</span>
+client, err := daemon.NewClient(<span class="hljs-string">&quot;.thrum/var/thrum.sock&quot;</span>)
+<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+    log.Fatal(err)
+}
+<span class="hljs-keyword">defer</span> client.Close()
+
+<span class="hljs-comment">// Call health method</span>
+result, err := client.Call(<span class="hljs-string">&quot;health&quot;</span>, <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]any{})
+<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+    log.Fatal(err)
+}
+
+<span class="hljs-keyword">var</span> healthResp daemon.HealthResponse
+<span class="hljs-keyword">if</span> err := json.Unmarshal(result, &amp;healthResp); err != <span class="hljs-literal">nil</span> {
+    log.Fatal(err)
+}
+
+fmt.Printf(<span class="hljs-string">&quot;Status: %s\n&quot;</span>, healthResp.Status)</code></pre>
+<h3>From Other Languages</h3>
+<h4>Python Example</h4>
+<pre><code class="language-python hljs"><span class="hljs-keyword">import</span> socket
+<span class="hljs-keyword">import</span> json
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">call_rpc</span>(<span class="hljs-params">method, params={}</span>):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(<span class="hljs-string">&#x27;.thrum/var/thrum.sock&#x27;</span>)
+
+    request = {
+        <span class="hljs-string">&#x27;jsonrpc&#x27;</span>: <span class="hljs-string">&#x27;2.0&#x27;</span>,
+        <span class="hljs-string">&#x27;method&#x27;</span>: method,
+        <span class="hljs-string">&#x27;params&#x27;</span>: params,
+        <span class="hljs-string">&#x27;id&#x27;</span>: <span class="hljs-number">1</span>
+    }
+
+    sock.sendall(json.dumps(request).encode() + <span class="hljs-string">b&#x27;\n&#x27;</span>)
+    response = sock.recv(<span class="hljs-number">4096</span>)
+    sock.close()
+
+    <span class="hljs-keyword">return</span> json.loads(response)
+
+<span class="hljs-comment"># Call health method</span>
+result = call_rpc(<span class="hljs-string">&#x27;health&#x27;</span>)
+<span class="hljs-built_in">print</span>(result[<span class="hljs-string">&#x27;result&#x27;</span>][<span class="hljs-string">&#x27;status&#x27;</span>])</code></pre>
+<h4>Node.js Example</h4>
+<pre><code class="language-javascript hljs"><span class="hljs-keyword">const</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;net&quot;</span>);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">callRPC</span>(<span class="hljs-params">method, params = {}</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> client = net.<span class="hljs-title function_">createConnection</span>(<span class="hljs-string">&quot;.thrum/var/thrum.sock&quot;</span>);
+
+    <span class="hljs-keyword">const</span> request = {
+      <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">&quot;2.0&quot;</span>,
+      <span class="hljs-attr">method</span>: method,
+      <span class="hljs-attr">params</span>: params,
+      <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,
+    };
+
+    client.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;connect&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+      client.<span class="hljs-title function_">write</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(request) + <span class="hljs-string">&quot;\n&quot;</span>);
+    });
+
+    client.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;data&quot;</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(data.<span class="hljs-title function_">toString</span>());
+      client.<span class="hljs-title function_">end</span>();
+      <span class="hljs-title function_">resolve</span>(response.<span class="hljs-property">result</span>);
+    });
+
+    client.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;error&quot;</span>, reject);
+  });
+}
+
+<span class="hljs-comment">// Call health method</span>
+<span class="hljs-title function_">callRPC</span>(<span class="hljs-string">&quot;health&quot;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Status:&quot;</span>, result.<span class="hljs-property">status</span>);
+});</code></pre>
+<h2>Best Practices</h2>
+<h3>Connection Management</h3>
+<ol>
+<li><strong>Reuse connections</strong> - Keep the connection open for multiple requests</li>
+<li><strong>Handle disconnections</strong> - Implement retry logic for connection failures</li>
+<li><strong>Set timeouts</strong> - Don&#39;t wait forever for responses</li>
+</ol>
+<h3>Error Handling</h3>
+<ol>
+<li><strong>Check error field</strong> - Always check for <code>error</code> in response</li>
+<li><strong>Handle specific error codes</strong> - Different codes require different actions</li>
+<li><strong>Retry on transient errors</strong> - Socket errors, timeouts</li>
+</ol>
+<h3>Request IDs</h3>
+<ol>
+<li><strong>Use unique IDs</strong> - Helps correlate requests and responses</li>
+<li><strong>Can be strings or numbers</strong> - Both are valid per JSON-RPC 2.0</li>
+<li><strong>Optional for notifications</strong> - Omit ID if you don&#39;t need a response</li>
+</ol>
+<h2>Troubleshooting</h2>
+<h3>Connection Refused</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check if daemon is running</span>
+ps aux | grep thrum
+
+<span class="hljs-comment"># Check socket exists</span>
+<span class="hljs-built_in">ls</span> -l .thrum/var/thrum.sock
+
+<span class="hljs-comment"># Check socket permissions</span>
+<span class="hljs-comment"># Should be: srw------- (0600)</span></code></pre>
+<h3>Parse Errors</h3>
+<p>Common causes:</p>
+<ul>
+<li>Missing newline (<code>\n</code>) at end of request</li>
+<li>Invalid JSON syntax</li>
+<li>Wrong encoding (must be UTF-8)</li>
+</ul>
+<h3>Method Not Found</h3>
+<ul>
+<li>Check method name spelling (case-sensitive)</li>
+<li>Verify daemon version supports the method</li>
+<li>See available methods section above</li>
+</ul>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="api/websocket.html">WebSocket API</a> — use these methods over WebSocket for
+real-time browser and agent connections</li>
+<li><a href="daemon.html">Daemon Architecture</a> — how the daemon registers and dispatches
+these RPC handlers</li>
+<li><a href="inbox-query-methods.html">Inbox Query Methods</a> — deeper coverage of
+<code>message.list</code> filtering, pagination, and read-state tracking</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li><a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0 Specification</a></li>
+<li>Daemon Architecture: <code>docs/daemon.md</code></li>
+<li>Development Guide: <code>docs/development.md</code></li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

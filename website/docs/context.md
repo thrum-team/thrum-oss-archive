@@ -1,0 +1,710 @@
+---
+title: "Agent Context Management"
+description:
+  "Per-agent context storage for persisting volatile project state across
+  sessions and machines"
+category: "coordination"
+order: 6
+tags: ["context", "agents", "persistence", "markdown", "state"]
+last_updated: "2026-02-12"
+---
+
+## Agent Context Management
+
+> **TL;DR:** Context lets agents save notes that survive session restarts and
+> compaction. Save with `thrum context save`, view with `thrum context show`.
+> Files live in `.thrum/context/{agent}.md` — plain Markdown you can read and
+> edit directly. For most people, the `/thrum:update-project` skill is the
+> easiest way to keep context current — run it before shutting down for the day.
+>
+> See also: [Session Restart & Context Recovery](session-restart.md) for
+> automated restart snapshots that extract conversation history from Claude
+> Code's JSONL transcripts.
+
+## Overview
+
+Agents lose state between sessions due to context window compaction, session
+resets, or switching machines. The context system preserves volatile session
+state so agents can pick up where they left off.
+
+**Why this exists:** When an agent session ends (context compacted, Claude Code
+restarted, new worktree), the work-in-progress state vanishes. Context files
+capture that state so the next session can continue seamlessly.
+
+**Primary use case:** The `/thrum:update-project` skill in Claude Code uses this
+system to save session summaries before compaction or session end.
+
+**Storage:** Context files live in `.thrum/context/` (gitignored by default).
+Each agent gets two files:
+
+- `.thrum/context/{name}.md` - Volatile session state (updated frequently)
+- `.thrum/context/{name}_preamble.md` - Stable reference (rarely changes)
+
+## Context Files
+
+Context files hold volatile session state that doesn't belong in git commits but
+needs to survive session boundaries.
+
+**What to put in context:**
+
+- Current task and progress
+- Architectural decisions under consideration
+- Partial investigation results
+- Discovered patterns or anti-patterns
+- TODOs or questions for the next session
+- Work-in-progress findings
+
+**What NOT to put in context:**
+
+- Permanent documentation (use git-tracked docs)
+- Message-based coordination (use `thrum send`)
+- Code or configuration (use proper git-tracked files)
+
+**Location:**
+
+```text
+.thrum/
+├── context/
+│   ├── furiosa.md                  # Agent context (volatile) + user overlay
+│   ├── furiosa_preamble.md         # Agent preamble (stable)
+│   ├── maximus.md
+│   ├── maximus_preamble.md
+│   └── coordinator_1B9K33T6RK.md   # Hash-based agent ID
+```
+
+**Dual purpose of `.thrum/context/<agent>.md`:** this file serves two roles.
+First, it stores volatile session state written by `thrum context save`. Second,
+it acts as a **hand-authored user overlay**: `RenderRoleTemplate` appends any
+non-empty content to the rendered preamble after a `---` separator, so
+project-specific instructions and conventions are always included in the agent's
+boot context without editing the role template itself. `thrum quickstart`
+auto-creates the file empty so it's ready to customize. Whitespace-only files
+are treated as absent — no stray separator is added.
+
+Context files are local by default. Use `thrum context sync` to manually share
+across worktrees via the a-sync branch.
+
+## Preamble
+
+Each agent can have a preamble - a stable, user-editable header stored at
+`.thrum/context/{agent}_preamble.md`. The preamble is automatically prepended
+when showing context, providing a persistent reference that survives context
+saves.
+
+**Default preamble:** When you run `thrum quickstart`, a default preamble is
+created automatically with thrum quick-reference commands.
+
+**User-editable:** The preamble is just a markdown file. You can edit it
+directly or replace it with `thrum context preamble --file custom.md`.
+
+**Key properties:**
+
+- Not touched by `thrum context save` - the preamble persists across saves
+- Auto-created on first quickstart with default thrum quick-reference
+- Not removed by `thrum context clear` - clear only removes session context
+- Removed on agent delete - cleaned up alongside context
+
+**Default content:**
+
+```markdown
+## Thrum Quick Reference
+
+**Check messages:** `thrum inbox --unread` (does not mark as read) **Check sent
+status:** `thrum sent --unread` (messages with unread recipients) **Mark all
+read:** `thrum message read --all` **Send message:**
+`thrum send "message" --to @<agent_name>` — ALWAYS use the specific agent name
+(e.g., `@coordinator_main`), NEVER the role (e.g., `@coordinator`). Role names
+fan out to ALL agents with that role. Run `thrum team` to find exact names.
+**Reply:** `thrum reply <MSG_ID> "response"` **Status:** `thrum overview`
+**Who's online:** `thrum team` **Save context:** Use `/thrum:update-project`
+skill. **NEVER run `thrum context save` manually** — it overwrites accumulated
+session state.
+
+## Background Message Listener
+
+ALWAYS keep a background listener running. Spawn on session start; it loops
+automatically for up to 4 hours — no manual re-arming needed. Set up a cron
+watchdog (`CronCreate`, every 30 min) to auto-respawn it if it stops. Run
+`thrum prime` to get the spawn command with the correct repo path pre-filled.
+```
+
+**Customization examples:**
+
+You can edit the preamble to add project conventions, role-specific
+instructions, team rosters, or boot sequences:
+
+```bash
+# Edit the preamble directly
+vim .thrum/context/furiosa_preamble.md
+
+# Or replace it from a file
+cat > my-preamble.md <<'EOF'
+## Project Conventions
+
+**Architecture:** Hexagonal (ports/adapters)
+**Testing:** Always run `make test` before committing
+**Commits:** Follow Conventional Commits (feat:, fix:, docs:)
+
+## Thrum Quick Reference
+... (default commands) ...
+EOF
+
+thrum context preamble --file my-preamble.md
+```
+
+## CLI Commands
+
+### thrum context save
+
+Save context content from a file or stdin.
+
+```bash
+thrum context save [flags]
+```
+
+| Flag      | Description                                        | Default |
+| --------- | -------------------------------------------------- | ------- |
+| `--file`  | Path to markdown file to save as context           |         |
+| `--agent` | Override agent name (defaults to current identity) |         |
+
+**Examples:**
+
+```bash
+# Save from a file
+thrum context save --file notes.md
+
+# Save from stdin
+echo "Working on auth module" | thrum context save
+
+# Save for a different agent
+thrum context save --agent coordinator --file notes.md
+```
+
+**Agent safety note:** Agents should use the `/thrum:update-project` skill
+instead of running `thrum context save` directly. The skill composes a
+structured context (decisions, next steps, work-in-progress) before saving,
+whereas running the command manually with arbitrary input can overwrite
+accumulated session state.
+
+---
+
+### thrum context show
+
+Display the saved context for the current agent.
+
+```bash
+thrum context show [flags]
+```
+
+| Flag            | Description                                        | Default |
+| --------------- | -------------------------------------------------- | ------- |
+| `--agent`       | Override agent name (defaults to current identity) |         |
+| `--raw`         | No header, file boundary markers for piping        | `false` |
+| `--no-preamble` | Exclude preamble from output                       | `false` |
+
+**Examples:**
+
+```bash
+# Show preamble + context (default)
+thrum context show
+
+# Show context for a different agent
+thrum context show --agent furiosa
+
+# Raw output with file boundary markers
+thrum context show --raw
+
+# Context only, no preamble
+thrum context show --no-preamble
+```
+
+**Output modes:**
+
+Default (preamble + context with header):
+
+```text
+# Context for furiosa (1234 bytes, updated 2026-02-11T10:00:00Z)
+
+## Thrum Quick Reference
+...
+
+# Current Work
+- Implementing JWT token refresh
+```
+
+Raw (`--raw`, shows file boundaries):
+
+```text
+<!-- preamble: .thrum/context/furiosa_preamble.md -->
+## Thrum Quick Reference
+...
+<!-- end preamble -->
+
+# Current Work
+- Implementing JWT token refresh
+```
+
+---
+
+### thrum context clear
+
+Remove the context file for the current agent.
+
+```bash
+thrum context clear [flags]
+```
+
+| Flag      | Description                                        | Default |
+| --------- | -------------------------------------------------- | ------- |
+| `--agent` | Override agent name (defaults to current identity) |         |
+
+**Examples:**
+
+```bash
+# Clear context for current agent
+thrum context clear
+
+# Clear context for a different agent
+thrum context clear --agent furiosa
+```
+
+Note: Idempotent - running clear when no context exists is a no-op.
+
+---
+
+### thrum context sync
+
+Copy the context file to the a-sync branch for sharing across worktrees and
+machines.
+
+```bash
+thrum context sync [flags]
+```
+
+| Flag      | Description                                        | Default |
+| --------- | -------------------------------------------------- | ------- |
+| `--agent` | Override agent name (defaults to current identity) |         |
+
+**Examples:**
+
+```bash
+# Sync context for current agent
+thrum context sync
+
+# Sync context for a different agent
+thrum context sync --agent furiosa
+```
+
+**What it does:**
+
+1. Copies `.thrum/context/{agent}.md` to the sync worktree at
+   `.git/thrum-sync/a-sync/context/{agent}.md`
+2. Commits the change with message `"context: update {agent}"`
+3. Pushes to the remote a-sync branch
+
+**Notes:**
+
+- No-op when no remote is configured (local-only mode)
+- Respects the `--local` daemon flag
+- Manual only - context is never synced automatically
+
+---
+
+### thrum context preamble
+
+Show or manage the preamble for the current agent.
+
+```bash
+thrum context preamble [flags]
+```
+
+| Flag      | Description                                        | Default |
+| --------- | -------------------------------------------------- | ------- |
+| `--agent` | Override agent name (defaults to current identity) |         |
+| `--init`  | Create or reset to default preamble                |         |
+| `--file`  | Set preamble from file                             |         |
+
+**Examples:**
+
+```bash
+# Show current preamble
+thrum context preamble
+
+# Create/reset to default preamble
+thrum context preamble --init
+
+# Set preamble from a custom file
+thrum context preamble --file my-preamble.md
+
+# Show preamble for a different agent
+thrum context preamble --agent furiosa
+```
+
+**Role-aware `--init`:** When a role template exists in
+`.thrum/role_templates/{role}.md`, `--init` uses it instead of the generic
+default. The template is rendered with the agent's identity data (name, role,
+module, worktree path) to produce a role-specific preamble. If no role template
+is found, the default thrum quick-reference preamble is used as a fallback. See
+[Role-Based Preamble Templates](role-templates.md) for details.
+
+---
+
+## The /thrum:update-project Skill
+
+The `/thrum:update-project` skill is a Claude Code plugin slash command defined
+in `claude-plugin/commands/update-project.md`. It does **not** use MCP messaging
+— it works entirely through local shell commands and a spawned sub-agent.
+
+**What it does:**
+
+1. You provide a brief narrative of your session: what you worked on, key
+   decisions made, current state, and what the next session needs to know.
+2. The skill spawns a **general-purpose sub-agent** that:
+   - Runs `git log`, `git status`, `git branch` to gather repo state
+   - Runs `bd stats`, open epics, and ready issues if available
+   - Reads the existing `project_state.md`
+   - Merges your narrative with the gathered state via targeted edits
+3. The sub-agent returns a brief summary of what was updated.
+
+**Example:**
+
+```yaml
+User: /thrum:update-project
+Agent: Please write a brief narrative of what you worked on this session,
+       key decisions, current state, and what the next session needs to know.
+User: We're refactoring the auth module. Decided to use JWT with
+      refresh tokens. Need to add rate limiting tests.
+Agent: [Spawns sub-agent to gather git/task state and update project_state.md]
+      ✓ Project state updated (5 sections edited)
+```
+
+The skill reduces the friction of updating project state and ensures consistent
+formatting by combining your narrative with automatically gathered repo and task
+state.
+
+---
+
+## Use Cases and Patterns
+
+### Single-Agent Session Continuity
+
+```bash
+# At the end of a work session
+echo "# Next Steps
+- Finish JWT implementation
+- Add rate limiting tests
+- Review security considerations" | thrum context save
+
+# Next session
+thrum context show
+```
+
+### Multi-Agent Handoff
+
+```bash
+# Agent A saves context before handing off
+thrum context save --file handoff-notes.md
+thrum context sync  # Share across worktrees
+
+# Agent B (in another worktree) pulls and reads
+git fetch origin
+thrum context show --agent furiosa
+```
+
+### Context Updates at Decision Points
+
+Save context when you make a significant decision, discover something important,
+or reach a natural breakpoint:
+
+```bash
+# After architectural decision
+echo "# Decision: Using JWT with refresh tokens
+- Token expiry: 15 min (access), 7 days (refresh)
+- Storage: Redis for refresh tokens
+- Rate limit: 100 req/min per IP" | thrum context save
+```
+
+### Integration with thrum overview
+
+The `thrum overview` command shows context file size and age when context
+exists:
+
+```bash
+$ thrum overview
+You: @implementer (furiosa)
+Session: active for 2h15m
+Intent: Implementing JWT refresh
+Context: 1.2 KB (updated 5m ago)    # ← Context indicator
+Inbox: 3 unread (12 total)
+Sync: ✓ synced
+```
+
+---
+
+## RPC API
+
+Context operations are available via the daemon's RPC API:
+
+### context.save
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "context.save",
+  "params": {
+    "agent_name": "furiosa",
+    "content": "base64-encoded-content"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "agent_name": "furiosa",
+    "message": "Context saved for furiosa (248 bytes)"
+  }
+}
+```
+
+---
+
+### context.show
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "context.show",
+  "params": {
+    "agent_name": "furiosa",
+    "include_preamble": true
+  }
+}
+```
+
+The `include_preamble` field is optional and defaults to `true` when omitted.
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "agent_name": "furiosa",
+    "preamble": "base64-encoded-preamble",
+    "content": "base64-encoded-content",
+    "has_context": true,
+    "has_preamble": true,
+    "preamble_size": 256,
+    "size": 1234,
+    "updated_at": "2026-02-11T10:00:00Z"
+  }
+}
+```
+
+---
+
+### context.preamble.show
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "context.preamble.show",
+  "params": {
+    "agent_name": "furiosa"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "agent_name": "furiosa",
+    "content": "base64-encoded-preamble",
+    "has_preamble": true
+  }
+}
+```
+
+---
+
+### context.preamble.save
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "context.preamble.save",
+  "params": {
+    "agent_name": "furiosa",
+    "content": "base64-encoded-content"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "agent_name": "furiosa",
+    "message": "Preamble saved for furiosa (256 bytes)"
+  }
+}
+```
+
+---
+
+### context.clear
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "context.clear",
+  "params": {
+    "agent_name": "furiosa"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "agent_name": "furiosa",
+    "message": "Context cleared for furiosa"
+  }
+}
+```
+
+---
+
+## Implementation Notes
+
+### Locking Strategy
+
+Context RPC handlers follow the daemon's standard locking patterns:
+
+- `context.save` and `context.clear` acquire a write lock (`Lock()`)
+- `context.show` acquires a read lock (`RLock()`)
+
+This ensures thread-safe access when multiple clients interact with context
+files.
+
+### File Format
+
+Context files are plain markdown (`.md`). No special format or structure is
+enforced - agents are free to use any markdown convention that suits their
+workflow.
+
+**Common patterns:**
+
+- Heading-based sections (`# Next Steps`, `# Decisions`, `# Questions`)
+- Bulleted lists for TODOs
+- Code blocks for snippets or commands
+- Fenced blocks for structured data (JSON, YAML)
+
+### Sync Workflow (Manual Only)
+
+Context sync is manual-only to avoid noise and respect agent autonomy:
+
+- The daemon never auto-syncs context files
+- Agents must explicitly run `thrum context sync` to share
+- Sync respects local-only mode (no-op when `--local` is set on the daemon)
+
+**Rationale:** Context is volatile and session-specific. Auto-syncing would
+create unnecessary churn. Manual sync gives agents control over when and what to
+share.
+
+---
+
+## Best Practices
+
+### Keep Context Concise
+
+Context files should be high-signal summaries, not exhaustive logs. Prefer
+bullet points over paragraphs.
+
+**Good:**
+
+```markdown
+# Next Steps
+
+- Finish JWT implementation (see src/auth/jwt.go)
+- Add rate limiting (decided on 100 req/min per IP)
+- Review security: check token expiry edge cases
+```
+
+**Bad:**
+
+```markdown
+# What I Did Today
+
+I started by looking at the auth module and then I realized that we need JWT so
+I implemented a basic version but it's not complete yet and I still need to add
+rate limiting which I discussed with the team and we decided on 100 requests per
+minute...
+```
+
+### Update Context at Decision Points
+
+Save context when you make a significant decision, discover something important,
+or reach a natural breakpoint.
+
+**When to update:**
+
+- After choosing between architectural alternatives
+- When discovering a bug or anti-pattern
+- Before switching to a different task
+- At the end of a work session
+
+### Use the /thrum:update-project Skill
+
+The skill provides a consistent, low-friction workflow for updating project
+state. Install the thrum Claude Code plugin and use it regularly.
+
+### Sync Selectively
+
+Only sync context that is useful to other agents or future sessions on different
+machines. Local notes and WIP context can stay local.
+
+---
+
+## Next Steps
+
+- [Identity System](identity.md) — how agents are named, registered, and
+  identified across sessions and worktrees
+- [CLI Reference](cli.md) — complete documentation for every `thrum context`
+  command and all other CLI commands
+- [Agent Coordination](agent-coordination.md) — practical multi-agent workflows
+  including context handoff between agents
+- [Multi-Agent Support](multi-agent.md) — groups, runtime presets, and session
+  recovery with `thrum prime`

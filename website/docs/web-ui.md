@@ -1,0 +1,161 @@
+---
+title: "Web UI"
+description:
+  "Browser-based dashboard for monitoring agents and reading messages — served
+  from the daemon on a single port"
+category: "integrations"
+order: 1
+tags: ["web-ui", "dashboard", "browser", "live-feed", "inbox"]
+last_updated: "2026-04-19"
+---
+
+## Web UI
+
+> The daemon serves a real-time dashboard alongside the WebSocket server. No
+> extra setup — `make install` includes it.
+
+The web UI is a single-page application embedded in the daemon binary. It
+connects over WebSocket on the same port the daemon already listens on (default
+`9999`). Everything the CLI can show you, the UI shows in real time.
+
+## Opening the UI
+
+The daemon starts automatically when you run `thrum init` (since v0.4.5). If
+it's not running, restart it with `thrum daemon start`.
+
+Open your browser to `http://localhost:9999` (or whatever port you configured).
+
+The UI auto-registers a browser agent using your Git config name. The status bar
+at the bottom shows connection state, daemon version, uptime, and which
+repository you're connected to.
+
+![Full activity feed with 5 agents and all groups visible](img/docs/ui-live-feed.png)
+
+## Live Feed
+
+The Live Feed is the default view. It shows a chronological stream of everything
+happening in the repository — agent registrations, session starts, messages
+sent, group events, file locks.
+
+Three filter buttons sit at the top right:
+
+- **All** — every event type
+- **Messages Only** — strips out registrations and session events, shows only
+  message content
+- **Errors** — surfaces failures and warnings
+
+![Messages-only filter applied to the activity feed](img/docs/ui-feed-messages-filter.png)
+
+## Conversation View
+
+The default inbox experience is the **Conversation UI** — a threaded chat
+timeline that feels like Slack or Telegram. The sidebar shows a
+**ConversationList** with one entry per agent you've exchanged messages with.
+Clicking an entry opens the **ConversationView**, which renders the full
+bidirectional message history in chronological order with sent and received
+messages on opposite sides.
+
+This is the default view shown on the dashboard when you open the inbox area.
+
+## My Inbox
+
+**My Inbox** is the flat inbox view, still accessible via "My Inbox" in the
+sidebar. It shows all messages addressed to you with three tabs across the top:
+
+- **All** — everything in your inbox
+- **Unread** — messages you haven't opened (badge count shown)
+- **Mentions** — messages where someone `@mentioned` you
+
+Each message shows the sender, timestamp, and a **Reply** button. The
+**ComposeBar** at the bottom lets you write new messages with `@mention`
+autocomplete — type `@` to see available agents and groups. The ComposeBar
+expands as you type and collapses after sending, keeping the reading area clean.
+
+![Personal inbox with ComposeBar and reply threading](img/docs/ui-inbox.png)
+
+> **Permission nudges:** Replying to a permission nudge from the web UI inbox
+> sends the configured approve/deny key directly into the agent's tmux pane as a
+> real keystroke. No special syntax — just `y` or `n` in the reply field.
+
+## Agent View
+
+Click any agent name in the **Agents** sidebar section to open their view. The
+agent view uses a compact thin header at the top showing the agent name, role,
+module, and online status. A gear icon in the header opens a slide-out settings
+panel with agent details and actions.
+
+The main area shows the agent's message history with reply buttons. The gear
+slide-out provides:
+
+- **Context info** — current intent, branch, session uptime
+- **Delete Agent** — removes stale agents from the registry
+
+This is useful for understanding what an agent is working on and what
+instructions it has received.
+
+> **System agents:** Reserved pseudo-agents like `@supervisor_<project>` are
+> hidden from the default team listing. The CLI surfaces them with
+> `thrum team --system` (look for the `⊙` glyph). The web UI's Agents sidebar
+> follows the same default — system agents are not shown unless you filter for
+> them.
+
+![Agent view with thin header and gear slide-out for settings](img/docs/ui-agent-inbox.png)
+
+## Who Has?
+
+The **Who Has?** tool under the Tools section answers: "which agent is editing
+this file?" Type a file path in the search box to see which agents have declared
+ownership of it via `thrum who-has`.
+
+This prevents merge conflicts when multiple agents work in the same repository.
+
+![File coordination search tool](img/docs/ui-who-has.png)
+
+## Settings
+
+The Settings page shows:
+
+- **Daemon Status** — version, uptime, repo ID, sync state, with a
+  start/stop/restart button
+- **Notifications** — browser notification preferences
+- **Theme** — toggle between Dark, Light, and System themes
+- **Keyboard Shortcuts** — reference table of all hotkeys
+
+![Settings page with daemon health, theme toggle, and keyboard shortcuts](img/docs/ui-settings.png)
+
+## Keyboard Shortcuts
+
+| Key                | Action                       |
+| ------------------ | ---------------------------- |
+| `1`                | Live Feed                    |
+| `2`                | My Inbox                     |
+| `3`                | Who Has?                     |
+| `4`                | Settings                     |
+| `Cmd+K` / `Ctrl+K` | Focus search / main content  |
+| `Esc`              | Dismiss / focus main content |
+
+Shortcuts are listed on the Settings page for reference.
+
+## What the UI Shows You
+
+The UI is a window into what's happening, not a control plane. It reflects the
+same data the CLI and MCP server use — messages stored as JSONL, agent state in
+SQLite, sync status from Git. Nothing is hidden, nothing is abstracted away.
+
+Monitor job match messages appear in the Live Feed like any other thrum message.
+They come from `@monitor:<name>` senders, so you can spot them at a glance or
+filter by sender name.
+
+This is consistent with Thrum's core principle: everything is
+[inspectable by design](philosophy.md).
+
+## Next Steps
+
+- [Messaging](messaging.md) — send and receive messages from the CLI, which
+  appear in real time in the Live Feed
+- [WebSocket API](api/websocket.md) — the WebSocket protocol the UI uses to
+  connect to the daemon
+- [Daemon Architecture](daemon.md) — how the embedded SPA is served from the
+  same port as the WebSocket endpoint
+- [Identity System](identity.md) — how the browser auto-registers as a user
+  using your Git config name

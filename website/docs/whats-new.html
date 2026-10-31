@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>What's New — Thrum</title>
+  <meta name="description" content="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="What's New — Thrum">
+  <meta property="og:description" content="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">
+  <meta property="og:url" content="https://thrum.team/docs/whats-new.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What's New — Thrum">
+  <meta name="twitter:description" content="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/whats-new.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"What's New","description":"Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.","url":"https://thrum.team/docs/whats-new.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link active" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>What&#39;s New</h2>
+<p>This page tracks the user-visible changes in recent Thrum releases — highlights,
+breaking changes, and anything that needs attention when you upgrade. The full
+machine-readable history lives in
+<a href="https://github.com/leonletto/thrum/blob/main/CHANGELOG.html">CHANGELOG.md</a>.</p>
+<h2>v0.10.7 — In Soak (RC)</h2>
+<p><strong>v0.10.7-rc.1</strong> was tagged 2026-06-26 and is the current pre-release. It carries
+two changes:</p>
+<ul>
+<li><strong>Public DB schema floor raised v51 → v52</strong> (thrum-ej6qn) — an open-core
+compatibility bump that moves the public release line&#39;s schema floor up one
+step. ⚠ <strong>The v52 migration is one-way:</strong> a binary that predates v52 cannot
+reopen a database once it has migrated. Downgrading to a <code>&lt;v52</code> binary requires
+restoring your pre-migration-v51 backup, so take a <code>.thrum/</code> backup before
+upgrading if you might need to roll back.</li>
+<li><strong>Stuck-pane queue dispatch watchdog</strong> (thrum-7yhs) — the daemon now detects
+queue-dispatch panes that wedge instead of draining their queued commands and
+recovers them, closing a class of silently-stalled command queues.</li>
+</ul>
+<p>Lint and security CI stages were waived for this RC owing to the known Go 1.26
+tooling gap (pre-existing, not specific to this release).</p>
+<h3>Upgrade Notes</h3>
+<ul>
+<li><strong>Schema migration is one-way (v51 → v52).</strong> Back up your <code>.thrum/</code> directory
+before upgrading. Rolling back to a pre-v52 binary requires restoring that
+pre-migration-v51 backup.</li>
+<li><strong>Install via the curl beta channel.</strong> See the
+<a href="beta-channel.html">Beta Channel</a> page for install commands pinned to
+<code>v0.10.7-rc.1</code> and the matching <code>release/v0.10.7</code> plugins.</li>
+</ul>
+<p>Full change list:
+<a href="https://github.com/leonletto/thrum/blob/main/CHANGELOG.html">CHANGELOG</a>. See the
+<a href="beta-channel.html">Beta Channel</a> page for install commands.</p>
+<h2>v0.10.6 — 2026-06-23</h2>
+<p><a href="https://github.com/leonletto/thrum/releases/tag/v0.10.6"><code>v0.10.6</code></a> was
+promoted to stable on 2026-06-23 after a long RC soak. It&#39;s a
+sync-and-reliability release: the cross-machine sync path got re-architected,
+the database schema was made forward-compatible with newer builds, and a batch
+of cross-host sync-storm fixes landed along the way.</p>
+<p>The headline is the <strong>sync re-architecture</strong>. Cross-machine sync is now
+notify-driven — a daemon pushes a wake to its peers when something actually
+changes, instead of leaning on a fixed timer to go looking for work. The old
+fixed 60-second sync poll is gone (legacy <code>sync_interval</code> config keys are now
+ignored); a periodic check still runs in the background as a safety net for
+missed notifications. Idle daemons go quiet (no more steady drip of heartbeat
+commits on the <code>a-sync</code> branch), and busy clusters stop drowning in sync
+chatter. Messages now write to a new <code>messages-v2/</code> path. <strong>Mixed-cluster
+heads-up:</strong> a v0.10.5 peer can&#39;t read messages from an upgraded v0.10.6 peer,
+since v0.10.6 writes only to <code>messages-v2/</code> — upgrade every peer in the mesh in
+one window, not piecemeal.</p>
+<p><strong>Schema forward-compatibility.</strong> A v0.10.6 binary can now open and operate on a
+database created by a newer-schema build without the one-way migration that used
+to brick the older binary — the footgun where running two binaries against one
+shared worktree DB could leave the v0.10.6 binary unable to reopen it. The newer
+tables are dead-end on v0.10.6 (no code reads them); it&#39;s DB-open compatibility
+only, with no behavior change.</p>
+<p><strong>Cross-host sync-storm fixes.</strong> Two storms seen in production on busy
+multi-host meshes got fixed. A duplicate <code>message_id</code> in relayed history no
+longer stalls inbound sync — <code>message.create</code> apply is idempotent now, so a
+collision is a no-op that still advances the batch instead of retrying forever.
+And the daemon backstop only nudges locally-resident recipients, so a host stops
+waking its local sessions every 15 minutes for other hosts&#39; mail and stops
+accumulating spool envelopes without bound.</p>
+<p><strong>Safer sync exposure.</strong> The <code>a-sync</code> exposure guard now gates on repository
+visibility: the daemon probes <code>origin</code> anonymously and refuses to push message
+history to a publicly readable repo unless you explicitly override it.
+Read-state also got unified on a single source of truth, with a one-time
+backfill that clears historically-stuck &quot;phantom unread.&quot;</p>
+<p><strong>Quality-of-life changes.</strong> The inbox defaults to newest-first (chronological
+is opt-in via <code>--chronological</code> / <code>--oldest</code>); <code>thrum send</code>, <code>reply</code>, and
+<code>message edit</code> take <code>--stdin</code> / <code>--body-file</code> so bodies with backticks or
+<code>$(...)</code> arrive verbatim; <code>thrum team</code> gained <code>--daemon</code> / <code>--host</code> filters plus
+<code>local</code> and <code>daemons</code> subviews; and the permission-reminder ladder stops nagging
+once the approval modal has cleared. Under the hood: timestamped pre-migration
+DB backups, an RC-tag plugin distribution scheme so <code>/plugin update</code> upgrades
+cleanly, two new daemon config keys (<code>events_retention_days</code>,
+<code>compaction_size_threshold_mb</code>), and a round of agent-restart reliability fixes.</p>
+<h3>Upgrade Notes</h3>
+<ul>
+<li><strong>Upgrade all peers in one window (mixed-cluster).</strong> A v0.10.5 peer can&#39;t read
+messages written by an upgraded v0.10.6 peer — v0.10.6 writes only to the new
+<code>messages-v2/</code> path. Upgrade every peer in the mesh together rather than
+piecemeal.</li>
+<li><strong>Read-state migration is one-way.</strong> The one-time read-state backfill can&#39;t be
+reopened by a binary that predates it. Back up your <code>.thrum/</code> directory before
+upgrading if you might need to roll back.</li>
+<li><strong>One-time spool cleanup.</strong> Spool envelopes that accumulated before the
+backstop fix aren&#39;t removed automatically — you can safely delete non-resident
+directories under <code>.thrum/spool/</code>.</li>
+<li><strong>Public-repo sync.</strong> If you intentionally sync message history over a
+publicly readable repo, set <code>daemon.sync.public_exposure_override</code> to the
+exact remote; otherwise the daemon refuses the push.</li>
+</ul>
+<p>Full change list:
+<a href="https://github.com/leonletto/thrum/blob/main/CHANGELOG.html">CHANGELOG v0.10.6</a>.
+See the <a href="beta-channel.html">Beta Channel</a> page for install commands.</p>
+<h2>v0.10.5 — 2026-05-21</h2>
+<p><a href="https://github.com/leonletto/thrum/releases/tag/v0.10.5"><code>v0.10.5</code></a> shipped
+2026-05-21 after an eight-RC soak — the backstory (what it&#39;s actually like to
+run a release with a team of agents) is in the blog post
+<a href="/blog/28-agents-and-a-release-on-the-side.html">28 Agents and a Release on the Side</a>.</p>
+<p>One thing to know before you upgrade: the <strong>BREAKING</strong> <code>thrum send</code> change. The
+bare form <code>thrum send &quot;msg&quot;</code> now requires either <code>--to @&lt;agent&gt;</code> for a directed
+send or <code>--broadcast</code> for explicit team fanout — the old silent-broadcast
+default was a footgun (one accidental bare send fanned out to a 90-plus-agent
+team mid-cycle). <code>--to @everyone</code> still works as the legacy keyword. Adding
+<code>--to</code> or <code>--broadcast</code> to your scripts and aliases is the only migration step.</p>
+<p>Backstop and hygiene. The headline change is operational: a daemon-side backstop
+nudger re-emits delivery notifications for stale-unread messages on its own
+schedule, replacing the per-agent <code>thrum-inbox-poll.sh</code> cron that previously had
+to be installed and maintained per worktree. Around that: long-running agent
+worktrees stop drifting from the embedded daemon-managed script templates
+(<code>runtime-init</code> now overwrites them while preserving user-customized configs),
+<code>thrum prime</code> leaves a visible scrollback anchor so you can confirm at a glance
+that context loaded, the <code>project-setup</code> skill works in redirected worktrees
+again, and a handful of inbox-race fixes land alongside two small new CLI flags
+(<code>thrum inbox --from @agent</code>, <code>thrum worktree teardown --delete-branch</code>).</p>
+<p>Plus a headless <code>worktree.Create</code> / <code>worktree.Destroy</code> Go API moving into
+<code>internal/worktree</code> — no user-visible CLI change, but it&#39;s the substrate the
+v0.11 agent epics build on for ephemeral-worktree flows. The URL migration to
+<code>thrum.team</code> from <code>leonletto.github.io/thrum</code> also wraps up in this release
+(Phase 6.3 — old URLs redirect cleanly).</p>
+<p>Beyond the backstop work, v0.10.5 tightens how Thrum sits alongside the tools
+around it. <code>thrum init</code> now merges its hooks into an existing
+<code>.claude/settings.json</code> instead of skipping the file outright, so it coexists
+cleanly with third-party hooks — most importantly the one <code>bd setup claude</code>
+installs. Beads integration itself moves to that <code>bd setup claude</code> path (or
+thrum&#39;s own auto-install when Beads is enabled and on your <code>PATH</code>); the
+standalone Beads plugin is no longer recommended.</p>
+<p>There&#39;s also a round of operator-facing reliability fixes: <code>thrum monitor stop</code>
+no longer hangs or leaves orphaned child processes, the <code>thrum monitor</code>
+subcommands accept the human-readable monitor name instead of only the ID, and
+the diagnostic commands warn consistently when you&#39;ve run them from the wrong
+worktree. On the coordination side, two v0.11 coordinator-discipline skills were
+backported — context-monitoring (a restart ladder that catches an agent before
+it hits a context blow-up) and review-gates for the brainstorm pipeline.</p>
+<h3>Upgrade Notes</h3>
+<ul>
+<li><strong><code>thrum send</code> migration (BREAKING).</strong> Update scripts and aliases that use the
+bare <code>thrum send &quot;msg&quot;</code> — add <code>--to @&lt;name&gt;</code> for a directed send or
+<code>--broadcast</code> for team fanout. <code>--to @everyone</code> still works as the legacy
+keyword.</li>
+<li><strong>Beads users:</strong> if you&#39;re on the standalone Beads plugin, switch to the CLI +
+hook path — uninstall the plugin, <code>brew install beads</code>, run <code>bd setup claude</code>,
+restart Claude Code. Thrum-managed projects handle this for you.</li>
+<li><strong>Otherwise, no action needed.</strong> The daemon backstop nudger is on by default;
+if you installed the old <code>thrum-inbox-poll.sh</code> cron you can remove it (it&#39;s
+now a no-op).</li>
+</ul>
+<p>Full change list:
+<a href="https://github.com/leonletto/thrum/blob/main/CHANGELOG.html">CHANGELOG v0.10.5</a>.
+See the <a href="beta-channel.html">Beta Channel</a> page for install commands.</p>
+<h2>v0.10.4 — 2026-05-17 (Quick Footgun Release)</h2>
+<p><a href="https://github.com/leonletto/thrum/releases/tag/v0.10.4"><code>v0.10.4</code></a> shipped
+2026-05-17 after a compressed 4-hour soak. rc.1 was unsalvageable — its
+remediation text advertised an internal <code>--repo</code> escape hatch to agent-facing
+output, undoing the guard&#39;s intent. rc.2 corrected the text and promoted clean.</p>
+<p><strong>Standard thrum functionality is unchanged.</strong> v0.10.4 only fixes confusing
+messages agents get when they cd into the wrong worktree by accident. Normal
+same-worktree day-to-day use is unaffected. This is UX and safety hardening, not
+a regression fix. Full backstory:
+<a href="https://thrum.team/blog/shooting-yourself-in-both-feet.html">Shooting Yourself in Both Feet</a>.</p>
+<p>The bug was a known footgun in the original identity-guard work (thrum-7b84.6):
+when an agent&#39;s CLI command ran from a worktree that didn&#39;t match its pane-bound
+identity, mutating commands could silently send under the wrong identity.
+v0.10.4 splits CLI commands into three behaviour classes:</p>
+<ul>
+<li><strong>Class A — mutating commands (send, reply, message read, inbox markRead,
+context save, etc.):</strong> fail closed with a clear error message naming both the
+expected worktree and the actual cwd. Nothing leaves under the wrong identity.</li>
+<li><strong>Class B — diagnostic commands (team, status, daemon, whoami, version):</strong>
+keep working but emit a one-line banner before the output: &quot;you&#39;re in another
+worktree — running against your registered agent at …&quot;. Lets cross-repo
+housekeeping scripts (updating thrum + restarting daemons across N repos)
+still succeed without spurious failures.</li>
+<li><strong>Class C — purely informational reads (inbox listing without markRead, list
+helpers):</strong> same banner as Class B, no other change.</li>
+</ul>
+<p>The remediation: cd back to the agent&#39;s own worktree, or run <code>thrum prime</code> to
+re-claim the identity if the pane binding has drifted.</p>
+<p>See the <a href="beta-channel.html">Beta Channel</a> page for install commands.</p>
+<h2>v0.10.3</h2>
+<p><a href="https://github.com/leonletto/thrum/releases/tag/v0.10.3"><code>v0.10.3</code></a> shipped
+2026-05-16 after a 5-day, 11-RC soak cycle. Each rc.N closed exactly one bug the
+previous candidate surfaced under real use — none of them dramatic on their own,
+every one the kind of thing that turns into &quot;thrum is flaky&quot; if it ships
+uncaught. The full story is in the blog post
+<a href="/blog/v0-10-the-release-that-wouldnt-land.html">The Release That Wouldn&#39;t Land</a>.</p>
+<p>This release is largely about the runtime experience: codex gains the same
+first-class plugin treatment claude has had, fresh and restarted tmux panes no
+longer sit idle when an agent misses its prime banner, and the first-launch
+trust dialogs both codex and claude show are now recognized as a distinct class
+so Thrum&#39;s startup keystrokes don&#39;t accidentally answer them. A bundle of
+quieter fixes around env scoping, self-echo, and preamble framing rounds it out.</p>
+<h3>Added</h3>
+<ul>
+<li><p><strong>Codex plugin first-class support.</strong> <code>codex-plugin/plugins/thrum/</code> now ships
+the same hook surface the Claude plugin has: SessionStart auto-prime,
+PreToolUse safety block, and a Stop hook that flags unread inbox messages.
+Fourteen role-discipline skills sync over from <code>claude-plugin</code>. Installation
+is a one-command bootstrap that also handles a third-party cache-staging gap
+in codex 0.130.0, so you can install and start using it in the same step:</p>
+<pre><code class="language-bash hljs">bash &lt;(curl -fsSL https://raw.githubusercontent.com/leonletto/thrum/thrum-dev/codex-plugin/plugins/thrum/scripts/install-plugin.sh)</code></pre>
+</li>
+<li><p><strong>Tmux silence watchdog after launch and restart.</strong> When <code>thrum tmux launch</code>
+or <code>thrum tmux restart</code> returns, the daemon watches the agent&#39;s pane for
+silence and sends a contextual nudge if the agent hasn&#39;t engaged within the
+configured threshold. Closes the long-standing gap where fresh codex agents
+(and large-context restarts in claude) would sit idle at a welcome banner or
+post-restart screen because they&#39;d missed the prime instruction. Configurable
+via the new <code>restart.silence_watchdog_seconds</code> key (default 30s; negative
+disables; see <a href="configuration.html">Configuration</a>). Internally this also
+replaces the previous hardcoded 10-second pre-inject sleep with a
+pane-stability readiness probe.</p>
+</li>
+<li><p><strong>Trust-gate detection for codex and claude first-launch dialogs.</strong> Thrum
+recognizes the trust prompt both runtimes show on first launch in a new
+directory as a distinct class. When a trust gate is up, keystroke injection
+paths (identity banner, prime nudge, watchdog nudge) are skipped so the user
+can answer the prompt without interference from Thrum. Normal
+permission-prompt handling and supervisor notify are unchanged — see
+<a href="permission-prompts.html#trust-gate-detection">Trust-Gate Detection</a>.</p>
+</li>
+<li><p><strong>Per-session env scoping at session create.</strong> <code>tmux.CreateSessionWithEnv</code>
+passes <code>THRUM_NAME/AGENT_ID/ROLE/MODULE/HOME/INTENT</code> per-session, so distinct
+tmux sessions on a shared server present distinct identities to their initial
+shells. Subsequent split-window and new-window panes inherit correctly.</p>
+</li>
+<li><p><strong>Anti-rush discipline in coordinator and orchestrator preambles.</strong> Five
+operational rules codify patterns the project has hit before — skipping review
+gates on small diffs, bucketing findings as &quot;follow-ups&quot; without
+justification, shipping a fix labeled X when the actual cause is something
+else, declaring DONE without verifying the user-visible bug is gone, and
+taking the cheapest path on autopilot.</p>
+</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><p><strong><code>thrum init</code> lowercases the default agent name.</strong> The wizard previously
+derived names like <code>coord_316Redesign</code> from a capitalized repo directory and
+then rejected its own suggestion at the validator (<code>a-z</code>, <code>0-9</code>, <code>_</code> only).
+The default is now always validator-compatible.</p>
+</li>
+<li><p><strong>Pre-launch readiness is gated on pane stability, not a fixed sleep.</strong> The
+post-launch / post-restart inject path polls the tmux pane every second and
+proceeds once two consecutive captures are byte-identical (TUI rendered,
+runtime at input-ready), with a 60s ceiling. Replaces the brittle
+<code>Sleep(10s) + retry</code> pattern that drove an earlier trust-prompt regression.</p>
+</li>
+<li><p><strong>Role preambles now say skills MUST be invoked, not auto-loaded.</strong> The
+&quot;Available skills (situational)&quot; section in seven role preambles previously
+implied skills fire automatically when the runtime matches trigger phrases.
+Skills do not auto-load — agents must invoke them explicitly via the <code>Skill</code>
+tool. Wording is now directive rather than descriptive.</p>
+</li>
+<li><p><strong>Enhanced role preambles regain the in-tmux listener-suppression carveout.</strong>
+Twelve enhanced preambles
+(<code>deployer / documenter / monitor / planner / tester / reviewer</code> ×
+<code>strict / autonomous</code>) had restated the &quot;spawn a listener on session start&quot;
+instruction without preserving the tmux carveout from the base preamble,
+causing tmux-managed agents to spawn a redundant background listener that
+burned context for zero delivery benefit. Carveout restored; a regression test
+now fails any preamble that issues the spawn directive without the
+SKIP-when-in-tmux qualifier.</p>
+</li>
+<li><p><strong><code>thrum worktree create</code> propagates SessionStart hook scripts</strong> into the new
+worktree&#39;s <code>scripts/</code> directory. <code>scripts/thrum-startup.sh</code> and
+<code>scripts/thrum-check-inbox.sh</code> are gitignored, so <code>git worktree add</code> doesn&#39;t
+carry them across; without the per-worktree copy, the Claude Code SessionStart
+hook fired against a missing script and the agent never quickstarted in
+worktree-created subdirs. Copy is idempotent on size+mtime.</p>
+</li>
+<li><p><strong><code>codex</code> runtime preset is marked <code>HasSessionStartHook: true</code></strong> (parity with
+<code>claude</code> and <code>cursor</code>). The codex SessionStart hook shipped earlier but the
+preset wasn&#39;t updated, so <code>HandleLaunch</code> / <code>HandleRestart</code> were routing codex
+through the non-hook branch (typing <code>/thrum:prime</code> into the TUI) instead of
+emitting the identity banner once the runtime rendered.</p>
+</li>
+<li><p><strong><code>/thrum:restart</code> skill rewritten around prose continuations.</strong> The skill
+dropped from ~134 lines to ~50 by replacing the JSON-snapshot Resume Plan
+template + <code>thrum tmux snapshot save</code> + append flow with a direct write of an
+in-context-composed prose continuation to <code>.thrum/restart/&lt;agent_id&gt;.md</code>.
+Auto-prime pickup is unchanged; coordinator-notify and the non-tmux operator
+fallback are preserved. Field-tested across 7 v0.11 substrate agent restart
+cycles — continuations averaged ~200 lines with high signal density. Synced
+across the codex, opencode, cursor, and claude runtime plugins.</p>
+</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li><p><strong>Self-echo phantom nudge.</strong> Outbound <code>thrum send</code> from agent A to agent B was
+producing a phantom <code>New message from @&lt;A&gt;</code> reminder in A&#39;s own pane on every
+send. Root cause: <code>CLAUDE_PROJECT_DIR</code> leaks through a shared tmux server&#39;s
+default-environment, so Claude Code in B&#39;s pane was resolving the
+<code>${CLAUDE_PROJECT_DIR}/scripts/thrum-check-inbox.sh</code> hook against A&#39;s
+worktree. Fix scrubs <code>CLAUDE_PROJECT_DIR</code> at the existing <code>cleanTmuxEnv</code>
+chokepoint, alongside the <code>THRUM_*</code> and <code>TMUX/TMUX_PANE</code> scrubs. Scope is
+narrow to the single variable with documented leak evidence; <code>CLAUDE_API_KEY</code>
+and other <code>CLAUDE_*</code> vars are explicitly preserved by a regression test.</p>
+</li>
+<li><p><strong>Defense-in-depth self-echo guards.</strong> Independent of the env-leak fix, both
+the daemon spool dispatcher and the inbox-check hook now drop any spool entry
+whose <code>from</code> matches the receiving agent ID — so a future regression upstream
+cannot reach the user-visible self-echo nudge.</p>
+</li>
+<li><p><strong><code>project-philosophy</code> skill respects <code>AskUserQuestion</code>&#39;s 4-option limit.</strong>
+Step 5 of the skill prompted with option lists that could exceed the tool&#39;s
+hard cap of 4, failing with <code>Invalid tool parameters</code>. The skill now uses
+sequential questions (<code>category?</code> → <code>specific item within category?</code>) when the
+natural option count exceeds four. Synced across all four runtime plugin
+copies.</p>
+</li>
+<li><p><strong><code>thrum init --force</code> no longer silently disables messaging.</strong> A hard-coded
+assignment in the runtime-selection step was overwriting <code>single_agent_mode</code>
+to <code>true</code> on every init run, which disables the inbox listener and stop-hook
+checks. Agents appeared healthy in <code>thrum team</code> but inbound messages never
+arrived and replies silently dropped. Affected users upgrading via the common
+<code>thrum init --force</code> refresh path; fresh installs were unaffected. If you hit
+this on an earlier release, open the project&#39;s <code>.thrum/config.json</code> and flip
+<code>single_agent_mode</code> back to <code>false</code>.</p>
+</li>
+<li><p><strong>Watchdog now recognizes Claude Code 2.1.141&#39;s <code>·</code> thinking-spinner glyph.</strong>
+Claude 2.1.141 introduced a <code>·</code> prefix on some thinking-spinner states
+alongside the existing <code>✻</code> glyph. The watchdog&#39;s <code>claudeSpinnerRegex</code> only
+matched <code>✻</code>, so panes showing the new spinner were classified as silent —
+over-triggering nudges into still-thinking agents. The regex now covers both
+glyph forms; a regression test pins five observed <code>· &lt;verb&gt;…</code> variants against
+the live Claude TUI.</p>
+</li>
+</ul>
+<h3>Upgrade Notes</h3>
+<ul>
+<li><strong>One new config key.</strong> <code>restart.silence_watchdog_seconds</code> (default 30s,
+negative disables) — only relevant if you want to tune the post-launch /
+post-restart nudge cadence.</li>
+<li><strong>Codex users:</strong> the one-command installer above is the easiest path. The
+legacy <code>~/.codex/skills/</code> extra-roots loader is gone as of codex 0.130.0; if
+you previously installed there, see the migration note in
+<a href="codex-plugin.html">Codex Plugin</a>.</li>
+<li><strong>No CLI flag removals or behavior reversals</strong> since v0.10.2.</li>
+</ul>
+<h2>v0.10.2 — 2026-05-04</h2>
+<p>Hotfix release closing two related foot-guns from the v0.10.x identity work: the
+SessionStart hook (<code>scripts/thrum-startup.sh</code>) breaking on every
+already-registered worktree, and a tmux env-hijack class that caused new panes
+to resolve identity to the daemon-starter&#39;s agent. Plus a long-standing
+<code>thrum purge</code> regression where message JSONL files weren&#39;t actually shrinking.</p>
+<h3>Fixed</h3>
+<ul>
+<li><p><strong><code>thrum quickstart</code> no longer rejects idempotent same-name re-register.</strong> The
+<code>quickstart_self_rename</code> guard was firing on every call where the caller
+already owned an identity, even when the requested <code>--name</code> matched the
+existing one. This broke <code>scripts/thrum-startup.sh</code> — the SessionStart hook on
+every claude session — at step 3 (<code>thrum quickstart</code>); <code>set -e</code> aborted before
+steps 4 (inbox check), 5 (announce), and 6 (cron install) ran.
+<code>thrum tmux start</code> against an existing worktree hit the same guard and aborted
+before claude launched. <strong>Same-name re-register is now allowed without
+<code>--force</code></strong> (it&#39;s an idempotent no-op); a real rename (different <code>--name</code>)
+still requires <code>--force</code>.</p>
+</li>
+<li><p><strong><code>tmux.create</code>-spawned panes no longer inherit <code>THRUM_*</code> env from the
+daemon.</strong> When the daemon was started from a primed shell, every tmux pane it
+spawned inherited the daemon&#39;s <code>THRUM_AGENT_ID</code>, <code>THRUM_HOME</code>, etc. — causing
+the new pane&#39;s <code>thrum whoami</code> to resolve to the daemon-starter&#39;s identity
+instead of the pane&#39;s intended agent. Two-layer fix: scrub <code>THRUM_*</code> from the
+daemon&#39;s tmux exec env, AND pass per-session <code>-e KEY=</code> overrides so even
+long-running tmux servers (which cache the environ from server-start time)
+produce clean panes.</p>
+</li>
+<li><p><strong><code>thrum purge --confirm</code> now actually shrinks JSONL message files.</strong> The
+filter was passing the wrong field name (<code>&quot;created_at&quot;</code> vs the on-disk
+<code>&quot;timestamp&quot;</code>) when iterating message JSONLs, so every record was kept and
+on-disk files grew unboundedly. Verified live: <code>--before 30d</code> against a 335MB
+sync dir filtered 13 message files in 7.7s.</p>
+</li>
+<li><p><strong>Misleading <code>unauthenticated_rpc</code> deny message</strong> now points at <code>thrum prime</code>
+as the cache-warming recovery (was
+<code>cd into a registered agent worktree and retry</code>, which was the wrong fix when
+the caller already WAS in a registered worktree but the daemon&#39;s binding cache
+hadn&#39;t warmed after a restart).</p>
+</li>
+</ul>
+<h3>Internal</h3>
+<ul>
+<li>Release-test harness coord-whoami probe now retries 3× 30s instead of a single
+60s wait — recovers from missed-keystroke races on saturated multi-agent dev
+boxes.</li>
+<li>Unit-test hardening: <code>internal/cli</code> and <code>internal/config</code> test packages now
+have <code>TestMain</code> env-isolation guards so tests don&#39;t silently inherit <code>THRUM_*</code>
+pollution from the operator&#39;s primed shell.</li>
+</ul>
+<h3>Upgrade Notes</h3>
+<ul>
+<li><strong>No CLI flag changes; no config changes.</strong> Drop-in upgrade from v0.10.1.</li>
+<li>After upgrade: <code>make install</code> (or download the new binary), then
+<code>thrum daemon restart</code> so the running daemon picks up the new binary. <strong>Also
+refresh the Claude Code plugin</strong> (<code>/plugin update thrum</code>, or remove + add the
+marketplace) — v0.10.2 ships an updated <code>inject-prime-context.sh</code> that
+improves the SessionStart context delivery banner.</li>
+</ul>
+<h2>v0.10.1 — 2026-05-03</h2>
+<p>Two related identity-resolver fixes shipped together. v0.10.0 is marked
+prerelease; upgrade to v0.10.1.</p>
+<h3>Fixed</h3>
+<ul>
+<li><p><strong><code>thrum quickstart</code> from a <code>.thrum/redirect</code>-using worktree no longer writes
+the agent identity into the parent repo.</strong> When <code>THRUM_HOME</code> was set (which
+the wizard&#39;s daemon-inline path effectively does for spawned panes),
+<code>quickstart</code> was hijacking the identity-write target to
+<code>$THRUM_HOME/.thrum/identities/</code> and recording the parent path as the agent&#39;s
+<code>worktree</code>. Subsequent identity-resolution from any peer worktree could then
+cross-claim, with symptoms like <code>thrum whoami</code> returning the wrong agent and
+<code>unauthenticated_rpc</code> guard denying writes.</p>
+</li>
+<li><p><strong>Boot-time identity reconcile</strong> so write RPCs from any registered worktree
+succeed after a daemon restart, without re-running <code>thrum quickstart</code>.
+Previously, the peercred resolver matched caller CWDs against
+<code>session_refs JOIN sessions WHERE ended_at IS NULL</code> — that view is durable in
+SQLite but loses rows on shutdown / cleanup / long quiescence, so disk truth
+(identity files) and resolver truth (DB rows) drifted apart. <code>thrum send</code>,
+<code>thrum tmux start</code>, and other write RPCs would fail with
+<code>anonymous caller cannot invoke X</code> from a worktree where an identity file
+clearly existed; only <code>thrum quickstart --force</code> re-populated the rows
+(<code>thrum prime</code> did not). The fix walks <code>.thrum/identities/*.json</code> at daemon
+boot and inserts the missing <code>(sessions, session_refs)</code> pairs via <code>safedb</code> in
+a per-identity transaction. Local-only by design — direct SQL, no JSONL
+events, no cross-machine sync — because <code>session_refs</code> is intentionally
+local-only state. The same pass restores in-memory tmux pane-nudge bindings
+for any identity whose <code>tmux_session</code> is still alive. Closes thrum-soj8 +
+thrum-6kk6.</p>
+</li>
+</ul>
+<h3>How to verify after upgrade</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Existing redirect-using worktrees: re-quickstart from inside the</span>
+<span class="hljs-comment"># worktree to refresh the identity file with the corrected location</span>
+<span class="hljs-comment"># and worktree value.</span>
+<span class="hljs-built_in">cd</span> &lt;child-worktree&gt;
+thrum quickstart --name &lt;name&gt; --role &lt;role&gt; --module &lt;module&gt; --force
+thrum <span class="hljs-built_in">whoami</span>   <span class="hljs-comment"># should report the child worktree, not THRUM_HOME</span></code></pre>
+<h3>v0.10.0 prerelease note</h3>
+<p>The v0.10.0 release page on GitHub is marked prerelease and the Homebrew tap was
+reverted to v0.9.2 during the fix window. v0.10.1 promotes back to &quot;latest&quot; with
+the regression closed.</p>
+<h2>v0.10.0 — 2026-05-03</h2>
+<p>The v0.10.0 work centers on <code>thrum init</code>. The first-run experience used to be a
+silent scaffold and a list of follow-up commands; now it walks you through
+identity, worktrees root, role templates, and daemon start in one interactive
+flow. Existing CI scripts keep working unchanged via the <code>--non-interactive</code>
+flag (or any non-TTY stdin).</p>
+<h3>New</h3>
+<ul>
+<li><strong><code>thrum init</code> interactive wizard.</strong> On a TTY, <code>thrum init</code> prompts for agent
+name / role / module, worktrees-root path, role-template choice (enhanced /
+default / skip), and starts the daemon — all in one flow. Press enter through
+every prompt to accept the recommended defaults.</li>
+<li><strong>Pre-fill any prompt with a flag.</strong> The wizard reads <code>--name</code>, <code>--role</code>,
+<code>--module</code>, <code>--worktrees-root</code>, <code>--roles=enhanced|default|skip</code>, and
+<code>--no-daemon</code> so you can script it end-to-end in fixtures.</li>
+<li><strong><code>--force</code> re-init pre-seeds prompts from existing values.</strong> Running
+<code>thrum init --force</code> on a previously-initialized repo loads identity and
+worktrees-root from the current <code>.thrum/</code> so pressing enter through the
+prompts is a no-op refresh.</li>
+<li><strong>Transactional rollback on failure or SIGINT.</strong> If any wizard step errors
+after <code>.gitignore</code> / <code>.git/info/exclude</code> were touched, the wizard restores
+them byte-for-byte. Ctrl-C during prompts cleans up cleanly.</li>
+<li><strong><code>implementer-worktree-write-only</code> role template.</strong> The wizard&#39;s &quot;enhanced&quot;
+choice ships a stricter implementer preamble that pins writes to the agent&#39;s
+own worktree and forbids drive-by edits to the main repo.</li>
+<li><strong>tmux gate.</strong> If <code>tmux</code> is not on <code>PATH</code> when the wizard reaches the
+daemon-start step, init exits early with an OS-appropriate install hint
+(<code>brew install tmux</code> / <code>apt install tmux</code>).</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><strong>Default worktrees base path migrated.</strong> <code>worktrees.base_path</code> now defaults
+to <code>~/.thrum/worktrees/&lt;project&gt;</code> (was <code>~/.workspaces/&lt;project&gt;</code>). Repos with
+an explicit <code>Worktrees.BasePath</code> in <code>.thrum/config.json</code> are unaffected. If
+you relied on the implicit fallback and want existing worktrees to keep
+resolving, run
+<code>thrum config set worktrees.base_path &quot;$HOME/.workspaces/&lt;project&gt;&quot;</code> before
+the next worktree create. The wizard&#39;s worktrees-root prompt also accepts the
+legacy path.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li><strong><code>scripts/thrum-check-inbox.sh</code> excluded alongside <code>thrum-startup.sh</code>.</strong> Init
+now adds the inbox-check helper to <code>.gitignore</code> (and <code>.git/info/exclude</code> in
+stealth mode), preventing it from leaking into tracked changes.</li>
+</ul>
+<h3>Migration</h3>
+<ul>
+<li>If you scripted <code>thrum init</code> in CI: add <code>--non-interactive</code> (or rely on
+non-TTY stdin) — both keep the legacy silent path. The wizard never fires
+under those conditions.</li>
+<li>If your worktrees lived under <code>~/.workspaces/&lt;project&gt;</code> and you want them to
+stay there: pin the path with
+<code>thrum config set worktrees.base_path &quot;$HOME/.workspaces/&lt;project&gt;&quot;</code> before
+the next <code>thrum worktree create</code>.</li>
+</ul>
+<h2>v0.9.2 — 2026-04-29</h2>
+<p>The v0.9.2 work was mostly polish on agents and preambles — the parts of Thrum
+agents wake up with. If you&#39;ve been wishing role discipline survived restarts
+better, or that Claude Code sessions actually loaded the briefing they&#39;re
+supposed to, this is the release.</p>
+<h3>New</h3>
+<ul>
+<li><strong><code>role_config</code> persists in <code>.thrum/config.json</code>.</strong> When you run
+<code>/thrum:configure-roles</code>, your answers (autonomy + scope per role) save under
+a new top-level <code>role_config</code> key. The skill prefills from saved answers on
+re-run so you only re-confirm what you want to change. See
+<a href="role-templates.html">Role Templates</a> and
+<a href="configuration.html#role-config">Configuration → Role Config</a>.</li>
+<li><strong><code>thrum roles refresh</code></strong> — re-renders <code>.thrum/role_templates/&lt;role&gt;.md</code> from
+saved answers + the shipped templates embedded in the binary. Run this after
+upgrading Thrum without re-doing the interactive prompts.</li>
+<li><strong><code>thrum prime</code> surfaces drift hints.</strong> Three codes: <code>roles.config.migration</code>
+(rendered templates exist, no <code>role_config</code> block), <code>roles.config.schema-bump</code>
+(shipped schema newer than saved), <code>roles.config.body-diff</code> (shipped template
+body changed). Precedence is top to bottom; only one fires per repo.</li>
+<li><strong>User overlay composed into the rendered preamble.</strong>
+<code>.thrum/context/&lt;agent&gt;.md</code> is auto-created empty by <code>thrum quickstart</code>.
+Anything you write into it gets appended after <code>DefaultPreamble</code> with a <code>---</code>
+separator. Per-agent tweaks ride on top of the role discipline without forking
+the template.</li>
+<li><strong>Pane-side identity banner.</strong> Sessions launched via <code>thrum tmux create</code> and
+restarted via <code>thrum tmux restart</code> now display an Agent / Role / Worktree /
+Branch banner directly in the tmux pane, plus a <code>MUST READ</code> line pointing at
+the auto-loaded briefing. The banner only fires on runtimes that ship the
+SessionStart hook (Claude Code and Cursor today). See
+<a href="claude-code-plugin.html#pane-side-identity-banner">Claude Code Plugin → Pane-side identity banner</a>.</li>
+<li><strong>SessionStart hook injects <code>thrum prime</code> output.</strong> The Claude Code and Cursor
+plugins&#39; SessionStart hook now runs <code>thrum prime</code> and emits the full briefing
+inline as the hook&#39;s <code>additionalContext</code>. Restart-snapshot framing is hoisted
+to the top with a <code>🛑 ACTION REQUIRED</code> directive so it doesn&#39;t get
+read-and-rationalized-away.</li>
+<li><strong>Role-skills layer.</strong> Ten new description-triggered skills deepen role
+discipline situationally without bloating the always-loaded preamble. Three
+for coordinator (<code>dispatching-work</code>, <code>running-review-cycles</code>,
+<code>managing-state-and-lifecycle</code>), four for implementer (<code>receiving-dispatch</code>,
+<code>tdd-and-quality</code>, <code>status-and-handoff</code>, <code>receiving-review-feedback</code>), three
+for researcher (<code>investigating</code>, <code>answering-queries</code>, <code>maintaining-memory</code>).</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li><strong>tmux pty leak (thrum-x6e8.5).</strong> <code>tmux-exec</code> migrated from <code>respawn-pane</code> to
+a persistent-session pool. The previous approach leaked pseudo-terminals on
+every respawn, eventually exhausting the per-process fd limit on long-running
+daemons.</li>
+<li><strong><code>thrum tmux status</code> and <code>thrum tmux connect</code> leaked sessions across daemons
+(thrum-zuz5).</strong> Pass 2 of <code>HandleStatus</code> was filtering on <code>@thrum-managed=1</code>,
+which every Thrum daemon stamps — so sessions from unrelated worktrees and
+projects leaked into the picker. <code>HandleCreate</code> now also stamps
+<code>@thrum-thrum-dir=&lt;this daemon&#39;s thrum_dir&gt;</code> and pass 2 filters on it.
+<strong>Migration:</strong> sessions created before v0.9.2 won&#39;t appear in pass-2 output
+until you recreate them via <code>thrum tmux create</code>.</li>
+<li><strong><code>runPreambleInit</code> fallback ignored <code>.thrum/redirect</code> (thrum-5hhx).</strong>
+Worktree setups using the redirect indirection silently lost their custom
+preamble path. Fallback now follows the redirect.</li>
+<li><strong>Worktree preambles rendered relative strategy paths (thrum-rm4x,
+thrum-z9zl).</strong> Generated preambles referenced <code>strategies/&lt;file&gt;</code> relative to
+the rendering CWD, breaking when read from a different directory. Paths are
+now absolute against the project root.</li>
+<li><strong><code>thrum context preamble --init</code> overwrote customized templates
+(thrum-pk2o).</strong> <code>--init</code> skipped <code>.thrum/role_templates/&lt;role&gt;.md</code> and went
+straight to the generic default. It now consults <code>RenderRoleTemplate</code> first
+and only falls back when no rendered template exists.</li>
+<li><strong>Peercred unknown-vs-anonymous (thrum-ndtw, backported from v0.9.1).</strong> v0.9.0
+wrapped introspection failures (<code>tspeer.Get</code>, <code>gopsutil.Cwd</code>) with
+<code>ErrAnonymous</code>, which rejected mutating RPCs from registered Bash subprocesses
+on macOS. Steps 1+2 now return raw errors and fall through to legacy
+client-asserted identity. Provably-anonymous paths (steps 3+5) still wrap.</li>
+</ul>
+<h2>v0.9.1 — 2026-04-24</h2>
+<ul>
+<li><strong><code>thrum setup claude-md --apply</code></strong> — the documented-but-unimplemented command
+from issue #8 now works. Bare <code>thrum setup claude-md</code> prints the template;
+<code>--apply</code> creates <code>CLAUDE.md</code> (or appends to existing); <code>--apply --force</code>
+replaces idempotently. Block markers: <code>&lt;!-- BEGIN THRUM --&gt;</code> /
+<code>&lt;!-- END THRUM --&gt;</code>.</li>
+<li><strong>Peercred resolver error taxonomy (thrum-ndtw).</strong> Same fix described under
+v0.9.2 above; landed first in v0.9.1.</li>
+</ul>
+<h2>v0.9.0 — 2026-04-23</h2>
+<h3>What&#39;s New</h3>
+<ul>
+<li><strong>Permission-prompt detection</strong> — the daemon detects when a tmux-managed agent
+hits a blocking permission prompt and routes an actionable nudge to configured
+supervisors. Approve or deny from the CLI, web UI, or Telegram. See
+<a href="permission-prompts.html">Permission Prompt Detection</a>.</li>
+<li><strong>Identity guards</strong> — cross-worktree CWD enforcement hard-errors on CWD drift
+instead of silently misattributing actions to the wrong agent. See
+<a href="troubleshooting-identity.html">Troubleshooting: Identity</a>.</li>
+<li><strong>CLI hints (Phase B)</strong> — contextual guidance printed before and after
+destructive or multi-step commands. See <a href="cli-hints.html">CLI Hints</a>.</li>
+<li><strong>Drift reconciliation</strong> — peers self-heal address drift automatically without
+re-pairing. See <a href="peers.html">Peers</a>.</li>
+<li><strong><code>thrum tmux quickstart</code></strong> — alias for <code>thrum tmux create</code>. Same command,
+clearer name. <code>thrum tmux create</code> now requires <code>--name</code>, <code>--role</code>, <code>--module</code>
+(or <code>--no-agent</code>) and runs quickstart inside the new pane automatically.</li>
+<li><strong><code>thrum worktree setup</code></strong> — alias for <code>thrum worktree create</code>. Both commands
+now accept optional quickstart flags (<code>--name</code>, <code>--role</code>, <code>--module</code>,
+<code>--intent</code>, <code>--runtime</code>). Provide all three required flags and it creates a
+real tmux session, runs quickstart inside it, and prints the next-step
+<code>thrum tmux launch &lt;name&gt;</code> command. The agent identity is registered, but the
+runtime is not started until <code>tmux launch</code> runs — a clean two-step pattern
+with no manual <code>thrum quickstart</code>.</li>
+<li><strong>Single identity per worktree</strong> — quickstart cleans up old identity files
+after writing the new one. You can&#39;t end up with a stale identity causing
+auto-select errors.</li>
+<li><strong><code>thrum tmux launch</code> hard-errors on missing identity</strong> — launch needs an
+agent identity to determine the runtime. Sessions created with <code>--no-agent</code>
+(or worktrees with no identity file) cannot be launched until you register an
+agent first.</li>
+<li><strong>Next-step guard messages</strong> — <code>agent register</code>, <code>worktree create</code> (no agent),
+<code>purge --confirm</code>, <code>daemon stop</code>, <code>tmux restart</code>, and <code>tmux launch</code> now print
+explicit hints about what to do next (or what just broke).</li>
+<li><strong>Monitor Jobs v1</strong> — <code>thrum monitor start/list/show/stop/logs/restart</code>.
+Attach a monitor to any long-running process and it emits matches as synthetic
+Thrum messages. Leading-edge debounce (default 60s, min 30s), auto-persist,
+local-socket-only.</li>
+</ul>
+<h3>Breaking Changes</h3>
+<p>If you&#39;re upgrading from v0.8.x, read this section before starting the daemon.</p>
+<ul>
+<li><strong>Forged <code>caller_agent_id</code> rejected</strong> — pre-v0.9.0 callers could pass any
+<code>caller_agent_id</code> and it was accepted at face value. Now cross-checked against
+kernel-verified PID resolution. Mismatches get &quot;identity mismatch&quot; and are
+dropped.</li>
+<li><strong>WebSocket non-localhost origin → HTTP 403</strong> — pre-v0.9.0, <code>CheckOrigin</code>
+returned <code>true</code> for all origins. Browser pages on non-loopback origins can no
+longer upgrade to WebSocket.</li>
+<li><strong><code>message.delete</code> by non-author rejected</strong> — only the original author can
+soft-delete their own messages.</li>
+<li><strong><code>message.deleteByAgent</code> requires caller == target</strong> — agents can only
+bulk-delete their own messages.</li>
+<li><strong><code>message.deleteByScope</code> is daemon-internal only</strong> — no longer callable from
+any external client (CLI, browser, or unix socket).</li>
+<li><strong>Legacy daemon_id auto-rotated</strong> — first v0.9.0 daemon start rotates
+pre-existing hostname-derived daemon IDs to ULID format. Existing peer pairs
+must be re-paired: <code>thrum peer remove &lt;name&gt;</code> then
+<code>thrum peer add --type tailscale &lt;name&gt;</code> on each peer.</li>
+<li><strong>Downgrade blocked by migration guard</strong> — running a v0.8.x binary against a
+database migrated to schema v24 fails with a clear error. Recovery: stop
+daemon → restore <code>thrum.db.pre-migration-v&lt;N&gt;-bak</code> → run the older binary.</li>
+<li><strong><code>~/.thrum/runtimes.json</code> replaces the old platform config path</strong> — silently
+dropped on upgrade; custom runtimes disappear. Move the file manually: Linux:
+<code>~/.config/thrum/runtimes.json</code> → <code>~/.thrum/runtimes.json</code>; macOS:
+<code>~/Library/Application Support/thrum/runtimes.json</code> →
+<code>~/.thrum/runtimes.json</code>.</li>
+<li><strong><code>peer add --type</code> and <code>peer join --type</code> are now mandatory</strong> — the
+previously implicit <code>tailscale</code> default is gone. Add <code>--type tailscale</code> to any
+existing scripts that omit it.</li>
+<li><strong><code>alert-silence</code> hook no longer triggers permission-prompt detection</strong> —
+daemon-side poller replaces it (~20s detection latency). Existing
+<code>alert-silence</code> config in <code>.tmux.conf</code> is inert for this purpose.</li>
+<li><strong>Identity guards hard-error on CWD drift</strong> — running thrum from the wrong CWD
+fails with <code>identity guard &quot;cross_worktree&quot; fired: pid_mismatch</code> instead of
+silently misattributing. Use <code>THRUM_HOME</code> to pin repo path. See
+<a href="troubleshooting-identity.html">Troubleshooting: Identity</a>.</li>
+<li><strong><code>thrum daemon start</code> and <code>thrum init</code> refuse non-git directories</strong> — pass
+<code>--force</code> for non-anchored use.</li>
+<li><strong><code>thrum quickstart</code> refuses self-rename / name collision</strong> — without
+<code>--force</code>. Previously a silent overwrite.</li>
+<li><strong>Telegram fresh-DM <code>y</code> resolves a pending nudge instead of routing to
+<code>--target</code></strong> — if the sender has a pending permission nudge, a bare
+<code>y</code>/<code>n</code>/<code>yes</code>/<code>no</code>/<code>allow</code>/<code>deny</code> DM resolves that nudge rather than
+delivering to the configured target agent.</li>
+</ul>
+<h2>v0.7.x</h2>
+<ul>
+<li><strong>Orchestrator role</strong> — a dedicated coordinator agent that reads your plan,
+claims tasks, spawns implementers, and stops at every review gate without
+touching the merge button; see <a href="orchestrator-role.html">Orchestrator Role</a></li>
+<li><strong>Multi-runtime support</strong> — Claude Code, Codex, OpenCode, etc. all work; Thrum
+picks the right tmux launch command for each; see
+<a href="multi-runtime.html">Multi-Runtime</a></li>
+<li><strong>Peer mesh</strong> — agents on different machines join one team over Tailscale or
+local network with no extra servers; see <a href="peers.html">Peers</a></li>
+<li><strong>Single-agent mode</strong> — Thrum&#39;s context management and session tracking work
+without any messaging layer; it&#39;s now the default for new installs; see
+<a href="single-agent-mode.html">Single-Agent Mode</a></li>
+<li><strong>Daemon-managed tmux sessions</strong> — the daemon owns the session lifecycle,
+delivers messages the moment they arrive, and runs zero background listeners
+in the agent process; see <a href="tmux-sessions.html">Tmux Sessions</a></li>
+<li><strong>Command queue dispatch</strong> — coordinators submit commands to agent panes via
+<code>thrum tmux queue</code>, with completion tracking, <code>@system</code> notifications, and
+restart recovery; see
+<a href="tmux-sessions.html#command-queue-dispatch">Tmux Sessions — Queue Dispatch</a></li>
+<li><strong>Worktree management</strong> — <code>thrum worktree create/teardown/list</code> (alias:
+<code>thrum worktree setup</code>) handles git worktree setup with automatic Thrum and
+Beads redirect wiring</li>
+<li><strong>Daemon logging</strong> — structured slog output with lumberjack rotation; view
+with <code>thrum daemon logs</code>; configurable via <code>daemon.log_level</code></li>
+</ul>
+<h2>Older Releases</h2>
+<p>For releases before v0.7.0, and for the full machine-readable history, see
+<a href="https://github.com/leonletto/thrum/blob/main/CHANGELOG.html">CHANGELOG.md</a>.</p>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

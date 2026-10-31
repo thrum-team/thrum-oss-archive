@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Tailscale Sync — Thrum</title>
+  <meta name="description" content="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Tailscale Sync — Thrum">
+  <meta property="og:description" content="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">
+  <meta property="og:url" content="https://thrum.team/docs/tailscale-sync.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tailscale Sync — Thrum">
+  <meta name="twitter:description" content="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/tailscale-sync.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Tailscale Sync","description":"Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands","url":"https://thrum.team/docs/tailscale-sync.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link active" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Tailscale Sync</h2>
+<blockquote>
+<p><strong>Prerequisites:</strong> Tailscale installed and Thrum v0.5.8+ on all machines.</p>
+</blockquote>
+<h2>Overview</h2>
+<p>Thrum&#39;s Tailscale sync enables real-time event synchronization between daemon
+instances running on different machines connected via a
+<a href="https://tailscale.com">Tailscale</a> network. Agents on separate laptops, VMs, or
+CI runners can coordinate as if they were on the same machine -- messages, agent
+events, and session updates propagate automatically.</p>
+<p><strong>Key capabilities:</strong></p>
+<ul>
+<li><strong>Cross-machine sync</strong> -- Events flow between daemons over Tailscale&#39;s
+encrypted WireGuard tunnels</li>
+<li><strong>Push + pull</strong> -- Immediate push notifications on new events, with periodic
+pull as a fallback</li>
+<li><strong>Human-mediated pairing</strong> -- Simple 4-digit code to pair two machines (no
+auto-discovery, no complex key management)</li>
+<li><strong>Token authentication</strong> -- Each peer pair shares a unique 32-byte token for
+ongoing auth</li>
+<li><strong>Zero config networking</strong> -- No port forwarding, no firewall rules. Tailscale
+handles connectivity</li>
+</ul>
+<h2>Prerequisites</h2>
+<ol>
+<li><strong>Tailscale installed</strong> on all machines running Thrum daemons</li>
+<li><strong>Thrum v0.5.8+</strong> installed on all machines</li>
+</ol>
+<h2>Getting Started</h2>
+<h3>1. Configure Tailscale Sync</h3>
+<p>Create a <code>.env</code> file in your repo root with the required variables:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># .env (add to .gitignore — contains auth keys)</span>
+THRUM_TS_ENABLED=<span class="hljs-literal">true</span>
+THRUM_TS_HOSTNAME=my-laptop
+THRUM_TS_AUTHKEY=tskey-auth-xxxxx</code></pre>
+<p>The daemon auto-loads <code>.env</code> from the repo root (or <code>.thrum/.env</code>). Variables
+with <code>THRUM_</code> or <code>TAILSCALE_</code> prefixes are loaded; existing environment
+variables take precedence.</p>
+<p><strong>Important:</strong> <code>THRUM_TS_HOSTNAME</code> and <code>THRUM_TS_AUTHKEY</code> are both required. The
+hostname identifies your machine on the Tailscale network. Get an auth key from
+the <a href="https://login.tailscale.com/admin/settings/keys">Tailscale admin console</a>.</p>
+<h3>2. Start the Daemon</h3>
+<pre><code class="language-bash hljs">thrum daemon restart</code></pre>
+<p>When Tailscale sync is enabled, the daemon:</p>
+<ul>
+<li>Starts a tsnet listener on port 9100 (configurable)</li>
+<li>Registers sync RPC handlers (<code>sync.pull</code>, <code>sync.notify</code>, <code>sync.peer_info</code>,
+<code>pair.request</code>)</li>
+<li>Runs periodic sync every 15 seconds (with immediate sync on startup)</li>
+<li>Waits for peer pairing via CLI</li>
+</ul>
+<p><strong>Note:</strong> tsnet creates a separate Tailscale identity with a <code>-1</code> suffix (e.g.,
+<code>my-laptop-1</code>). This is normal — it&#39;s a userspace Tailscale instance running
+alongside your system Tailscale.</p>
+<h3>3. Pair Two Machines</h3>
+<p>Pairing requires action on both machines simultaneously. <code>thrum peer add</code> blocks
+for up to 5 minutes waiting for the other machine to connect — coordinate timing
+with the other operator.</p>
+<p><strong>On Machine A</strong> (the one you want to share with):</p>
+<pre><code class="language-bash hljs">thrum peer add --<span class="hljs-built_in">type</span> tailscale
+<span class="hljs-comment"># Output: Waiting for connection...</span>
+<span class="hljs-comment"># Peercode: my-laptop:100.x.y.z:9100:7392</span>
+<span class="hljs-comment"># (blocks up to 5 minutes)</span></code></pre>
+<p><strong>On Machine B</strong> (the one joining):</p>
+<pre><code class="language-bash hljs">thrum peer <span class="hljs-built_in">join</span> --<span class="hljs-built_in">type</span> tailscale my-laptop:100.x.y.z:9100:7392
+<span class="hljs-comment"># Output: Paired with &quot;my-laptop&quot;. Syncing started.</span></code></pre>
+<p><code>--type</code> is required on both commands. <code>peer add</code> prints a single peercode — the
+<code>name:ip:port:code</code> string — that you copy verbatim to Machine B. You can also
+pipe it in
+(<code>echo &quot;my-laptop:100.x.y.z:9100:7392&quot; | thrum peer join --type tailscale</code>) or
+pass it with <code>--peercode</code>.</p>
+<p><strong>Important:</strong> the peercode embeds the tsnet Tailscale IP (e.g.,
+<code>100.x.y.z:9100</code>), not the hostname — regular DNS can&#39;t resolve tsnet hostnames
+(the <code>-1</code> suffix variants). <code>peer add --type tailscale</code> picks the tsnet address
+automatically; if you need to check it, <code>tailscale status</code> shows the entry with
+the <code>-1</code> suffix matching the other machine&#39;s <code>THRUM_TS_HOSTNAME</code>.</p>
+<p>Machine A will also show success:</p>
+<pre><code class="language-text hljs">Paired with &quot;office-server&quot; (100.64.2.10:9100). Syncing started.</code></pre>
+<p>Both machines now sync events automatically.</p>
+<h3>4. Verify Sync</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># List paired peers</span>
+thrum peer list
+
+<span class="hljs-comment"># Detailed sync status</span>
+thrum peer status
+
+<span class="hljs-comment"># Check health endpoint</span>
+thrum overview</code></pre>
+<h2>Architecture</h2>
+<pre><code class="language-text hljs">Machine A                           Machine B
+┌─────────────────────┐             ┌─────────────────────┐
+│  Thrum Daemon       │             │  Thrum Daemon       │
+│  ├─ Event Log       │             │  ├─ Event Log       │
+│  ├─ tsnet Listener  │◄──────────►│  ├─ tsnet Listener  │
+│  ├─ Sync Manager    │  Tailscale  │  ├─ Sync Manager    │
+│  └─ Peer Registry   │  (WireGuard)│  └─ Peer Registry   │
+└─────────────────────┘             └─────────────────────┘
+         │                                    │
+    ┌────┴────┐                          ┌────┴────┐
+    │ Agents  │                          │ Agents  │
+    │ CLI/MCP │                          │ CLI/MCP │
+    └─────────┘                          └─────────┘</code></pre>
+<h3>Component Overview</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Event Log</strong></td>
+<td>Sequenced event store with origin tracking and dedup</td>
+</tr>
+<tr>
+<td><strong>tsnet Listener</strong></td>
+<td>Tailscale-native TCP listener (no port forwarding needed)</td>
+</tr>
+<tr>
+<td><strong>Sync Manager</strong></td>
+<td>Orchestrates pull sync, push notifications, and the scheduler</td>
+</tr>
+<tr>
+<td><strong>Sync Client</strong></td>
+<td>Pulls events from peers in batches with checkpointing</td>
+</tr>
+<tr>
+<td><strong>Sync Server</strong></td>
+<td>Exposes <code>sync.*</code> and <code>pair.*</code> RPC methods to peers (token-authenticated)</td>
+</tr>
+<tr>
+<td><strong>Peer Registry</strong></td>
+<td>Thread-safe registry of paired peers with JSON persistence</td>
+</tr>
+<tr>
+<td><strong>Pairing Manager</strong></td>
+<td>Handles the 4-digit code pairing flow</td>
+</tr>
+<tr>
+<td><strong>Sync Scheduler</strong></td>
+<td>Periodic sync every 15s for Tailscale peers (skips recently synced)</td>
+</tr>
+</tbody></table>
+<h2>Sync Protocol</h2>
+<h3>Event Log Foundation</h3>
+<p>Every event written to the daemon includes:</p>
+<ul>
+<li><strong><code>origin_daemon</code></strong> -- Unique daemon ID identifying the source machine</li>
+<li><strong><code>sequence</code></strong> -- Monotonically increasing per-daemon sequence number</li>
+</ul>
+<p>Events are stored in a SQLite <code>events</code> table with sequence-based pagination,
+enabling efficient delta sync.</p>
+<h3>Pull Sync</h3>
+<p>The primary sync mechanism. Daemon A asks Daemon B: &quot;Give me all events after
+sequence N.&quot;</p>
+<pre><code class="language-text hljs">Daemon A                              Daemon B
+   │                                      │
+   │ sync.pull(after_seq=42, token=...)   │
+   ├─────────────────────────────────────►│
+   │                                      │
+   │  {events: [...], next_seq: 1042,     │
+   │   more_available: true}              │
+   │◄─────────────────────────────────────┤
+   │                                      │
+   │ sync.pull(after_seq=1042, token=...) │
+   ├─────────────────────────────────────►│
+   │                                      │
+   │  {events: [...], next_seq: 1500,     │
+   │   more_available: false}             │
+   │◄─────────────────────────────────────┤</code></pre>
+<p>Batched pull with the <code>limit+1</code> trick to determine <code>more_available</code>. Checkpoints
+are persisted per-peer so sync resumes from where it left off. All requests
+include the peer&#39;s auth token.</p>
+<h3>Push Notifications</h3>
+<p>When a daemon writes a new event, it broadcasts a <code>sync.notify</code> to all known
+peers:</p>
+<pre><code class="language-text hljs">Daemon A writes event
+   │
+   ├──► sync.notify(daemon_id, latest_seq, token) ──► Daemon B
+   ├──► sync.notify(daemon_id, latest_seq, token) ──► Daemon C
+   │
+   Daemons B and C pull new events from A</code></pre>
+<p>Push notifications are fire-and-forget -- failures are logged but do not block
+the writer.</p>
+<h3>Periodic Sync Scheduler</h3>
+<p>For Tailscale peers, the scheduler runs every 15 seconds with a 10-second
+recent-sync threshold. It pulls from all known peers that were not synced
+recently. Combined with push notifications, this provides near-real-time sync
+(typically under 20 seconds end-to-end). An initial sync runs immediately on
+daemon startup.</p>
+<p>For Git-only sync (no Tailscale), the scheduler uses the default 5-minute
+interval with a 2-minute threshold.</p>
+<h3>Deduplication</h3>
+<p>Events are deduplicated by <code>event_id</code> (ULID-based, globally unique). The
+<code>HasEvent()</code> function provides O(1) dedup via the SQLite primary key index.
+Duplicate events from overlapping syncs are silently skipped.</p>
+<h2>Pairing Flow</h2>
+<p>Pairing establishes mutual trust between two machines with a human in the loop.</p>
+<pre><code class="language-text hljs">Machine A (thrum peer add)           Machine B (thrum peer join)
+   │                                      │
+   │  1. Generate 4-digit code + token    │
+   │  2. Display code to user             │
+   │                                      │
+   │        (human shares code)           │
+   │                                      │
+   │  pair.request(code, id, name, addr)  │
+   │◄─────────────────────────────────────┤ 3. User enters code
+   │                                      │
+   │  4. Verify code                      │
+   │  5. Store peer B + token             │
+   │                                      │
+   │  {status: paired, token, id, name}   │
+   ├─────────────────────────────────────►│ 6. Store peer A + token
+   │                                      │
+   │  Both peers now authenticate with    │
+   │  the shared token on every request   │</code></pre>
+<ul>
+<li>The pairing code is a random 4-digit number (3 attempts allowed)</li>
+<li>The token is a random 32-byte hex string</li>
+<li>Pairing sessions expire after 5 minutes</li>
+<li>Both peers store each other&#39;s info in <code>peers.json</code></li>
+</ul>
+<h2>Configuration</h2>
+<h3>Environment Variables</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>THRUM_TS_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Enable Tailscale sync</td>
+</tr>
+<tr>
+<td><code>THRUM_TS_HOSTNAME</code></td>
+<td>(required)</td>
+<td>Hostname for the tsnet listener</td>
+</tr>
+<tr>
+<td><code>THRUM_TS_PORT</code></td>
+<td><code>9100</code></td>
+<td>Port for the sync RPC listener</td>
+</tr>
+<tr>
+<td><code>THRUM_TS_AUTHKEY</code></td>
+<td>(required)</td>
+<td>Tailscale auth key (from admin console)</td>
+</tr>
+<tr>
+<td><code>THRUM_TS_CONTROL_URL</code></td>
+<td>(default)</td>
+<td>Custom control server URL (Headscale)</td>
+</tr>
+<tr>
+<td><code>THRUM_TS_STATE_DIR</code></td>
+<td><code>.thrum/var/tsnet</code></td>
+<td>tsnet state directory</td>
+</tr>
+</tbody></table>
+<p>These can be set via environment variables or in a <code>.env</code> file at the repo root.
+The <code>.env</code> file is auto-loaded by the daemon — only <code>THRUM_*</code> and <code>TAILSCALE_*</code>
+prefixed variables are read. <strong>Add <code>.env</code> to <code>.gitignore</code></strong> since it contains
+your auth key.</p>
+<h2>CLI Commands</h2>
+<h3><code>thrum peer</code></h3>
+<p>Manage sync peers:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Start pairing on this machine (prints a name:ip:port:code peercode)</span>
+thrum peer add --<span class="hljs-built_in">type</span> tailscale
+
+<span class="hljs-comment"># Join a remote peer using the peercode from `peer add`</span>
+thrum peer <span class="hljs-built_in">join</span> --<span class="hljs-built_in">type</span> tailscale &lt;name:ip:port:code&gt;
+
+<span class="hljs-comment"># List all paired peers</span>
+thrum peer list
+
+<span class="hljs-comment"># Remove a peer</span>
+thrum peer remove &lt;name&gt;
+
+<span class="hljs-comment"># Detailed sync status for all peers</span>
+thrum peer status</code></pre>
+<h3><code>thrum overview</code></h3>
+<p>When Tailscale sync is enabled, <code>thrum overview</code> includes sync information:</p>
+<pre><code class="language-text hljs">Tailscale Sync: enabled
+  Peers: 2 connected
+  Last sync: 30s ago
+  Hostname: my-laptop</code></pre>
+<h2>Security Model</h2>
+<p>Tailscale sync uses a simple three-layer security model:</p>
+<h3>1. Tailscale Encryption (Network Layer)</h3>
+<p>All traffic between daemons flows over Tailscale&#39;s WireGuard tunnels. This
+provides end-to-end encryption and identity verification at the network level.
+No data travels over the public internet unencrypted.</p>
+<h3>2. Pairing Code (Trust Establishment)</h3>
+<p>A human-mediated 4-digit code establishes initial trust between two machines.
+The pairing code must be shared out-of-band (verbally, chat, etc.), ensuring
+both sides consent to the peering relationship.</p>
+<ul>
+<li>4-digit random code (10,000 possibilities)</li>
+<li>3 attempts allowed before the session is locked</li>
+<li>5-minute timeout on pairing sessions</li>
+</ul>
+<h3>3. Token Authentication (Ongoing Auth)</h3>
+<p>After pairing, each request includes a 32-byte hex token. The receiving daemon
+validates the token against its peer registry before processing any sync
+request. The <code>pair.request</code> method is the only RPC exempt from token
+authentication (it&#39;s how new peers establish their tokens).</p>
+<ul>
+<li>Token validation is centralized in the sync server</li>
+<li>Invalid or missing tokens are rejected immediately</li>
+<li>Peer&#39;s <code>last_sync</code> is updated on each successful authenticated request</li>
+</ul>
+<h2>Peer Management</h2>
+<h3>Peer Registry</h3>
+<p>The peer registry is stored as JSON at <code>.thrum/var/peers.json</code> and persists
+across daemon restarts. It tracks:</p>
+<ul>
+<li>Daemon ID and name</li>
+<li>Network address (Tailscale IP + port)</li>
+<li>Auth token</li>
+<li>Paired-at timestamp and last sync time</li>
+</ul>
+<h2>Monitoring</h2>
+<h3>Health Endpoint</h3>
+<p>The daemon&#39;s <code>health</code> RPC method includes Tailscale sync status when enabled:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;tailscale_sync&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;enabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;hostname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-laptop&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;peer_count&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;peers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;daemon_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;d_abc123&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;office-server&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;last_sync&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;30s ago&quot;</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>Logs</h3>
+<p>Tailscale sync logs are prefixed for easy filtering:</p>
+<pre><code class="language-text hljs">[pairing] Session started, code=7392, timeout=5m0s
+[pairing] Paired with office-server (d_abc123) at 100.64.2.10:9100
+sync.notify: synced from d_abc123 — applied=5 skipped=0
+periodic_sync: starting with interval=15s, recent_threshold=10s</code></pre>
+<h2>Troubleshooting</h2>
+<h3>Cannot reach peer</h3>
+<ol>
+<li>Verify both machines are on the same Tailscale network</li>
+<li>Check that both daemons are running (<code>thrum daemon start</code>)</li>
+<li>Use the Tailscale IP (not hostname) for <code>peer join</code>: <code>tailscale status</code> to
+find it</li>
+<li>Test connectivity: <code>tailscale ping &lt;hostname&gt;</code></li>
+</ol>
+<h3>Pairing code rejected</h3>
+<ul>
+<li>Ensure you&#39;re entering the code displayed on the other machine</li>
+<li>Codes expire after 5 minutes -- run <code>thrum peer add</code> again if expired</li>
+<li>After 3 failed attempts, the session locks -- restart with <code>thrum peer add</code></li>
+</ul>
+<h3>Sync not working after pairing</h3>
+<ol>
+<li>Check <code>thrum peer status</code> for connection details</li>
+<li>Verify both daemons have Tailscale enabled (<code>THRUM_TS_ENABLED=true</code>)</li>
+<li>Check daemon logs for sync errors</li>
+</ol>
+<h2>Best Practices</h2>
+<h3>Network Setup</h3>
+<ul>
+<li><strong>Use auth keys</strong> (<code>THRUM_TS_AUTHKEY</code>) for headless CI/CD runners</li>
+<li><strong>Keep the default port</strong> (9100) unless you have a conflict</li>
+<li><strong>Use Tailscale ACLs</strong> to restrict which machines can communicate</li>
+</ul>
+<h3>Performance</h3>
+<ul>
+<li><strong>Push notifications</strong> trigger immediate pulls when events are written</li>
+<li><strong>Periodic sync</strong> (15s for Tailscale peers) ensures convergence even if push
+notifications are lost</li>
+<li><strong>Typical end-to-end latency</strong> is under 20 seconds across machines</li>
+<li><strong>Batch size</strong> of 1000 events per pull keeps memory bounded during large syncs</li>
+<li><strong>Checkpointing</strong> ensures no redundant transfers after restarts</li>
+</ul>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="tailscale-security.html">Tailscale Security</a> — the full security model:
+encryption layers, pairing codes, token authentication, and threat analysis</li>
+<li><a href="sync.html">Sync Protocol</a> — how Git-based sync works under the hood, for when
+Tailscale isn&#39;t available or you want async delivery</li>
+<li><a href="multi-agent.html">Multi-Agent Support</a> — coordinate agents across machines once
+sync is set up</li>
+<li><a href="configuration.html">Configuration</a> — configure sync interval, local-only mode,
+and other daemon settings</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

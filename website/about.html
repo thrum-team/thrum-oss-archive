@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>About — Thrum</title>
+  <meta name="description" content="About the developer behind Thrum">
+  <link rel="canonical" href="https://thrum.team/about.html">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="About — Thrum">
+  <meta property="og:description" content="About the developer behind Thrum">
+  <meta property="og:url" content="https://thrum.team/about.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About — Thrum">
+  <meta name="twitter:description" content="About the developer behind Thrum">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <!-- JSON-LD structured data: AboutPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","name":"About Thrum","url":"https://thrum.team/about.html","description":"About the developer behind Thrum","isPartOf":{"@type":"WebSite","name":"Thrum","url":"https://thrum.team/"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="header-nav">
+        <a href="index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="docs.html" class="nav-link">Docs</a>
+          <a href="blog.html" class="nav-link">Blog</a>
+          <a href="about.html" class="nav-link nav-link-active">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- About -->
+  <section class="section" style="padding-top: 120px;">
+    <div class="container-narrow">
+      <h1 class="section-title">About Thrum</h1>
+      <p class="section-lead" style="text-align: left;">
+        Thrum is built and maintained by <strong>Leon Letto</strong> &mdash; a software engineer focused on
+        AI agent tooling, developer infrastructure, and multi-agent coordination systems.
+      </p>
+
+      <div class="card" style="margin-top: 2rem; padding: 2rem;">
+        <h3 style="margin-top: 0;">Leon Letto</h3>
+        <p>
+          Creator of Thrum, a persistent messaging system designed to make AI agents
+          coordinate effectively across sessions, machines, and teams.
+        </p>
+        <p style="margin-bottom: 0;">
+          <a href="https://leonletto.github.io" target="_blank" rel="noopener">leonletto.github.io</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://linkedin.com/in/leonletto" target="_blank" rel="noopener">LinkedIn</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://github.com/leonletto" target="_blank" rel="noopener">GitHub</a>
+        </p>
+        <p class="text-muted" style="margin-top: 1rem; margin-bottom: 0; font-size: 0.875rem;">
+          Reach out via LinkedIn for questions, collaboration, or feedback.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+          <span class="text-muted">&mdash; Persistent messaging for AI agents</span>
+        </div>
+        <div class="footer-links">
+          <a href="docs.html">Documentation</a>
+          <a href="blog.html">Blog</a>
+          <a href="https://github.com/leonletto/thrum" target="_blank" rel="noopener">GitHub</a>
+          <a href="llms.txt">llms.txt</a>
+          <a href="llms-full.txt">llms-full.txt</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+  </script>
+</body>
+</html>

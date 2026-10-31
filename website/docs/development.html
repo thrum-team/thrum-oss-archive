@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Development Guide — Thrum</title>
+  <meta name="description" content="Setup, testing, building, contributing - complete guide for developing and extending Thrum">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Development Guide — Thrum">
+  <meta property="og:description" content="Setup, testing, building, contributing - complete guide for developing and extending Thrum">
+  <meta property="og:url" content="https://thrum.team/docs/development.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Development Guide — Thrum">
+  <meta name="twitter:description" content="Setup, testing, building, contributing - complete guide for developing and extending Thrum">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/development.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Development Guide","description":"Setup, testing, building, contributing - complete guide for developing and extending Thrum","url":"https://thrum.team/docs/development.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link active" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Thrum Development Guide</h2>
+<p>This guide explains how to set up and work with the Thrum codebase.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li><strong>Go 1.26+</strong>: <a href="https://go.dev/dl/">Install Go</a></li>
+<li><strong>Node.js 22+</strong> and <strong>pnpm 10+</strong>: Required for building the UI monorepo</li>
+<li><strong>Make</strong>: Build automation</li>
+<li><strong>Playwright</strong>: E2E testing (<code>npx playwright install chromium</code>)</li>
+<li><strong>golangci-lint</strong>: Code linting (auto-installed by <code>make lint</code>)</li>
+<li><strong>markdownlint-cli</strong>: Markdown linting (auto-installed by <code>make lint-md</code>)</li>
+</ul>
+<h2>Quick Start</h2>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Clone repository</span>
+git <span class="hljs-built_in">clone</span> &lt;repo-url&gt;
+<span class="hljs-built_in">cd</span> thrum
+
+<span class="hljs-comment"># Install dependencies</span>
+go mod download
+<span class="hljs-built_in">cd</span> ui &amp;&amp; pnpm install &amp;&amp; <span class="hljs-built_in">cd</span> ..
+
+<span class="hljs-comment"># Run Go tests</span>
+make <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Full build (UI + Go binary) and install to ~/.local/bin</span>
+make install
+
+<span class="hljs-comment"># Start daemon and verify</span>
+thrum daemon start
+thrum daemon status</code></pre>
+<h2>Project Structure</h2>
+<pre><code class="language-text hljs">thrum/
+├── cmd/
+│   └── thrum/               # CLI entry point
+│       ├── main.go          # Cobra command tree (all CLI commands)
+│       └── mcp.go           # MCP server command
+├── internal/                # Private packages
+│   ├── cli/                 # CLI business logic (one file per command)
+│   │   └── hints/           # CLI hint and suggestion output
+│   ├── config/              # Configuration loading and identity files
+│   ├── daemon/              # Daemon core
+│   │   ├── cleanup/         # Agent work context cleanup
+│   │   ├── permission/      # Permission prompt detection and keystroke delivery
+│   │   ├── reconcile/       # Agent state reconciliation
+│   │   ├── rpc/             # JSON-RPC 2.0 method handlers
+│   │   ├── state/           # Persistent state (JSONL + SQLite)
+│   │   ├── server.go        # Unix socket server
+│   │   ├── lifecycle.go     # Signal handling, defer cleanup, flock
+│   │   ├── pidfile.go       # JSON PID file with repo-affinity metadata
+│   │   ├── client.go        # Client library
+│   │   ├── flock.go         # FileLock struct definition
+│   │   ├── flock_unix.go    # flock() implementation (Unix)
+│   │   ├── flock_other.go   # No-op stubs (non-Unix)
+│   │   └── testutil_test.go # StartTestDaemon() helper
+│   ├── gitctx/              # Git-derived work context (branch, uncommitted files)
+│   ├── identity/            # ID generation (ULID-based: repo, agent, session, message, event)
+│   │   └── guard/           # Cross-worktree identity guards, WritePID enforcement
+│   ├── jsonl/               # JSONL reader/writer with file locking
+│   ├── mcp/                 # MCP stdio server (5 tools: 4 active + 1 deprecated; polling waiter)
+│   ├── paths/               # Path resolution, .thrum/redirect, sync worktree path
+│   ├── projection/          # JSONL to SQLite event replay (projector)
+│   ├── schema/              # SQLite schema, DDL, and migrations (v24)
+│   ├── sync/                # Sync engine (loop, merge, push, dedup, branch management)
+│   ├── tmux/                # Tmux operations, nudge delivery, session management (v0.7.1)
+│   ├── restart/             # JSONL conversation extraction, restart snapshots (v0.7.1)
+│   ├── bridge/              # Shared bridge components (v0.7.0)
+│   │   ├── bridge.go        # TransportBridge interface, Notification type
+│   │   ├── msgmap.go        # Local↔remote message ID mapping
+│   │   ├── relay.go         # Common inbound/outbound relay
+│   │   ├── wsclient.go      # Shared WebSocket client
+│   │   ├── peer/            # PeerBridge, PeerTransport, address validation
+│   │   └── telegram/        # Telegram bridge (thin wrappers around shared components)
+│   ├── transport/           # Transport abstraction layer
+│   ├── types/               # Shared event type definitions
+│   ├── web/                 # Embedded SPA (//go:embed React build)
+│   └── websocket/           # WebSocket server, connections, registry
+├── ui/                      # UI monorepo (Turborepo + pnpm workspaces)
+│   ├── packages/
+│   │   ├── shared-logic/    # Framework-agnostic business logic (TanStack, Zod)
+│   │   ├── web-app/         # React web application (Vite, shadcn/ui)
+│   │   └── tui-app/         # Terminal UI (Ink, placeholder)
+│   ├── turbo.json           # Turborepo configuration
+│   ├── pnpm-workspace.yaml  # pnpm workspace configuration
+│   └── package.json         # Root monorepo scripts
+├── tests/
+│   └── e2e/                 # Playwright E2E tests (13 spec files)
+│       ├── helpers/         # Test helpers (CLI wrapper, fixtures)
+│       ├── global-setup.ts  # Daemon start + agent registration
+│       └── global-teardown.ts
+├── scripts/                 # Setup scripts
+│   ├── setup-worktree-thrum.sh  # Configure .thrum/redirect for worktrees
+│   └── setup-worktree-beads.sh  # Configure .beads/redirect for worktrees
+├── docs/                    # User documentation
+├── dev-docs/                # Design documents and prompts
+├── .agents/                 # Agent workflow instructions (hidden directory)
+├── .beads/                  # Issue tracking (beads)
+├── Makefile                 # Build targets
+├── go.mod                   # Go module (github.com/leonletto/thrum)
+├── playwright.config.ts     # Playwright E2E configuration
+└── llms.txt / llms-full.txt # Agent reference files</code></pre>
+<h2>Development Workflow</h2>
+<h3>1. Running Tests</h3>
+<h4>Go Tests</h4>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Run all Go tests</span>
+make <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Run unit tests only (fast, skips integration)</span>
+make test-unit
+
+<span class="hljs-comment"># Run integration tests</span>
+make test-integration
+
+<span class="hljs-comment"># Run tests with verbose output</span>
+make test-verbose
+
+<span class="hljs-comment"># Run specific package tests</span>
+go <span class="hljs-built_in">test</span> ./internal/config/... -v
+
+<span class="hljs-comment"># Run with race detector</span>
+go <span class="hljs-built_in">test</span> -race ./...
+
+<span class="hljs-comment"># Run resilience tests (requires build tag)</span>
+go <span class="hljs-built_in">test</span> -tags=resilience ./internal/daemon/...</code></pre>
+<p><strong>Resilience Test Suite (v0.4.3):</strong></p>
+<p>The resilience test suite includes 39 tests covering crash recovery, concurrent
+access, and timeout enforcement. These tests require the <code>-tags=resilience</code>
+build flag:</p>
+<ul>
+<li>Crash recovery scenarios (daemon restart, state restoration)</li>
+<li>Concurrent access patterns (multiple goroutines, race conditions)</li>
+<li>Timeout enforcement (I/O timeouts, RPC timeouts, WebSocket timeouts)</li>
+</ul>
+<p>Run the full resilience suite:</p>
+<pre><code class="language-bash hljs">go <span class="hljs-built_in">test</span> -tags=resilience -v ./internal/daemon/resilience_test.go</code></pre>
+<h4>UI Tests</h4>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Run all UI tests (from monorepo root)</span>
+<span class="hljs-built_in">cd</span> ui &amp;&amp; pnpm <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Run web-app tests only</span>
+<span class="hljs-built_in">cd</span> ui/packages/web-app &amp;&amp; pnpm <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Run shared-logic tests only</span>
+<span class="hljs-built_in">cd</span> ui/packages/shared-logic &amp;&amp; pnpm <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Watch mode</span>
+<span class="hljs-built_in">cd</span> ui/packages/web-app &amp;&amp; pnpm <span class="hljs-built_in">test</span>:watch
+
+<span class="hljs-comment"># Coverage report</span>
+<span class="hljs-built_in">cd</span> ui/packages/web-app &amp;&amp; pnpm <span class="hljs-built_in">test</span>:coverage</code></pre>
+<h4>E2E Tests (Playwright)</h4>
+<p>E2E tests require the daemon to be running and the binary to be built:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Build and install</span>
+make install
+
+<span class="hljs-comment"># Start daemon</span>
+thrum daemon start
+
+<span class="hljs-comment"># Run all E2E tests (serial execution required)</span>
+npx playwright <span class="hljs-built_in">test</span> --workers=1
+
+<span class="hljs-comment"># Run a specific spec file</span>
+npx playwright <span class="hljs-built_in">test</span> tests/e2e/messaging.spec.ts --workers=1
+
+<span class="hljs-comment"># View HTML report</span>
+npx playwright show-report</code></pre>
+<p>The E2E test suite uses <code>global-setup.ts</code> to start the daemon and register a
+test agent, and <code>global-teardown.ts</code> to stop the daemon after all tests
+complete.</p>
+<h3>2. Code Coverage</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Generate Go coverage report</span>
+make test-coverage
+<span class="hljs-comment"># Report output: output/coverage.html</span></code></pre>
+<h3>3. Linting</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Run Go linter (auto-installs golangci-lint if missing)</span>
+make lint
+
+<span class="hljs-comment"># Auto-fix Go lint issues</span>
+make lint-fix
+
+<span class="hljs-comment"># Run Markdown linter</span>
+make lint-md
+
+<span class="hljs-comment"># Auto-fix Markdown issues</span>
+make lint-md-fix
+
+<span class="hljs-comment"># Run all linters (Go + Markdown)</span>
+make lint-all</code></pre>
+<h3>4. Formatting</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Format Go code</span>
+make <span class="hljs-built_in">fmt</span>
+
+<span class="hljs-comment"># Format Markdown files (requires prettier)</span>
+make fmt-md
+
+<span class="hljs-comment"># Format all files (Go + Markdown)</span>
+make fmt-all</code></pre>
+<h3>5. Building</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Full build: UI + Go binary</span>
+make build
+<span class="hljs-comment"># Output: ./bin/thrum</span>
+
+<span class="hljs-comment"># Build Go binary only (skip UI rebuild, uses existing internal/web/dist/)</span>
+make build-go
+
+<span class="hljs-comment"># Build UI only (pnpm install + build, copies to internal/web/dist/)</span>
+make build-ui
+
+<span class="hljs-comment"># Full build + install to ~/.local/bin</span>
+make install
+
+<span class="hljs-comment"># Run built binary</span>
+./bin/thrum</code></pre>
+<p>The build embeds the React SPA into the Go binary via <code>//go:embed</code> in
+<code>internal/web/embed.go</code>. The <code>make build-ui</code> step copies the Vite build output
+into <code>internal/web/dist/</code> so the Go embed directive can include it.</p>
+<p>A <code>.gitkeep</code> file in <code>internal/web/dist/</code> ensures <code>go build</code> and <code>go vet</code> work
+even when the UI has not been built.</p>
+<h2>Makefile Targets</h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>make help</code></td>
+<td>Show all available targets (default)</td>
+</tr>
+<tr>
+<td><code>make dev</code></td>
+<td>Build + sign, restart only the worktree-scoped daemon. Does NOT touch <code>~/.local/bin/thrum</code>. Safe for multi-agent machines — other agents on the host keep running their existing binary.</td>
+</tr>
+<tr>
+<td><code>make build</code></td>
+<td>Full build: UI + Go binary</td>
+</tr>
+<tr>
+<td><code>make build-ui</code></td>
+<td>Build UI and copy to embed location</td>
+</tr>
+<tr>
+<td><code>make build-go</code></td>
+<td>Build Go binary only (skip UI rebuild)</td>
+</tr>
+<tr>
+<td><code>make install</code></td>
+<td>Full build and install to <code>~/.local/bin</code></td>
+</tr>
+<tr>
+<td><code>make test</code></td>
+<td>Run all Go tests</td>
+</tr>
+<tr>
+<td><code>make test-unit</code></td>
+<td>Run unit tests only (fast)</td>
+</tr>
+<tr>
+<td><code>make test-integration</code></td>
+<td>Run integration tests</td>
+</tr>
+<tr>
+<td><code>make test-coverage</code></td>
+<td>Generate coverage report to <code>output/</code></td>
+</tr>
+<tr>
+<td><code>make test-verbose</code></td>
+<td>Run tests with verbose output</td>
+</tr>
+<tr>
+<td><code>make fmt</code></td>
+<td>Format Go code</td>
+</tr>
+<tr>
+<td><code>make fmt-md</code></td>
+<td>Format Markdown files with prettier</td>
+</tr>
+<tr>
+<td><code>make fmt-all</code></td>
+<td>Format all files (Go + Markdown)</td>
+</tr>
+<tr>
+<td><code>make lint</code></td>
+<td>Run golangci-lint</td>
+</tr>
+<tr>
+<td><code>make lint-fix</code></td>
+<td>Run golangci-lint with auto-fix</td>
+</tr>
+<tr>
+<td><code>make lint-md</code></td>
+<td>Run markdownlint</td>
+</tr>
+<tr>
+<td><code>make lint-md-fix</code></td>
+<td>Run markdownlint with auto-fix</td>
+</tr>
+<tr>
+<td><code>make lint-all</code></td>
+<td>Run all linters (Go + Markdown)</td>
+</tr>
+<tr>
+<td><code>make vet</code></td>
+<td>Run <code>go vet</code></td>
+</tr>
+<tr>
+<td><code>make tidy</code></td>
+<td>Tidy Go dependencies</td>
+</tr>
+<tr>
+<td><code>make clean</code></td>
+<td>Remove build artifacts (<code>output/</code>, <code>bin/</code>, <code>dist/</code>)</td>
+</tr>
+<tr>
+<td><code>make install-tools</code></td>
+<td>Install dev tools (golangci-lint, markdownlint-cli)</td>
+</tr>
+<tr>
+<td><code>make quick-check</code></td>
+<td>Fast pre-commit checks: format, vet, test, build</td>
+</tr>
+<tr>
+<td><code>make ci</code></td>
+<td>Full CI checks: format-all, lint-all, vet, test, build</td>
+</tr>
+<tr>
+<td><code>make pre-commit</code></td>
+<td>Alias for <code>quick-check</code></td>
+</tr>
+<tr>
+<td><code>make pre-push</code></td>
+<td>Alias for <code>ci</code></td>
+</tr>
+</tbody></table>
+<h2>Common Tasks</h2>
+<h3>Adding a New Event Type</h3>
+<ol>
+<li>Define event struct in <code>internal/types/events.go</code></li>
+<li>Add handler in <code>internal/projection/projector.go</code></li>
+<li>Add case in the <code>Apply()</code> switch statement</li>
+<li>Write tests in <code>internal/projection/projector_test.go</code></li>
+</ol>
+<p>Current event types handled by the projector:</p>
+<ul>
+<li><code>message.create</code>, <code>message.edit</code>, <code>message.delete</code></li>
+<li><code>agent.register</code></li>
+<li><code>agent.session.start</code>, <code>agent.session.end</code></li>
+<li><code>agent.update</code></li>
+<li><code>thread.create</code></li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-go hljs"><span class="hljs-comment">// 1. Define event type in internal/types/events.go</span>
+<span class="hljs-keyword">type</span> MyNewEvent <span class="hljs-keyword">struct</span> {
+    BaseEvent
+    MyField <span class="hljs-type">string</span> <span class="hljs-string">`json:&quot;my_field&quot;`</span>
+}
+
+<span class="hljs-comment">// 2. Add handler in internal/projection/projector.go</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(p *Projector)</span></span> applyMyNew(data json.RawMessage) <span class="hljs-type">error</span> {
+    <span class="hljs-keyword">var</span> event types.MyNewEvent
+    <span class="hljs-keyword">if</span> err := json.Unmarshal(data, &amp;event); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">&quot;unmarshal my.new: %w&quot;</span>, err)
+    }
+
+    <span class="hljs-comment">// Insert/update database</span>
+    _, err := p.db.Exec(<span class="hljs-string">`...`</span>)
+    <span class="hljs-keyword">return</span> err
+}
+
+<span class="hljs-comment">// 3. Update switch in Apply()</span>
+<span class="hljs-keyword">case</span> <span class="hljs-string">&quot;my.new&quot;</span>:
+    <span class="hljs-keyword">return</span> p.applyMyNew(event)</code></pre>
+<h3>Modifying Database Schema</h3>
+<ol>
+<li>Update table definitions in <code>internal/schema/schema.go</code></li>
+<li>Increment <code>CurrentVersion</code> constant (currently v24)</li>
+<li>Add migration logic in the <code>Migrate()</code> function</li>
+<li>Write tests for the new schema</li>
+<li>Update <code>docs/architecture.md</code></li>
+</ol>
+<h3>Testing with Temporary Databases</h3>
+<pre><code class="language-go hljs"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">TestMyFeature</span><span class="hljs-params">(t *testing.T)</span></span> {
+    <span class="hljs-comment">// Create temp database</span>
+    tmpDir := t.TempDir()
+    dbPath := filepath.Join(tmpDir, <span class="hljs-string">&quot;test.db&quot;</span>)
+
+    db, _ := schema.OpenDB(dbPath)
+    <span class="hljs-keyword">defer</span> db.Close()
+
+    schema.InitDB(db)
+
+    <span class="hljs-comment">// Test your feature</span>
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+<h3>Adding a New RPC Method</h3>
+<ol>
+<li>Create handler file in <code>internal/daemon/rpc/</code>:</li>
+</ol>
+<pre><code class="language-go hljs"><span class="hljs-comment">// internal/daemon/rpc/mymethod.go</span>
+<span class="hljs-keyword">package</span> rpc
+
+<span class="hljs-keyword">import</span> (
+    <span class="hljs-string">&quot;context&quot;</span>
+    <span class="hljs-string">&quot;encoding/json&quot;</span>
+)
+
+<span class="hljs-keyword">type</span> MyMethodHandler <span class="hljs-keyword">struct</span> {
+    <span class="hljs-comment">// dependencies</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">NewMyMethodHandler</span><span class="hljs-params">(deps...)</span></span> *MyMethodHandler {
+    <span class="hljs-keyword">return</span> &amp;MyMethodHandler{...}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *MyMethodHandler)</span></span> Handle(ctx context.Context, params json.RawMessage) (any, <span class="hljs-type">error</span>) {
+    <span class="hljs-comment">// Parse params</span>
+    <span class="hljs-keyword">var</span> args MyMethodArgs
+    <span class="hljs-keyword">if</span> err := json.Unmarshal(params, &amp;args); err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, fmt.Errorf(<span class="hljs-string">&quot;invalid params: %w&quot;</span>, err)
+    }
+
+    <span class="hljs-comment">// Implementation</span>
+    result := MyMethodResponse{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">return</span> result, <span class="hljs-literal">nil</span>
+}</code></pre>
+<ol>
+<li><p>Add tests in <code>internal/daemon/rpc/mymethod_test.go</code></p>
+</li>
+<li><p>Register in daemon startup (in <code>cmd/thrum/main.go</code>):</p>
+</li>
+</ol>
+<pre><code class="language-go hljs">myMethodHandler := rpc.NewMyMethodHandler()
+server.RegisterHandler(<span class="hljs-string">&quot;mymethod&quot;</span>, myMethodHandler.Handle)</code></pre>
+<ol>
+<li>Update documentation in <code>docs/rpc-api.md</code></li>
+</ol>
+<h2>Environment Variables</h2>
+<p>Configuration is resolved in priority order:</p>
+<ol>
+<li><code>THRUM_NAME</code> env var to select which identity file (highest priority)</li>
+<li>Environment variables: <code>THRUM_ROLE</code>, <code>THRUM_MODULE</code>, <code>THRUM_DISPLAY</code></li>
+<li>CLI flags (<code>--role</code>, <code>--module</code>, <code>--name</code>)</li>
+<li>Identity file in <code>.thrum/identities/{name}.json</code></li>
+<li>Error if required fields are missing</li>
+</ol>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Select a named agent identity</span>
+<span class="hljs-built_in">export</span> THRUM_NAME=furiosa
+
+<span class="hljs-comment"># Or set agent properties directly</span>
+<span class="hljs-built_in">export</span> THRUM_ROLE=implementer
+<span class="hljs-built_in">export</span> THRUM_MODULE=auth
+<span class="hljs-built_in">export</span> THRUM_DISPLAY=<span class="hljs-string">&quot;Auth Agent&quot;</span></code></pre>
+<p>Identity files are stored per-agent at <code>.thrum/identities/{name}.json</code> and
+contain repo ID, agent config, worktree name, and metadata.</p>
+<h2>Storage Layout</h2>
+<p>Thrum uses a split storage model:</p>
+<pre><code class="language-go hljs">.git/thrum-sync/a-sync/              # Sync worktree (a-sync orphan branch)
+├── events.jsonl                     # Agent lifecycle events (register, session, update)
+└── messages/                        # Per-agent message files (sharded)
+    ├── furiosa.jsonl                # Messages authored by agent <span class="hljs-string">&quot;furiosa&quot;</span>
+    └── coordinator.jsonl            # Messages authored by agent <span class="hljs-string">&quot;coordinator&quot;</span>
+
+.thrum/                              # Runtime directory (gitignored)
+├── <span class="hljs-keyword">var</span>/
+│   ├── messages.db                  # SQLite projection cache (rebuilt from JSONL)
+│   ├── thrum.sock                   # Unix socket <span class="hljs-keyword">for</span> daemon RPC
+│   ├── thrum.pid                    # JSON PID file with repo-affinity metadata
+│   └── ws.port                      # WebSocket port file (<span class="hljs-keyword">default</span> <span class="hljs-number">9999</span>)
+├── identities/                      # Per-agent identity files
+│   └── {name}.json                  # Agent identity (repo_id, role, module, etc.)
+└── redirect                         # Points to main worktree .thrum/ (feature worktrees only)</code></pre>
+<h3>Inspecting JSONL Files</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># View all events (agent lifecycle)</span>
+<span class="hljs-built_in">cat</span> .git/thrum-sync/a-sync/events.jsonl | jq .
+
+<span class="hljs-comment"># View messages for a specific agent</span>
+<span class="hljs-built_in">cat</span> .git/thrum-sync/a-sync/messages/furiosa.jsonl | jq .
+
+<span class="hljs-comment"># Filter by event type</span>
+<span class="hljs-built_in">cat</span> .git/thrum-sync/a-sync/events.jsonl | jq <span class="hljs-string">&#x27;select(.type == &quot;agent.register&quot;)&#x27;</span>
+
+<span class="hljs-comment"># Count events</span>
+<span class="hljs-built_in">wc</span> -l .git/thrum-sync/a-sync/events.jsonl</code></pre>
+<h3>Inspecting the SQLite Database</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Open database</span>
+sqlite3 .thrum/var/messages.db
+
+<span class="hljs-comment"># List tables</span>
+.tables
+
+<span class="hljs-comment"># Query messages</span>
+SELECT * FROM messages LIMIT 10;
+
+<span class="hljs-comment"># Check schema version</span>
+SELECT * FROM schema_version;</code></pre>
+<h2>Daemon Development</h2>
+<h3>Daemon Architecture</h3>
+<p>The daemon runs as a background service handling client connections via Unix
+socket, with a WebSocket server and embedded SPA all on a single port (default
+9999).</p>
+<p><strong>Key components:</strong></p>
+<ul>
+<li><strong>Server</strong> (<code>internal/daemon/server.go</code>): JSON-RPC 2.0 over Unix socket</li>
+<li><strong>Lifecycle</strong> (<code>internal/daemon/lifecycle.go</code>): Signal handling, defer cleanup
+safety net, flock-based process detection</li>
+<li><strong>PID file</strong> (<code>internal/daemon/pidfile.go</code>): JSON format with <code>PIDInfo</code> struct
+(PID, repo path, socket path, started at). Backward-compatible reader falls
+back to plain integer format. All <code>agent_pid</code> writes into identity files must
+go through <code>internal/identity/guard.WritePID</code>. All legacy direct-write
+callsites have been removed; CI guards against re-introduction.</li>
+<li><strong>File lock</strong> (<code>internal/daemon/flock.go</code>, <code>flock_unix.go</code>): OS-level
+<code>flock()</code> on socket file. Auto-released on process death (even SIGKILL). No-op
+stubs for non-Unix platforms.</li>
+<li><strong>State</strong> (<code>internal/daemon/state/</code>): Manages JSONL writes (sharded per-agent)
+and SQLite projection. <code>NewState(thrumDir, syncDir, repoID)</code> separates runtime
+state from sync data.</li>
+<li><strong>RPC handlers</strong> (<code>internal/daemon/rpc/</code>): Method implementations for agent,
+session, message, thread, health, sync, queue, and user operations</li>
+<li><strong>Queue</strong> (<code>internal/daemon/rpc/queue.go</code>, <code>queue_rpc.go</code>): Command queue
+dispatch for tmux sessions — per-session FIFO, silence-based completion
+detection, <code>@system</code> notifications, restart recovery</li>
+<li><strong>Logging</strong> (<code>internal/daemon/logging.go</code>): Slog-based structured logging with
+lumberjack rotation (10 MB, 4 backups, 28 days, gzip)</li>
+<li><strong>safecmd</strong> (<code>internal/daemon/safecmd/</code>): Git command wrapper with 5s/10s
+timeouts and automatic <code>-c user.name</code> injection for sync worktree commits</li>
+<li><strong>Client</strong> (<code>internal/daemon/client.go</code>): Connection library for CLI-to-daemon
+communication</li>
+<li><strong>WebSocket</strong> (<code>internal/websocket/</code>): Server, connection registry, event
+streaming</li>
+<li><strong>Web</strong> (<code>internal/web/embed.go</code>): Embedded SPA served at <code>/</code> on the same port
+as WebSocket (<code>/ws</code>)</li>
+</ul>
+<p>See <code>docs/daemon.md</code> for detailed architecture.</p>
+<h3>Running the Daemon</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Start daemon (background, auto-creates sync worktree)</span>
+thrum daemon start
+
+<span class="hljs-comment"># Check status (shows PID, repo path, WebSocket port)</span>
+thrum daemon status
+
+<span class="hljs-comment"># Stop daemon</span>
+thrum daemon stop
+
+<span class="hljs-comment"># Auto-start (happens automatically via any CLI command)</span>
+thrum send <span class="hljs-string">&quot;Hello&quot;</span> --to @coordinator</code></pre>
+<h3>Testing Daemon Code</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Run daemon tests</span>
+go <span class="hljs-built_in">test</span> ./internal/daemon/...
+
+<span class="hljs-comment"># With coverage</span>
+go <span class="hljs-built_in">test</span> -cover ./internal/daemon/...
+
+<span class="hljs-comment"># RPC handler tests</span>
+go <span class="hljs-built_in">test</span> ./internal/daemon/rpc/... -v
+
+<span class="hljs-comment"># State tests</span>
+go <span class="hljs-built_in">test</span> ./internal/daemon/state/... -v</code></pre>
+<p>Use the <code>StartTestDaemon()</code> helper in <code>internal/daemon/testutil_test.go</code> for
+integration tests. It gives you automatic <code>t.Cleanup()</code> with force-kill to
+prevent test orphan processes on timeout or panic.</p>
+<h3>Debugging Daemon</h3>
+<p><strong>Check if daemon is running:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Check PID file (JSON format)</span>
+<span class="hljs-built_in">cat</span> .thrum/var/thrum.pid | jq .
+
+<span class="hljs-comment"># Check process</span>
+ps aux | grep thrum
+
+<span class="hljs-comment"># Check socket</span>
+<span class="hljs-built_in">ls</span> -l .thrum/var/thrum.sock</code></pre>
+<p><strong>Test RPC calls manually:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Using netcat</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;health&quot;,&quot;id&quot;:1}&#x27;</span> | nc -U .thrum/var/thrum.sock</code></pre>
+<p><strong>View daemon logs:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># View last 50 lines (default)</span>
+thrum daemon logs
+
+<span class="hljs-comment"># Stream live</span>
+thrum daemon logs -f
+
+<span class="hljs-comment"># Last hour</span>
+thrum daemon logs --since 1h
+
+<span class="hljs-comment"># Raw file access (for development introspection)</span>
+<span class="hljs-built_in">cat</span> .thrum/var/daemon.log
+
+<span class="hljs-comment"># Check daemon status (shows PID, repo path, WebSocket port)</span>
+thrum daemon status</code></pre>
+<p><strong>Clean restart:</strong></p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Stop daemon</span>
+thrum daemon stop
+
+<span class="hljs-comment"># Remove stale files if needed</span>
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.sock
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.pid
+
+<span class="hljs-comment"># Restart</span>
+thrum daemon start</code></pre>
+<h3>Common Daemon Issues</h3>
+<p><strong>Socket path too long:</strong></p>
+<ul>
+<li>Unix sockets limited to ~104 characters</li>
+<li>Use shorter temp directory paths in tests</li>
+<li>Example: <code>filepath.Join(tmpDir, &quot;d.sock&quot;)</code> not
+<code>filepath.Join(tmpDir, &quot;.thrum&quot;, &quot;var&quot;, &quot;thrum.sock&quot;)</code></li>
+</ul>
+<p><strong>Permission denied:</strong></p>
+<ul>
+<li>Socket should be 0600 (owner only)</li>
+<li>Check <code>.thrum/var/</code> directory permissions</li>
+</ul>
+<p><strong>Bind: address already in use:</strong></p>
+<ul>
+<li>Another daemon already running</li>
+<li>Pre-startup duplicate detection validates no existing daemon serves this repo</li>
+<li>Check PID file and kill process</li>
+<li>Remove stale socket file</li>
+</ul>
+<p><strong>Connection refused:</strong></p>
+<ul>
+<li>Daemon not running</li>
+<li>Check PID file exists</li>
+<li>Verify socket file exists</li>
+</ul>
+<h2>MCP Server Development</h2>
+<p>The MCP server (<code>thrum mcp serve</code>) gives Claude Code native MCP tools agents
+instead of shelling out to the CLI. It uses stdio transport (JSON-RPC over
+stdin/stdout).</p>
+<p><strong>Key files:</strong></p>
+<ul>
+<li><code>internal/mcp/server.go</code>: Server skeleton and tool registration</li>
+<li><code>internal/mcp/tools.go</code>: Tool handler implementations</li>
+<li><code>internal/mcp/types.go</code>: Request/response type definitions</li>
+<li><code>internal/mcp/waiter.go</code>: polling-based blocking message waiter (500ms over
+the Unix socket)</li>
+<li><code>cmd/thrum/mcp.go</code>: <code>thrum mcp serve</code> Cobra command</li>
+</ul>
+<p><strong>MCP Tools (5 total: 4 active + 1 deprecated):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>send_message</code></td>
+<td>Send a message to another agent via @role addressing</td>
+</tr>
+<tr>
+<td><code>check_messages</code></td>
+<td>Poll for unread messages mentioning this agent</td>
+</tr>
+<tr>
+<td><code>wait_for_message</code></td>
+<td>Block until a message arrives (WebSocket push) or timeout</td>
+</tr>
+<tr>
+<td><code>list_agents</code></td>
+<td>List registered agents with active/offline status</td>
+</tr>
+<tr>
+<td><code>broadcast_message</code></td>
+<td><em>(Deprecated)</em> Broadcast to all agents — use <code>send_message(to=&quot;@everyone&quot;)</code> instead</td>
+</tr>
+</tbody></table>
+<p><strong>Architecture:</strong></p>
+<ul>
+<li>Per-call <code>cli.Client</code> creation (thread-safe; Unix socket connections are
+cheap)</li>
+<li>WebSocket waiter with atomic incrementing JSON-RPC IDs</li>
+<li>Identity resolved at startup from <code>.thrum/identities/{name}.json</code></li>
+<li><code>THRUM_NAME</code> env var or <code>--agent-id</code> flag for multi-agent worktrees</li>
+</ul>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Start MCP server</span>
+thrum mcp serve
+
+<span class="hljs-comment"># Override agent identity</span>
+thrum mcp serve --agent-id furiosa</code></pre>
+<h2>Sync Engine</h2>
+<p>The sync engine runs in the daemon, performing fetch/merge/push every 60 seconds
+(configurable via <code>--sync-interval</code>).</p>
+<p><strong>Key files:</strong></p>
+<ul>
+<li><code>internal/sync/loop.go</code>: <code>SyncLoop</code> with periodic and manual sync triggers</li>
+<li><code>internal/sync/merge.go</code>: JSONL merge with deduplication (ULID event_id)</li>
+<li><code>internal/sync/push.go</code>: Git push to remote</li>
+<li><code>internal/sync/branch.go</code>: Safe orphan branch creation via <code>git commit-tree</code> +
+<code>git update-ref</code>, sync worktree with sparse checkout, 4-level health checks</li>
+<li><code>internal/sync/dedup.go</code>: Event deduplication by event_id</li>
+</ul>
+<p><strong>Sync worktree location:</strong> <code>.git/thrum-sync/a-sync/</code> (uses <code>git-common-dir</code> for
+nested worktree support).</p>
+<p><strong>Sparse checkout patterns:</strong> <code>/events.jsonl</code>, <code>/messages/</code>, <code>/messages.jsonl</code>
+(migration compat).</p>
+<h2>Worktree Setup</h2>
+<p>Thrum supports multiple git worktrees sharing a single daemon and data store via
+the <code>.thrum/redirect</code> mechanism. Feature worktrees point to the main worktree&#39;s
+<code>.thrum/</code> directory so all worktrees share one daemon, one SQLite database, and
+one set of JSONL files.</p>
+<h3>Setting Up a Worktree</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Option 1: Use the thrum worktree setup command (creates worktree + redirect + registration)</span>
+thrum worktree setup &lt;name&gt;
+
+<span class="hljs-comment"># Option 2: Use the setup script</span>
+./scripts/setup-worktree-thrum.sh /path/to/worktree
+
+<span class="hljs-comment"># Option 3: Manual setup</span>
+<span class="hljs-built_in">mkdir</span> -p /path/to/worktree/.thrum/identities
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;/path/to/main/repo/.thrum&quot;</span> &gt; /path/to/worktree/.thrum/redirect</code></pre>
+<h3>Beads Issue Tracking for Worktrees</h3>
+<p>All worktrees should share the same beads issue database:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Use the setup script</span>
+./scripts/setup-worktree-beads.sh /path/to/worktree
+
+<span class="hljs-comment"># Or manual setup</span>
+<span class="hljs-built_in">mkdir</span> -p /path/to/worktree/.beads
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;/path/to/main/repo/.beads&quot;</span> &gt; /path/to/worktree/.beads/redirect
+
+<span class="hljs-comment"># Verify</span>
+<span class="hljs-built_in">cd</span> /path/to/worktree &amp;&amp; bd <span class="hljs-built_in">where</span></code></pre>
+<h2>Testing Best Practices</h2>
+<h3>1. Use Table-Driven Tests</h3>
+<pre><code class="language-go hljs">tests := []<span class="hljs-keyword">struct</span> {
+    name <span class="hljs-type">string</span>
+    input <span class="hljs-type">string</span>
+    want <span class="hljs-type">string</span>
+}{
+    {<span class="hljs-string">&quot;case 1&quot;</span>, <span class="hljs-string">&quot;input1&quot;</span>, <span class="hljs-string">&quot;expected1&quot;</span>},
+    {<span class="hljs-string">&quot;case 2&quot;</span>, <span class="hljs-string">&quot;input2&quot;</span>, <span class="hljs-string">&quot;expected2&quot;</span>},
+}
+
+<span class="hljs-keyword">for</span> _, tt := <span class="hljs-keyword">range</span> tests {
+    t.Run(tt.name, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(t *testing.T)</span></span> {
+        got := MyFunction(tt.input)
+        <span class="hljs-keyword">if</span> got != tt.want {
+            t.Errorf(<span class="hljs-string">&quot;got %v, want %v&quot;</span>, got, tt.want)
+        }
+    })
+}</code></pre>
+<h3>2. Clean Up Resources</h3>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Use t.TempDir() for automatic cleanup</span>
+tmpDir := t.TempDir()
+
+<span class="hljs-comment">// Or defer cleanup</span>
+db, _ := schema.OpenDB(dbPath)
+<span class="hljs-keyword">defer</span> db.Close()</code></pre>
+<h3>3. Test Error Cases</h3>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Test both happy path and error cases</span>
+_, err := MyFunction(invalidInput)
+<span class="hljs-keyword">if</span> err == <span class="hljs-literal">nil</span> {
+    t.Error(<span class="hljs-string">&quot;expected error, got nil&quot;</span>)
+}</code></pre>
+<h3>4. Use StartTestDaemon for Integration Tests</h3>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Automatically cleans up on test completion (even on panic/timeout)</span>
+daemon := StartTestDaemon(t, tmpDir)
+<span class="hljs-keyword">defer</span> daemon.Stop()</code></pre>
+<h2>Code Style</h2>
+<ul>
+<li><strong>Formatting</strong>: Use <code>go fmt</code> (or <code>gofmt -s</code>)</li>
+<li><strong>Imports</strong>: Group stdlib, external, internal</li>
+<li><strong>Comments</strong>: Document exported functions and types</li>
+<li><strong>Error messages</strong>: Lowercase, no punctuation, wrap with <code>fmt.Errorf</code></li>
+<li><strong>Variable names</strong>: Short, descriptive (e.g., <code>db</code>, <code>cfg</code>, <code>msg</code>)</li>
+</ul>
+<h2>Git Workflow</h2>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Create feature branch</span>
+git checkout -b feature/my-feature
+
+<span class="hljs-comment"># Make changes and test</span>
+go <span class="hljs-built_in">test</span> ./...
+
+<span class="hljs-comment"># Commit</span>
+git add .
+git commit -m <span class="hljs-string">&quot;Add my feature&quot;</span>
+
+<span class="hljs-comment"># Push</span>
+git push origin feature/my-feature
+
+<span class="hljs-comment"># Create PR</span>
+gh <span class="hljs-built_in">pr</span> create</code></pre>
+<h2>Troubleshooting</h2>
+<h3>&quot;no such table&quot; error</h3>
+<p>The SQLite projection database is a rebuild-able cache. Delete it and restart
+the daemon to rebuild from JSONL:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">rm</span> .thrum/var/messages.db
+thrum daemon stop
+thrum daemon start</code></pre>
+<h3>&quot;cannot open file&quot; error</h3>
+<p>Check file permissions and directory existence:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">ls</span> -la .thrum/
+<span class="hljs-built_in">ls</span> -la .thrum/var/</code></pre>
+<h3>Tests fail with &quot;database is locked&quot;</h3>
+<p>Close any open SQLite connections or delete WAL files:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">rm</span> .thrum/var/*.db-wal
+<span class="hljs-built_in">rm</span> .thrum/var/*.db-shm</code></pre>
+<h3>Daemon won&#39;t start (duplicate detection)</h3>
+<p>The daemon validates no existing instance serves the same repository before
+starting. Check for a stale PID file:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">cat</span> .thrum/var/thrum.pid | jq .
+<span class="hljs-comment"># If the process is dead, remove the PID file</span>
+<span class="hljs-built_in">rm</span> .thrum/var/thrum.pid
+thrum daemon start</code></pre>
+<h3><code>go build</code> fails with embed error</h3>
+<p>If the UI has not been built, <code>internal/web/dist/</code> needs at least a <code>.gitkeep</code>
+file:</p>
+<pre><code class="language-bash hljs"><span class="hljs-built_in">touch</span> internal/web/dist/.gitkeep</code></pre>
+<p>Or build the UI first: <code>make build-ui</code></p>
+<h2>Key Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://github.com/spf13/cobra">cobra</a></td>
+<td>CLI command framework</td>
+</tr>
+<tr>
+<td><a href="https://pkg.go.dev/modernc.org/sqlite">modernc.org/sqlite</a></td>
+<td>Pure Go SQLite driver</td>
+</tr>
+<tr>
+<td><a href="https://github.com/oklog/ulid">oklog/ulid</a></td>
+<td>ULID generation for event IDs</td>
+</tr>
+<tr>
+<td><a href="https://github.com/gorilla/websocket">gorilla/websocket</a></td>
+<td>WebSocket server</td>
+</tr>
+<tr>
+<td><a href="https://github.com/modelcontextprotocol/go-sdk">go-sdk (MCP)</a></td>
+<td>MCP server SDK</td>
+</tr>
+</tbody></table>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="architecture.html">Architecture</a> — the full system design before diving into
+specific packages</li>
+<li><a href="daemon.html">Daemon Architecture</a> — the daemon&#39;s component layout for adding
+new RPC handlers or sync features</li>
+<li><a href="rpc-api.html">RPC API Reference</a> — all existing RPC methods as a reference
+point when adding new ones</li>
+<li><a href="security-cicd.html">Security &amp; CI/CD</a> — CI workflows, branch protection, and
+how documentation is deployed</li>
+</ul>
+<h2>Resources</h2>
+<ul>
+<li><strong>Architecture</strong>: <code>docs/architecture.md</code></li>
+<li><strong>Daemon Architecture</strong>: <code>docs/daemon.md</code></li>
+<li><strong>RPC API Reference</strong>: <code>docs/rpc-api.md</code></li>
+<li><strong>Sync Design</strong>: <code>docs/sync.md</code></li>
+<li><strong>Quickstart Guide</strong>: <code>docs/quickstart.md</code></li>
+<li><strong>CLI Reference</strong>: <code>docs/cli.md</code></li>
+<li><strong>Identity System</strong>: <code>docs/identity.md</code></li>
+<li><strong>Workflow Templates</strong>: <code>docs/workflow-templates.md</code> (structured feature
+development with AI agents)</li>
+<li><strong>Agent Reference</strong>: <code>llms.txt</code> (concise) and <code>llms-full.txt</code> (detailed)</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

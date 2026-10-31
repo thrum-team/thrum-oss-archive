@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>CLI Hints — Thrum</title>
+  <meta name="description" content="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="CLI Hints — Thrum">
+  <meta property="og:description" content="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">
+  <meta property="og:url" content="https://thrum.team/docs/cli-hints.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CLI Hints — Thrum">
+  <meta name="twitter:description" content="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/cli-hints.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"CLI Hints","description":"Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.","url":"https://thrum.team/docs/cli-hints.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link active" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>CLI Hints</h2>
+<h3>Overview</h3>
+<p>When you run a Thrum command, you don&#39;t always know what&#39;s about to happen — or
+what you should do next. This is true for humans and for agents running Thrum
+commands inside scripts.</p>
+<p>CLI hints fill that gap. There are two kinds:</p>
+<ul>
+<li><strong>Pre-action hints</strong> fire before the command runs. A <code>warn</code> hint flags a risky
+condition — maybe the session name already exists, or the directory you&#39;re
+pointing at isn&#39;t a git worktree. If the condition is bad enough, the command
+aborts before touching anything.</li>
+<li><strong>Post-action hints</strong> fire after success. An <code>info</code> hint suggests the natural
+next step — usually the exact command you&#39;d want to run.</li>
+</ul>
+<p>By default, hints appear as a text trailer on stderr (Shape B). If you&#39;re
+running with <code>--json</code>, they move into the JSON body (Shape C). Either way, the
+success output on stdout stays clean so pipes work.</p>
+<p>Phase B (v0.9.0) wires hints to three commands: <code>thrum send</code>,
+<code>thrum tmux create</code>, and <code>thrum init</code>. Those commands have 8 stable hint codes.
+All other commands still use the legacy <code>LegacyHint()</code> flat-map (random tips,
+not codes), until they&#39;re retrofitted in a later phase.</p>
+<hr>
+<h3>Suppression</h3>
+<p>Three ways to silence hints:</p>
+<ul>
+<li><code>--quiet</code> — suppresses hints <strong>and</strong> the human-readable success line. Use when
+you want silent success/failure with no extra output.</li>
+<li><code>--json</code> — doesn&#39;t suppress hints. It moves them into the <code>hints</code> array in the
+JSON output instead. Tooling reads them there.</li>
+<li><code>THRUM_NO_HINTS=1</code> — suppresses hints entirely in both text and JSON mode.
+Truthy: any non-empty value except <code>&quot;0&quot;</code> or <code>&quot;false&quot;</code> (case-insensitive).</li>
+</ul>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Suppress hints for this one call</span>
+THRUM_NO_HINTS=1 thrum tmux create --session impl --runtime claude --cwd /repos/impl
+
+<span class="hljs-comment"># Or export it for the whole shell session</span>
+<span class="hljs-built_in">export</span> THRUM_NO_HINTS=1</code></pre>
+<p><code>--quiet</code> and <code>--json</code> are per-call flags. <code>THRUM_NO_HINTS</code> is an environment
+variable — useful in CI, scripts, or agent sessions where you never want hint
+noise.</p>
+<hr>
+<h3>Shape B: text trailer (default)</h3>
+<p>When you run a command without <code>--json</code>, hints render as a stderr trailer after
+the success line. The success line itself goes to stdout.</p>
+<pre><code class="language-text hljs">$ thrum tmux create --session impl_demo --runtime claude --cwd /tmp/foo
+
+✓ session created: impl_demo
+
+  warn [tmux.create.not-a-worktree]: --cwd &#x27;/tmp/foo&#x27; is not a git worktree
+    fix:  git worktree add /tmp/foo &lt;branch&gt;
+    or:   thrum worktree create &lt;name&gt;    (creates + wires a fresh worktree)
+
+  info [tmux.create.next-launch]: session created — agent is NOT running yet
+    start:  thrum tmux launch impl_demo
+    prime:  thrum tmux send impl_demo &#x27;/thrum:prime&#x27;    (after launch, for non-claude runtimes)</code></pre>
+<p>A few things to notice:</p>
+<ul>
+<li>The success line (<code>✓ session created: impl_demo</code>) goes to stdout. The hints go
+to stderr. Piping the output to <code>jq</code> or another tool won&#39;t get contaminated.</li>
+<li><code>warn</code> hints appear before <code>info</code> hints, regardless of the order they fired.</li>
+<li>Each hint can have option rows below it — suggested commands with short
+labels. Label widths align across rows within a hint.</li>
+<li>A leading blank line separates hints from the command&#39;s stdout.</li>
+</ul>
+<p>When a <code>warn</code> hint blocks execution, the command exits non-zero and only the
+blocking hints appear. The success line never prints because nothing succeeded.</p>
+<hr>
+<h3>Shape C: JSON output</h3>
+<p>Pass <code>--json</code> to get machine-readable output. Hints move into a <code>hints</code> array
+inside the JSON body.</p>
+<pre><code class="language-bash hljs">thrum tmux create --session impl_demo --runtime claude --cwd /tmp/foo --json</code></pre>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ok&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;session&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;impl_demo&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;runtime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;claude&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;hints&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tmux.create.not-a-worktree&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;warn&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;--cwd &#x27;/tmp/foo&#x27; is not a git worktree&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;options&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;label&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;fix&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;cmd&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;git worktree add /tmp/foo &lt;branch&gt;&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;label&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;or&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;cmd&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;thrum worktree create &lt;name&gt;&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;note&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;creates + wires a fresh worktree&quot;</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tmux.create.next-launch&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;info&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;session created — agent is NOT running yet&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;options&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;label&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;start&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;cmd&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;thrum tmux launch impl_demo&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;label&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;prime&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;cmd&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;thrum tmux send impl_demo &#x27;/thrum:prime&#x27;&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;note&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;after launch, for non-claude runtimes&quot;</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p>The <code>hints</code> key is omitted entirely when there are no hints, so you don&#39;t need
+to handle <code>&quot;hints&quot;: null</code>. If <code>THRUM_NO_HINTS</code> is set, the key is also omitted
+even in JSON mode.</p>
+<p>Each hint object has:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code</code></td>
+<td>string</td>
+<td>Stable dotted slug (see catalog below)</td>
+</tr>
+<tr>
+<td><code>severity</code></td>
+<td>string</td>
+<td><code>&quot;warn&quot;</code> or <code>&quot;info&quot;</code></td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>Human-readable description</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td>array</td>
+<td>Zero or more suggested next steps</td>
+</tr>
+</tbody></table>
+<p>Each option object has <code>label</code> (short identifier), <code>cmd</code> (exact command string),
+and optionally <code>note</code> (parenthetical caveat).</p>
+<hr>
+<h3>Hint code catalog (Phase B — pilot commands)</h3>
+<p>All 8 codes are stable. They won&#39;t be renamed once published; new codes get
+added to the catalog in later phases.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Severity</th>
+<th>Trigger</th>
+<th>AllowForce</th>
+<th>Commands</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tmux.create.not-a-worktree</code></td>
+<td>warn</td>
+<td><code>--cwd</code> path is not a git worktree</td>
+<td>false</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>tmux.create.session-exists</code></td>
+<td>warn</td>
+<td>tmux session name already running</td>
+<td>true</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>tmux.create.identity-exists-alive</code></td>
+<td>warn</td>
+<td>worktree has a live registered agent</td>
+<td>false</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>tmux.create.identity-exists-stale</code></td>
+<td>warn</td>
+<td>worktree has a stale identity file (no live session)</td>
+<td>true</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>tmux.create.next-launch</code></td>
+<td>info</td>
+<td>post-success: session created, agent not running yet</td>
+<td>n/a</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>tmux.create.identity-replaced</code></td>
+<td>info</td>
+<td>post-success: <code>--force</code> replaced a stale identity</td>
+<td>n/a</td>
+<td><code>tmux create</code></td>
+</tr>
+<tr>
+<td><code>send.recipient-stale</code></td>
+<td>info</td>
+<td>recipient&#39;s last activity exceeds 30 minutes</td>
+<td>n/a</td>
+<td><code>send</code></td>
+</tr>
+<tr>
+<td><code>init.next-quickstart</code></td>
+<td>info</td>
+<td>post-success: no agent identity registered yet</td>
+<td>n/a</td>
+<td><code>init</code></td>
+</tr>
+</tbody></table>
+<p>Severity column uses <code>warn</code> and <code>info</code> as they appear in the actual output.
+<code>n/a</code> in AllowForce means the hint is informational and never blocks execution.</p>
+<hr>
+<h3>AllowForce semantics</h3>
+<p><code>AllowForce</code> only matters for <code>warn</code> hints. It controls whether <code>--force</code> can
+override the block.</p>
+<p><strong><code>AllowForce=true</code> (recoverable):</strong> The condition is risky but the operator can
+knowingly proceed. Without <code>--force</code>, the command aborts and prints the hint.
+With <code>--force</code>, the hint is logged but execution continues.</p>
+<p>Examples: a session name that already exists (<code>tmux.create.session-exists</code>), or
+a stale identity file in the worktree (<code>tmux.create.identity-exists-stale</code>).
+Both cases have a clear recovery path where overwriting the existing state is
+the right call.</p>
+<p><strong><code>AllowForce=false</code> (hard refusal):</strong> Even <code>--force</code> won&#39;t help. The operation
+can&#39;t be safely completed because proceeding would cause worse problems than
+aborting.</p>
+<p>Examples: <code>--cwd</code> isn&#39;t a git worktree (<code>tmux.create.not-a-worktree</code>) — there&#39;s
+nothing useful to do with a non-worktree path. A live agent is registered in the
+target worktree (<code>tmux.create.identity-exists-alive</code>) — overwriting a live
+session&#39;s identity file would orphan a running agent. In both cases, the right
+answer is to fix the input, not to force through.</p>
+<p><strong><code>info</code> hints:</strong> Never block, regardless of <code>AllowForce</code>. They&#39;re post-action
+observations. The field isn&#39;t applicable to them.</p>
+<hr>
+<h3>Pre-action blocking</h3>
+<p>Here&#39;s the execution sequence for a command with wired hint sources:</p>
+<ol>
+<li>Collect pre-action hints (<code>Post=false</code>).</li>
+<li>Call <code>HandlePreAction</code>. If any <code>warn</code> hint blocks (either <code>AllowForce=false</code>,
+or <code>AllowForce=true</code> and <code>--force</code> wasn&#39;t passed), execution stops. The
+blocking hints render to stderr and the CLI exits non-zero. The underlying
+RPC is never called.</li>
+<li>If no hints block, the command runs.</li>
+<li>On success, collect post-action hints (<code>Post=true</code>) and emit them.</li>
+</ol>
+<p>When a hard-refusal hint fires (<code>AllowForce=false</code>), the abort message is:</p>
+<pre><code class="language-text hljs">aborted — see hint above for next steps</code></pre>
+<p>When a recoverable hint fires without <code>--force</code>:</p>
+<pre><code class="language-text hljs">aborted (pass --force to override recoverable conditions)</code></pre>
+<p>The distinction matters if you&#39;re parsing exit messages in a script. Both exit
+non-zero.</p>
+<hr>
+<h3>Phase roadmap</h3>
+<p><strong>Phase B (shipped in v0.9.0):</strong> <code>thrum send</code>, <code>thrum tmux create</code>,
+<code>thrum init</code>. Eight hint codes. Stable dotted slugs you can match in scripts and
+tooling.</p>
+<p><strong>Phases C–E (planned):</strong></p>
+<ul>
+<li>Phase C: retrofit the hint pipeline to remaining commands (currently on the
+legacy <code>LegacyHint()</code> flat-map).</li>
+<li>Phase D: daemon-side anti-pattern detection — hints that fire based on runtime
+state the daemon observes, not just command inputs.</li>
+<li>Phase E: docs and <code>llms.txt</code> updates to cover the expanded catalog.</li>
+</ul>
+<p>The hint code namespace is append-only. Codes published in Phase B won&#39;t change.</p>
+<hr>
+<h3>See Also</h3>
+<ul>
+<li><a href="configuration.html">Configuration</a> — <code>THRUM_NO_HINTS</code> env var and full
+environment variable reference</li>
+<li><a href="cli.html">CLI Reference</a> — full command reference for <code>thrum send</code>,
+<code>thrum tmux create</code>, and <code>thrum init</code></li>
+<li><a href="tmux-sessions.html">Tmux Sessions</a> — worktree-anchored session workflow that
+the <code>tmux.create.*</code> hints assume</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

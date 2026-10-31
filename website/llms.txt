@@ -1,0 +1,1068 @@
+# Thrum v0.10.6
+
+> Git-backed messaging for AI agent coordination. Real-time. Cross-machine. Cross-repo. Persistent.
+
+## What is Thrum
+
+Thrum is a messaging and coordination system for AI agents. Messages are stored
+in append-only JSONL logs (sharded by agent) on a dedicated `a-sync` orphan
+branch, accessed via a `.git/thrum-sync/a-sync` git worktree. A SQLite projection provides
+fast queries. A background daemon provides JSON-RPC over Unix socket and
+WebSocket, with automatic Git sync every 60 seconds. No branch switching is
+needed -- all sync operations happen within the worktree.
+
+New in v0.7.0: single-agent mode (default for new repos), cross-repo peer
+communication via Tailscale, PID-based identity resolution, and a three-tier
+context model for session persistence across compaction.
+
+New in v0.7.1: tmux-managed sessions replace background listeners with instant
+daemon-driven nudge delivery. Session restart extracts conversation history from
+JSONL transcripts and reloads it in new sessions.
+
+New in v0.8.0:
+- Tmux command queue (`thrum tmux queue/queue-status/cancel`) — daemon-managed
+  FIFO dispatch with `@system` completion notifications and restart recovery.
+- Worktree management (`thrum worktree create/teardown/list`) — git worktrees
+  with automatic thrum and beads redirect wiring.
+- Orchestrator role — plan execution with review gates, agent lifecycle, and
+  worktree management. Includes `thrum:orchestrate` skill.
+- Multi-runtime tmux — `ClaudePID` renamed to `AgentPID` (schema v17).
+  `PreferredRuntime` field + `--runtime` flag on `thrum quickstart`. OpenCode,
+  Codex, and other runtimes launch via tmux alongside Claude.
+- Agent status (`thrum agent set-status working|idle|blocked`) — auto-nudge
+  detection when working status mismatches silent pane.
+- Daemon logging — slog + lumberjack rotation. `thrum daemon logs` command.
+  Configurable `daemon.log_level` in config.json.
+- Graceful restart flow — `thrum tmux restart` (without `--force`) asks the
+  agent to save its own snapshot before killing, falling back to JSONL
+  extraction on timeout.
+
+New in v0.8.1: CI fix for npm publish packaging (no user-facing changes).
+
+New in v0.8.2:
+- Cursor plugin — full Cursor integration with rules, hooks, skills, commands,
+  and MCP config. Deployed via `cursor-plugin/local-install.sh` into `.cursor/`.
+- Test infrastructure scripts (`scripts/test-setup.sh`, `scripts/test-teardown.sh`)
+  for automated agent test environments.
+- Worktree create quickstart fix — `thrum worktree create` with quickstart
+  flags now creates a real tmux session (kept, not destroyed) and runs
+  quickstart inside it via SendKeys instead of the old temp-session + queue
+  RPC path that rejected agentless sessions. Daemon-side retry at 5s if shell
+  init swallowed the command, CLI-side pane capture at 12s if the identity
+  file still hasn't appeared. Repo-root guard: errors out if the resolved
+  worktree path or `worktrees.base_path` is the repo root itself.
+- Two-step create + launch — `thrum worktree create` and `thrum tmux create`
+  now print explicit next-step hints: "Agent is NOT running yet. Start it
+  with: thrum tmux launch <name>". The agent identity is registered, but the
+  runtime is not started until `tmux launch` runs.
+- `thrum tmux launch` hard-errors on missing identity — sessions created
+  with `--no-agent` (or worktrees with no identity file) cannot be launched.
+  Returns an error telling you to run `thrum quickstart` first. Launching a
+  runtime without an identity is a no-op.
+- Next-step guard messages — `agent register`, `worktree create` (no agent),
+  `purge --confirm`, `daemon stop`, and `tmux restart` now print explicit
+  hints about what to do next or what just broke. `daemon stop` warns that
+  messaging commands will fail until the daemon is restarted. `tmux restart`
+  warns when the snapshot has 0 lines (no conversation history).
+- Purge auto-re-register message corrected — agents auto-re-register via
+  `RefreshLocalIdentity` wired into `getClient()`, so no manual action is
+  needed after `thrum purge`.
+
+New in v0.9.0:
+- Safe agent registration — `thrum tmux create` now requires quickstart flags
+  (`--name`, `--role`, `--module`) or `--no-agent`; runs quickstart inside the
+  pane automatically. New alias: `thrum tmux quickstart`.
+  `thrum worktree create` gains optional quickstart flags; when all three are
+  provided it creates a real tmux session and runs quickstart inside it.
+  New alias: `thrum worktree setup`. Single-identity-per-worktree enforcement.
+- Monitor Jobs — `thrum monitor start/list/show/stop/logs/restart`. Spawn a
+  child process, watch stdout+stderr with a regex, and emit matches as
+  synthetic Thrum messages to a target agent. (`thrum monitor add` is an alias
+  for `thrum monitor start`.) Leading-edge debounce (default 60s).
+  Local-only, max 100 monitors.
+- Permission prompt detection — daemon-side silence-hash poller (~20s detection
+  latency). Polls every 10s; stable on 2 identical hashes. Permission nudges
+  auto-forward to Telegram when bridge is configured and bridge user is a
+  `permission_supervisors` entry. Reply via threaded reply (y/yes/approve/a or
+  n/no/deny/d) OR fresh DM (y/n/yes/no/allow/deny — note `approve` and `a`
+  don't trigger fresh-DM path).
+- Identity guards — 8 named enforcement checkpoints (cross_worktree, G1a/G1b
+  quickstart guards, non_git_bootstrap, unauthenticated_rpc,
+  daemon_writer_liveness, prime_ownership, dead_pid_auto_reclaim).
+  3 modes: strict / warn / off.
+- Schema v24 (permission_nudges v21, origin_daemon col v22, daemon_identity v23,
+  telegram_msg_map v24).
+- CLI hints (Phase B) — contextual hints wired on `thrum init`, `thrum send`,
+  `thrum tmux create`. 8 stable codes. Shape B = stderr trailer; Shape C = JSON
+  `hints` array. Suppress with --quiet, --json, or THRUM_NO_HINTS=1.
+  Full catalog: docs/cli-hints.md.
+- Peer drift reconciliation — `peer join --type repair` for in-place re-pairing
+  without new peercode. `drift_reconcile_failed` shown as inline hint in peer list.
+- Permission supervisors — configure via `permission_supervisors` config key
+  (array of role/agent/user names; default ["coordinator"]) and `project_name`
+  (owner of @supervisor_<project> pseudo-agent). Detection: daemon-side
+  SessionPoller; pattern match + stability hash scoped to bottom 15 lines of
+  pane capture. Claude deny key is per-shape via DisambiguateClaudeDeny:
+  "3" (3-option Variant A), "2" (2-option Variant B-Bash, option 2 starts with
+  "No"), "Escape" (2-option Variant B-Read / unknown). Snippet truncation is
+  tail-biased (last 5-6 lines) with ANSI strip. Full reference:
+  docs/permission-prompts.md.
+- BREAKING: `peer add --type` and `peer join --type` now MANDATORY.
+
+New in v0.9.1:
+- Peercred resolver error taxonomy (thrum-ndtw) — introspection failures at
+  Step 1 (kernel peer credentials) and Step 2 (gopsutil CWD) no longer wrap
+  `ErrAnonymous`. They return raw errors so `server.go` falls through to the
+  legacy client-asserted identity path (pre-v0.9.0 behavior). Only Step 3
+  (no git root above CWD) and Step 5 (CWD's git root doesn't match any
+  registered worktree) are PROVABLY anonymous — those still wrap
+  `ErrAnonymous` and trigger the allowlist-rejection error
+  `anonymous caller cannot invoke "<method>": cd into a registered agent
+  worktree and retry`.
+  Diagnostic path: slog.Warn fires at both introspection-failure paths with
+  `step=pid failed` (kernel peercred) or `step=cwd failed` (gopsutil). Grep
+  daemon logs for those keys to distinguish "we couldn't classify you" from
+  "you are provably outside every registered worktree".
+  Fixes 2026-04-24 breakage where claude-code Bash subprocesses on macOS hit
+  gopsutil.Cwd races (subprocess exits before introspection completes) and
+  interactive zsh callers hit the same path — both were incorrectly rejected
+  as anonymous despite being legitimate callers.
+- thrum setup claude-md --apply (issue #8) — implemented the
+  documented-but-missing CLI subcommand. External users following the
+  quickstart hit `Error: unknown flag: --apply` because the setupCmd stub
+  only suggested `thrum worktree setup`. The command now installs a
+  Thrum-managed block (wrapped in `<!-- BEGIN THRUM -->...<!-- END THRUM -->`
+  markers) into ./CLAUDE.md. Three forms: bare prints to stdout, --apply
+  creates-or-appends, --apply --force replaces existing block idempotently.
+  Errors with exit 1 if a block exists and --force is not set. Template is
+  static (go:embed) and intentionally minimal (~30-40 lines: what Thrum
+  is, 5 essential commands, docs pointer). Plugin-vs-standalone framing:
+  use this path ONLY when not running the Claude Code Thrum plugin —
+  the plugin already injects messaging instructions, so combining the two
+  duplicates content. The CLAUDE.md block is the alternative for other
+  runtimes (codex, cursor, opencode, kiro) and for Claude Code
+  without the plugin.
+
+New in v0.10.6:
+- Sync re-architecture — cross-machine sync is notify-driven (real-time push)
+  instead of a fixed-interval poll. The old 60-second `sync_interval` poll was
+  removed (legacy `sync_interval` config keys are silently ignored); a periodic
+  safety-net still runs to catch missed notifications (5 minutes by default, 15
+  seconds when Tailscale peers are connected). Messages write to a new
+  `messages-v2/` path. Mixed-cluster note: a v0.10.5 peer can't read messages
+  from an upgraded v0.10.6 peer — upgrade every peer in the mesh together.
+- Schema forward-compatibility — a v0.10.6 binary opens and operates on a
+  database created by a newer-schema build without the one-way migration that
+  used to brick the older binary. DB-open compatibility only; the newer tables
+  are dead-end on v0.10.6 (no consumer code reads them).
+- Cross-host sync-storm fixes — a duplicate `message_id` in relayed history no
+  longer stalls inbound sync (`message.create` apply is idempotent), and the
+  daemon backstop only nudges locally-resident recipients (no more 15-minute
+  wakeups for other hosts' mail, no unbounded spool growth).
+- a-sync exposure guard — the daemon probes `origin` anonymously and refuses to
+  push message history to a publicly readable repo unless
+  `daemon.sync.public_exposure_override` is set to the exact remote.
+- Read-state unification — read truth is unified on `message_deliveries.read_at`
+  with a one-time backfill that clears historically-stuck "phantom unread."
+- Inbox defaults to newest-first — the reply-clustered chronological view is
+  opt-in via `--chronological` / `--oldest`.
+- Shell-safe message bodies — `thrum send`, `reply`, and `message edit` accept
+  `--stdin` / `--body-file <path>` / `-` so bodies with backticks or `$(...)`
+  arrive verbatim.
+- `thrum team` daemon/host filters — `--daemon <id>` and `--host <name>` narrow
+  the roster; `thrum team local` and `thrum team daemons` add per-daemon views.
+
+New in v0.10.5:
+- Daemon-side backstop nudger — daemon polls for stale-unread messages and
+  re-emits delivery nudges, replacing the user-side `thrum-inbox-poll.sh`
+  cron pattern. More reliable (survives runtime restarts) and lower-overhead
+  than a per-agent cron schedule. Existing cron installs continue as no-ops
+  alongside it; cron removal queued for a future release.
+- `thrum inbox --from @agent` filter — scope unread inbox to messages from a
+  single sender. Useful for catching up on one agent's traffic without paging
+  through the rest of the queue.
+- `thrum worktree teardown --delete-branch` flag — tear down a worktree and
+  delete its branch in one step. Previously required a separate `git branch -D`.
+- `thrum prime` first-turn ack instruction — the prime briefing now asks the
+  runtime to emit a short acknowledgment line on receipt, giving the agent a
+  visible scrollback anchor confirming context loaded.
+- Headless `worktree.Create` / `worktree.Destroy` Go API — worktree lifecycle
+  moves to a shared `internal/worktree` package used by both the cobra commands
+  and newer programmatic callers. Behavior-equivalent to the previous
+  cobra-only path; opens the door to ephemeral-worktree flows. No user-visible
+  CLI change.
+- `runtime-init` overwrites stale daemon-managed scripts (thrum-akqv P1) —
+  `scripts/thrum-startup.sh` and `scripts/thrum-check-inbox.sh` are now
+  overwrite-on-init while user-customized configs (`.claude/settings.json`,
+  `AGENTS.md`, `.gemini/instructions.md`, `opencode.json`, etc.) remain
+  preserve-on-init. Fixes silent template drift in long-running worktrees as
+  substrate-side script changes evolved across releases.
+- `thrum prime` ack interpolation strips backticks from identity fields
+  (thrum-x7rb) — prevents literal markdown/shell interpretation leaking into
+  the rendered ack template when an agent name or display field contained `\``.
+- `project-setup` skill follows `.thrum/redirect` when checking
+  `philosophy.md` — previously failed in redirected worktrees because it
+  resolved the worktree-local path directly.
+- Inbox backstop spool envelopes preserved from janitor reaping — the janitor
+  was prematurely deleting backstop-pending envelopes, causing stale-unread
+  messages to disappear from inbox before the backstop nudger could re-deliver.
+- Self-mention semantic fix — messages with an explicit self-mention now route
+  correctly to the author's own inbox; `read_at` is stamped at insert for the
+  self-delivery row so it doesn't show as unread to its own author.
+- URLs migrated from `leonletto.github.io/thrum` to `thrum.team` across
+  README, website content, docs, and SEO references (Phase 6.3). Old URLs
+  still resolve via redirect.
+- `thrum worktree create` / `teardown` rewired through `internal/worktree`.
+  No user-visible behavior change.
+
+New in v0.10.1:
+- Hotfix for v0.10.0 quickstart-redirect regression. `thrum quickstart`
+  from a worktree using `.thrum/redirect` was writing the agent's
+  identity file to `$THRUM_HOME/.thrum/identities/` instead of the
+  caller's worktree, with `worktree` field also set to `$THRUM_HOME`.
+  Latent bug since `299131e434` (Mar 6); surfaced because Epic-D's
+  wizard + worktree-create flow routes through `buildInlineQuickstartCmd`
+  more often, which sends `thrum quickstart` into daemon-spawned panes
+  that inherit `THRUM_HOME` from the daemon. Fix: PersistentPreRunE
+  exempts `init` and `quickstart` from `THRUM_HOME` substitution;
+  `BuildQuickstartCmd` now accepts and emits `--repo <path>` explicitly
+  on the daemon-inline path; `quickstart`'s G1a/G1b guard and Step 2.5
+  enrichment paths drop redundant `EffectiveRepoPath` calls.
+  Two release-test scenarios (108 local, r02 remote) added as a
+  regression gate. v0.10.0 is marked prerelease; upgrade to v0.10.1.
+- Boot-time identity reconcile. Write RPCs (`thrum send`, `thrum tmux
+  start`) from a registered worktree no longer fail with `anonymous
+  caller cannot invoke X` after a daemon restart. The peercred
+  resolver matches caller CWDs against `session_refs JOIN sessions
+  WHERE ended_at IS NULL`; that view is durable in SQLite but loses
+  rows on shutdown / cleanup / long quiescence, so disk truth (identity
+  files) and resolver truth (DB rows) drifted apart. Previously only
+  `thrum quickstart --force` repopulated; `thrum prime` did not. New
+  package `internal/daemon/bootstrap/Reconcile` walks
+  `.thrum/identities/*.json` at boot and inserts the missing
+  `(sessions, session_refs)` pairs through `safedb` in a per-identity
+  transaction with `INSERT OR IGNORE`. Local-only — direct SQL, no
+  JSONL events, no cross-machine sync. Same pass also restores the
+  in-memory `sessionCwds` pane-nudge map for live tmux sessions.
+  Defensive `filepath.IsAbs` guard skips fixture stub `worktree:
+  "test"` files. Wires into `cmd/thrum/main.go daemonRun` between
+  `tmuxHandler.ReconcilePoller` and `paneSilencePoller.Run` with a
+  10s `context.WithTimeout`. New release scenario 109. Closes
+  thrum-soj8 + thrum-6kk6.
+
+New in v0.10.0:
+- `thrum init` interactive wizard — on a TTY, `thrum init` now launches a
+  multi-step wizard (identity → worktrees-root → role-template → daemon).
+  Press enter through every prompt to accept defaults. Legacy silent path
+  is preserved on non-TTY stdin or with `--non-interactive`. Pre-fill any
+  prompt with `--name`, `--role`, `--module`, `--worktrees-root`,
+  `--roles=enhanced|default|skip`, `--no-daemon`. `--force` re-init
+  pre-seeds prompts from existing `.thrum/config.json` and identity.
+  Transactional: SIGINT or step-failure restores `.gitignore` and
+  `.git/info/exclude` byte-for-byte.
+- New role template `implementer-worktree-write-only.md` — wizard's
+  "enhanced" choice ships an implementer preamble that pins writes to the
+  agent's own worktree and forbids drive-by edits to the main repo.
+- Default `Worktrees.BasePath` migrated from `~/.workspaces/<project>` to
+  `~/.thrum/worktrees/<project>`. Repos with an explicit `worktrees.base_path`
+  in `.thrum/config.json` are unaffected. Pin the legacy path with
+  `thrum config set worktrees.base_path "$HOME/.workspaces/<project>"` to
+  preserve existing worktrees.
+- tmux gate — if `tmux` is not on `PATH` when the wizard reaches the
+  daemon-start step, init exits early with an OS-appropriate install hint.
+- `scripts/thrum-check-inbox.sh` now correctly excluded alongside
+  `thrum-startup.sh` in `.gitignore` (and `.git/info/exclude` in stealth
+  mode).
+
+New in v0.9.2:
+- Role configuration system (thrum-z2et) — `/thrum:configure-roles` answers
+  persist under a new `role_config` top-level key in `.thrum/config.json`
+  (per-role autonomy + scope + rendered_hash; top-level schema_version).
+  `thrum roles refresh` regenerates `.thrum/role_templates/<role>.md` from
+  saved answers + the shipped templates embedded in the binary.
+  `thrum prime` surfaces three drift hints: `roles.config.migration`
+  (rendered templates exist but no role_config), `roles.config.schema-bump`
+  (shipped schema_version > saved), and `roles.config.body-diff` (shipped
+  body_hash != saved rendered_hash). Precedence: migration > schema-bump >
+  body-diff. `.thrum/context/<agent>.md` doubles as a hand-authored user
+  overlay appended to the rendered preamble with a `---` separator;
+  `thrum quickstart` auto-creates it empty.
+- SessionStart identity banner + auto-load directive — Claude Code sessions
+  launched via `thrum tmux create` and restarted via `thrum tmux restart`
+  show a pane-side identity banner and a size-aware `MUST-READ` directive
+  pointing at the briefing. The plugin SessionStart hook also injects
+  `thrum prime` output via `additionalContext` so the briefing reaches the
+  model even when the pane is small. Restart-snapshot framing is hoisted to
+  the top of `additionalContext` and rephrased as a directive.
+- tmux session scoping (thrum-zuz5) — `thrum tmux status` and `thrum tmux
+  connect` now scope to the current daemon via a `@thrum-thrum-dir` tag,
+  no longer leaking sessions across worktrees and projects. Migration:
+  pre-0.9.2 sessions need to be recreated via `thrum tmux create` to appear
+  in pass-2 output.
+- tmux pty leak fix (thrum-x6e8.5) — tmux-exec migrated from `respawn-pane`
+  to a persistent-session pool with flock-based coordination (portable
+  fallback when flock is unavailable), eliminating fd-leak crashes on
+  long-running daemons.
+- Preamble fallback fixes (thrum-5hhx, rm4x, z9zl) — `runPreambleInit`
+  fallback now follows `.thrum/redirect`; rendered preamble paths to
+  strategy files are absolute, not relative.
+
+## Quick Start
+
+  thrum init                                          # Set up .thrum/ in repo
+  thrum daemon start                                  # Start background daemon
+  thrum quickstart --name <agent-name> --role planner --module auth        # Register + start session
+  thrum send "Starting work on auth module"            # Send a message
+  thrum inbox                                          # Check messages
+  thrum sent                                           # Check sent items and receipts
+
+## Global Flags
+
+All commands accept these flags:
+
+  --role VALUE        Agent role (or THRUM_ROLE env var)
+  --module VALUE      Agent module (or THRUM_MODULE env var)
+  --json              JSON output for scripting
+  --quiet             Suppress non-essential output
+  --verbose           Debug output
+
+## All Commands
+
+### Setup & Orientation
+
+  thrum init [--force] [--stealth] [--runtime claude|codex|cursor|gemini|opencode|cli-only|all] [--dry-run] [--skills] [--agent-name NAME] [--agent-role ROLE] [--agent-module MODULE]
+    Initialize Thrum in the current repository. Optionally generate runtime-specific configs.
+    --skills installs just the thrum skill without full runtime configuration.
+    Populates the `identity` block in config.json (daemon_id generated once via Bootstrap; idempotent).
+    G2 guard: refuses non-git CWD; --force bypasses.
+
+  thrum worktree setup WORKTREE_NAME
+    Configure a feature worktree with .thrum/redirect to share the main issue database. Alias for `thrum worktree create`.
+
+  thrum setup claude-md [--apply] [--force]
+    Install or manage a Thrum-managed block in ./CLAUDE.md. Default: prints template to stdout.
+    --apply: writes to ./CLAUDE.md. Creates file with template-only content if missing.
+             Appends blank-line + template at end if file exists without a Thrum block.
+             Errors if a Thrum block already present (exit 1, stderr message asks for --force).
+    --force (with --apply): replaces the existing Thrum block in place. Idempotent.
+    Block markers: <!-- BEGIN THRUM --> ... <!-- END THRUM --> (single space, no version, no trailing dot).
+    Template is intentionally minimal (~30-40 lines): what Thrum is, 5 essential commands
+    (whoami/team/inbox/send/reply), quickstart pointer.
+    Use this ONLY when NOT running the Claude Code Thrum plugin — the plugin already
+    injects messaging instructions via SessionStart hook + skills + slash commands.
+    The CLAUDE.md path is for Claude Code without the plugin, or other runtimes (codex,
+    cursor, opencode, kiro). Use one or the other, not both.
+
+  thrum quickstart --name <agent-name> --role ROLE --module MODULE [--display NAME] [--intent TEXT] [--runtime PRESET] [--dry-run] [--force] [--no-init] [--preamble-file PATH]
+    Register agent, start session, generate runtime config, and set intent in one step.
+    Runtime presets: claude, codex, cursor, gemini, opencode, cli-only.
+    --runtime writes `preferred_runtime` to the identity file (used by `thrum tmux launch`).
+    G1a guard: refuses self-rename (caller already owns an identity in this worktree); --force bypasses.
+    G1b guard: refuses name collision with a live foreign PID; --force bypasses.
+
+  thrum overview [--json]
+    Show combined status: identity, work context, team, inbox, sync.
+
+  thrum whoami [--json]
+    Show current agent identity (lightweight, no daemon required).
+
+  thrum version
+    Show version, build hash, repository URL, and documentation URL.
+
+  thrum prime [--json]
+    Gather comprehensive session context for agent initialization or context recovery.
+    Shows: identity, session, team, inbox summary, branch, daemon status, commands, listener instruction.
+    G5 guard: must be called from the topmost runtime process, not from inside another agent's process tree.
+
+  thrum completion [bash|fish|powershell|zsh]
+    Generate shell autocompletion scripts.
+
+### Messaging
+
+  thrum send MESSAGE [--scope type:value] [--ref type:value] [--mention @role] [--thread ID] [--to @agent_name|@everyone] [--format markdown|plain|json] [--structured JSON]
+    Send a message. --to accepts @agent_name or @everyone.
+
+  thrum reply MSG_ID TEXT [--format markdown|plain|json]
+    Reply to a message, copying the parent's audience (mentions/scopes). Includes reply_to reference.
+
+  thrum inbox [--scope type:value] [--mentions] [--unread] [--all|-a] [--from @agent_name] [--page-size N] [--limit N] [--page N]
+    List messages in your inbox. Auto-filters to messages addressed to you + broadcasts.
+    Use --all to disable auto-filtering and show everything.
+
+  thrum sent [--to @agent|@everyone] [--unread] [--page-size N] [--limit N] [--page N]
+    List messages you sent, including resolved recipients and durable read state.
+    Use 'thrum message get <message-id>' for full details on one message.
+
+  thrum wait [--timeout DURATION] [--scope type:value] [--mention @role] [--after OFFSET]
+    Block until a matching message arrives.
+    --after sign convention: negative (e.g., -30s) = include messages sent up to N ago; positive (e.g., +60s) = only messages N in the future; omit for "now". Exit 0=received, 1=timeout, 2=error.
+
+### Message Management
+
+  thrum message get MSG_ID
+    Get a single message with full details.
+
+  thrum message edit MSG_ID TEXT
+    Edit a message (full replacement, author only).
+
+  thrum message delete MSG_ID --force
+    Delete a message.
+
+  thrum message read [MSG_ID...] [--all]
+    Mark messages as read. Use --all to mark all unread messages as read.
+
+  thrum purge --before DURATION|DATE [--confirm]
+  thrum purge --all [--confirm]
+    Remove old messages, sessions, and events. Without --confirm, shows a preview.
+    Supports relative durations (2d, 24h), dates (2026-03-15), and RFC 3339.
+    Cleans both SQLite and sync JSONL files. Agents are not touched.
+
+### Agent Identity
+
+  thrum agent register --role ROLE --module MODULE [--name NAME] [--display NAME] [--force] [--re-register]
+    Register this agent. Identity priority: THRUM_NAME env > --name flag > identity file.
+
+  thrum agent whoami
+    Show current agent identity and active session.
+
+  thrum agent list [--role ROLE] [--module MODULE] [--context]
+    List registered agents. --context shows branch/commits/intent.
+
+  thrum agent delete NAME
+    Delete an agent (removes identity, messages, SQLite record).
+
+  thrum agent cleanup [--force] [--dry-run] [--threshold DAYS]
+    Detect and remove orphaned agents. --threshold sets stale cutoff (default: 30 days).
+
+### Agent Session Aliases
+
+  thrum agent start                     # Alias for session start
+  thrum agent end [--reason normal|crash] [--session-id ID]  # Alias for session end
+  thrum agent set-intent TEXT           # Alias for session set-intent
+  thrum agent set-task TASK             # Alias for session set-task
+  thrum agent heartbeat [--add-scope type:value] [--remove-scope type:value] [--add-ref type:value] [--remove-ref type:value]
+
+  thrum agent set-status <working|idle|blocked> [--agent NAME]       # v0.8.0
+    Set agent operational status. Without --agent, updates local identity directly.
+    With --agent, sends RPC to daemon to update a remote agent's identity file.
+    Daemon uses this for auto-nudge detection: if pane is silent but status is
+    "working", daemon nudges on next silence event.
+
+### Sessions
+
+  thrum session start
+    Start a new work session (agent must be registered).
+
+  thrum session end [--reason normal|crash] [--session-id ID]
+    End current session.
+
+  thrum session list [--active] [--agent AGENT_ID]
+    List all sessions. --active shows only active sessions.
+
+  thrum session heartbeat [--add-scope type:value] [--remove-scope type:value] [--add-ref type:value] [--remove-ref type:value]
+    Send heartbeat. Triggers git context extraction, updates last-seen time.
+
+  thrum session set-intent TEXT
+    Set work intent for current session. Pass "" to clear.
+
+  thrum session set-task TASK
+    Set current task identifier. Pass "" to clear.
+
+### Team Overview
+
+  thrum team [--all] [--system] [--json]
+    Show rich status for all active agents (sessions, context, inbox, branches).
+    Use --all to include offline agents. --system includes reserved pseudo-agents.
+    ⊙ glyph marks reserved pseudo-agents (e.g. @supervisor_<project>).
+
+### Context Management
+
+  thrum context save [--file PATH] [--agent NAME]
+    Save context for current agent from file or stdin.
+
+  thrum context show [--agent NAME] [--raw] [--no-preamble]
+    Show saved context for current agent. Alias: thrum context load.
+
+  thrum context clear [--agent NAME]
+    Clear saved context for current agent.
+
+  thrum context preamble [--init] [--file PATH] [--agent NAME]
+    Show or manage the preamble (stable header prepended to context).
+
+  thrum context sync [--agent NAME]
+    Copy context to the a-sync branch for sharing across worktrees.
+
+### Coordination
+
+  thrum who-has FILE
+    Check which agents are editing a file.
+
+  thrum ping AGENT
+    Check if an agent is online (with or without @ prefix).
+
+### Sync
+
+  thrum sync status
+    Show sync loop status and last sync time.
+
+  thrum sync force
+    Trigger immediate sync (non-blocking).
+
+### Peer Management (Cross-Repo, v0.7.0)
+
+  thrum peer add --type TYPE [--name NAME]
+    Start a pairing session. Displays a 16-digit peercode. Blocks until peer connects (5min timeout).
+    Prompts for THRUM_TS_AUTHKEY if not set.
+    --type is MANDATORY (BREAKING in v0.9.0). Values: tailscale, local, network, repair.
+
+  thrum peer join [peercode] [--peercode CODE] [--repo-path PATH] --type TYPE
+    Connect to a remote peer using the peercode from `peer add`.
+    Peercode format: name:ip:port:code. Accepts positional arg, --peercode flag, stdin pipe, or interactive prompt.
+    Use --repo-path for local same-machine peers (sets transport to "local").
+    --type is MANDATORY (BREAKING in v0.9.0). Values: tailscale, local, network, repair.
+    repair type is peer join only; used for drift reconciliation without a new peercode.
+
+  thrum peer list [--json]
+    List paired peers with address, last sync, sequence number.
+    drift_reconcile_failed peers show an inline └─ hint row with remediation command.
+
+  thrum peer remove <name>
+    Remove a paired peer. Stops syncing immediately.
+
+  thrum peer status [--json]
+    Show detailed per-peer health: pairing time, auth status, sync state.
+
+  thrum peer configure <peer-name> <action> <agent-name>
+    Manage proxy agents for a peer. Actions: add-agent, remove-agent.
+    Proxy agents appear locally as prefix:name (e.g., sf:coordinator_main).
+
+### Single-Agent Mode (v0.7.0)
+
+  thrum single-agent-mode [true|false|on|off]
+    Toggle or query single-agent mode. Without args, prints current mode.
+    When enabled: no listener, no cron watchdog, no stop hook, no messaging protocol.
+    Context features (prime, sessions, context save/show) still work.
+    Default for new repos after thrum init.
+
+### Runtime Presets
+
+  thrum runtime list
+    List all runtime presets (claude, codex, cursor, gemini, amp, kiro-cli, cli-only).
+
+  thrum runtime show <name>
+    Show details for a runtime preset.
+
+  thrum runtime set-default <name>
+    Set the default runtime preset.
+
+### Role Templates
+
+  thrum roles list
+    List role templates and matching agents.
+
+  thrum roles deploy [--agent NAME] [--dry-run]
+    Re-render preambles from role templates. Full overwrite.
+
+### Configuration
+
+  thrum config show [--json]
+    Show effective configuration from all sources (config.json, env, defaults).
+
+### Tmux Session Management (v0.7.1)
+
+  thrum tmux create <name> --cwd <path> --name <agent-name> --role ROLE --module MODULE [--intent TEXT] [--runtime PRESET] [--force] [--no-agent]
+    Create a tmux session for an agent with clean environment and monitor-silence hooks.
+    --name, --role, --module are required (or pass --no-agent to skip registration).
+    Runs `thrum quickstart` inside the pane automatically after creating the session.
+    --intent, --runtime, --force are passed through to quickstart.
+
+  thrum tmux quickstart <name> --cwd <path> --name <agent-name> --role ROLE --module MODULE [...]
+    Alias for `thrum tmux create`.
+
+  thrum tmux launch <name> [--runtime PRESET]
+    Start an AI tool inside an existing tmux session. Default runtime: claude.
+    PRESET: claude, opencode, codex, cursor, kiro-cli, shell, etc.
+
+  thrum tmux status
+    Show all tmux-managed sessions with agent info, state, runtime, and branch.
+
+  thrum tmux list
+    Alias for thrum tmux status.
+
+  thrum tmux kill <name>
+    Tear down a tmux session and clear tmux_session from identity file.
+
+  thrum tmux send <name> "text"
+    Send text into a tmux session via send-keys.
+
+  thrum tmux capture <name> [--lines N]
+    Capture visible pane content from a tmux session.
+
+  thrum tmux restart <name> [--force] [--runtime R]
+    Restart a tmux session with context snapshot. Two flows:
+    - Graceful (default): sends @system message asking agent to save, nudges,
+      polls for snapshot up to restart.graceful_timeout; falls back to JSONL on timeout.
+    - Force (--force): skips graceful prompt, extracts from JSONL directly (Claude-only).
+    Either way: kills session, creates new one, relaunches with snapshot via prime.
+
+### Tmux Command Queue (v0.8.0)
+
+  thrum tmux queue <session> <command> [--timeout SECONDS] [--wait] [--silence FLOAT]
+    Submit a command to a tmux session's queue. Daemon dispatches FIFO when the
+    pane goes silent, detects completion via next silence event, captures output.
+    - --timeout: command timeout in seconds (default: 120)
+    - --wait: block until the command reaches a terminal state; suppresses @system notification
+    - --silence: silence threshold in seconds (server default: 5.0)
+    Without --wait: returns command_id immediately; sends @system inbox message on completion,
+    timeout, cancellation, or interruption.
+
+  thrum tmux queue-status <session> [--json]
+    Show the active command and queued commands for a session.
+
+  thrum tmux cancel <command-id>
+    Cancel a queued or active command.
+
+### Worktree Management (v0.8.0)
+
+  thrum worktree create <name> [-b BRANCH] [--detach] [--name <agent-name> --role ROLE --module MODULE] [--intent TEXT] [--runtime PRESET] [--force]
+    Create a git worktree with Thrum and Beads redirect wiring. Worktree path:
+    `worktrees.base_path/<name>` (default: ~/.thrum/worktrees/<project>/<name>).
+    - -b / --branch: branch name (default: feature/<name>)
+    - --detach: create detached HEAD worktree
+    - --name, --role, --module (all optional): if all three provided, creates a
+      real tmux session with the worktree as cwd and runs quickstart inside the
+      pane via SendKeys (PID-isolated, with daemon-side retry at 5s and CLI-side
+      pane capture at 12s). The session is kept — start the runtime later with
+      `thrum tmux launch <name>`. The CLI prints the next-step launch command.
+    Sets up .thrum/redirect and .thrum/identities/ (if worktrees.thrum_enabled).
+    Sets up .beads/redirect (if worktrees.beads_enabled and .beads/ exists).
+    v0.8.2: errors out if the resolved worktree path or worktrees.base_path is
+    the repo root itself (repo-root guard).
+
+  thrum worktree setup <name> [-b BRANCH] [--detach] [...]
+    Alias for `thrum worktree create`.
+
+  thrum worktree teardown <name> [--delete-branch]
+    Remove a worktree and clean up Thrum identity files.
+    Runs `git worktree remove --force <path>` after cleanup.
+    --delete-branch (v0.10.5): also delete the worktree's branch in the same
+    step (previously required a separate `git branch -D`).
+
+  thrum worktree list
+    List git worktrees with Thrum agent info (reads identity files to show
+    which agent is active per worktree).
+
+### Monitor Jobs (v0.9.0)
+
+  thrum monitor start --name <name> --match <regex> --to @<agent> [--debounce 60s] [--env KEY=VALUE] -- <argv...>
+    Spawn a long-running child process. Watch its stdout+stderr for lines matching
+    the regex. Each match emits a synthetic Thrum message to the target agent.
+    (`thrum monitor add` is an alias for `thrum monitor start`.)
+    - --name: unique monitor name
+    - --match: Go regex applied to each output line
+    - --to: recipient agent (@name)
+    - --debounce: leading-edge debounce window (default: 60s, min: 30s)
+    - --env KEY=VALUE: extra env vars for the child (repeatable; redacted in output)
+    - -- <argv...>: command + args (no shell expansion; use explicit argv)
+    Sender identity appears as `monitor:<name>` in the inbox.
+    Monitors auto-persist and survive daemon restart.
+
+  thrum monitor list [--all]
+    List running monitors. --all includes stopped ones.
+
+  thrum monitor show <id>
+    Show monitor config, status, and recent log lines.
+
+  thrum monitor stop <id>
+    Stop a monitor. Sends SIGTERM to the child process.
+
+  thrum monitor logs <id>
+    Tail recent output from a monitor's captured log buffer.
+
+  thrum monitor restart <id>
+    Restart a stopped or failed monitor.
+
+### Monitor Jobs workflow
+
+  # Watch a build log and ping the reviewer when tests fail
+  thrum monitor start \
+    --name build-watcher \
+    --match "FAIL|panic:" \
+    --to @reviewer \
+    --debounce 120s \
+    -- tail -F /var/log/ci/build.log
+
+  # Check what's running
+  thrum monitor list
+
+  # Inspect output
+  thrum monitor logs build-watcher
+
+  # Stop when done
+  thrum monitor stop build-watcher
+
+### Session Restart (v0.7.1)
+
+  thrum tmux snapshot save [--reason self-initiated|external|context-threshold]
+    Save conversation snapshot for session restart.
+
+  thrum tmux snapshot restore
+    Output restart snapshot to stdout and delete file. Manual escape hatch.
+
+  thrum tmux snapshot check
+    Check if restart snapshot exists. Exit 0 = yes, exit 1 = no.
+
+### Daemon
+
+  thrum daemon start [--local]
+    Start daemon in background. --local disables remote git sync.
+    G2 guard: refuses non-git CWD; --force bypasses.
+
+  thrum daemon stop
+    Stop daemon gracefully.
+
+  thrum daemon status
+    Show daemon running state, PID, uptime, version.
+    Shows Identity block: daemon_id, repo_name, hostname, repo_path, git_origin_url, init_at.
+
+  thrum daemon restart
+    Stop and restart daemon.
+
+  thrum daemon logs [--follow|-f] [--lines|-n N] [--since DURATION|DATE]  # v0.8.0
+    View the daemon log file (.thrum/var/daemon.log). Default: last 50 lines.
+    --follow streams new lines; --lines N shows N lines (0 = all);
+    --since filters by time (e.g., "1h", "7d", "2026-04-09", RFC 3339).
+    Daemon uses lumberjack rotation: 10 MB max, 4 backups, 28 days, gzip.
+    Log level controlled by `daemon.log_level` in config.json.
+
+## Common Agent Workflows
+
+### Start working on a repo
+
+  thrum init
+  thrum daemon start
+  thrum quickstart --name <agent-name> --role implementer --module auth --intent "Building auth flow"
+
+### Send a message to a teammate
+
+  thrum send "Auth module ready for review" --to @reviewer --scope module:auth
+
+### Broadcast to all agents
+
+  thrum send "Stopping for lunch, back in 30" --to @everyone
+
+### Check inbox and reply
+
+  thrum inbox --unread
+  thrum sent --unread
+  thrum reply msg_01HXE... "Looks good, merging now"
+
+### Coordinate on shared files
+
+  thrum who-has auth.go
+  thrum agent list --context
+
+### Check team status
+
+  thrum team
+
+### Check if an agent is online
+
+  thrum ping @reviewer
+
+### Get a combined status overview
+
+  thrum overview
+
+### Cross-repo peer communication (Tailscale, v0.7.0)
+
+  # Machine A
+  thrum peer add --type tailscale   # Displays 16-digit peercode, blocks 5min
+  # Machine B
+  thrum peer join --type tailscale --peercode alice:100.64.1.5:44123:7392168401234567
+  # Both daemons now route messages bidirectionally
+
+  # Configure proxy agents so remote agents are addressable locally
+  thrum peer configure alice add-agent planner
+  thrum send "Ready for review" --to @alice:planner
+
+### Launch agents in tmux sessions (v0.7.1+)
+
+  # Create a worktree, register the agent, and create the tmux session in one step (v0.8.2)
+  # The agent is NOT running yet — tmux launch starts the runtime.
+  thrum worktree create api-feature -b feature/api-refactor \
+    --name impl_api --role implementer --module api
+  thrum tmux launch api-feature
+
+  # OR for an existing worktree: create the session + run quickstart in one command
+  thrum tmux create implementer-api \
+    --cwd ~/.thrum/worktrees/myproj/api-feature \
+    --name impl_api --role implementer --module api --runtime claude
+  thrum tmux launch implementer-api
+  # quickstart runs automatically inside the pane during create; tmux launch
+  # then starts the runtime. Hard-errors if the session was created with
+  # --no-agent or the worktree has no identity file.
+
+  thrum send "Your epic is thrum-abc. Start working." --to @impl_api
+
+  # Check session status
+  thrum tmux status
+
+  # Dispatch a command to the agent's pane and await completion (v0.8.0)
+  thrum tmux queue implementer-api "make test" --wait --timeout 300
+
+  # Restart an agent with context preserved (graceful by default in v0.8.0)
+  thrum tmux restart implementer-api
+  thrum tmux restart implementer-api --force       # Skip graceful save, extract JSONL directly
+
+### Orchestrator workflow (v0.8.0)
+
+  The orchestrator role executes plans epic-by-epic with review gates. It creates
+  worktrees, launches implementers, dispatches tasks via tmux queue, manages
+  agent lifecycle, and hands back a merge report. See the `thrum:orchestrate`
+  skill for the full playbook.
+
+  # Configure worktrees base path (affects `thrum worktree create`)
+  # Edit .thrum/config.json:
+  #   "worktrees": { "base_path": "/abs/path/to/worktrees", "beads_enabled": true, "thrum_enabled": true }
+  #   "orchestration": { "merge_target": "main", "default_autonomy": "end_only" }
+
+### Save and recover context
+
+  thrum context save --file session-notes.md
+  thrum prime                  # Gather all context for recovery
+
+## Key Concepts
+
+  Agent       An AI agent or human identified by role + module. ID: agent:role:hash.
+  Session     A work period for an agent. Tracks scopes, refs, heartbeats.
+  Role        Agent's function (e.g., implementer, reviewer, planner).
+  Module      Component the agent is responsible for (e.g., auth, db, ui).
+  Scope       Routing metadata on messages (format: type:value, e.g., module:auth).
+  Ref         Reference metadata (format: type:value, e.g., pr:42, mention:reviewer).
+  Mention     Tag another agent by role: @role. Stored as ref type "mention".
+  Sync        The `a-sync` orphan branch accessed via `.git/thrum-sync/a-sync` worktree.
+  Heartbeat   Periodic signal from agent. Extracts git state, updates last-seen.
+  Context     Saved session state for recovery after compaction or session boundaries.
+  Peer        A Tailscale-connected remote daemon for direct machine-to-machine sync.
+  Runtime     AI coding tool preset (Claude, Codex, Cursor, Gemini, etc.) with config defaults.
+  Monitor     A long-running child process whose stdout/stderr is watched by the daemon.
+              Regex matches emit synthetic Thrum messages to a target agent. Local-only.
+
+## MCP Server
+
+  thrum mcp serve [--agent-id NAME]
+    Start MCP stdio server for native agent messaging (JSON-RPC over stdin/stdout).
+    Use --agent-id to select identity file. Configure in .claude/settings.json.
+
+  MCP Tools:
+    send_message(to, content, reply_to?, metadata?)
+      Send a message to another agent. --to accepts @agent_name or @everyone.
+      - to: recipient @agent_name or @everyone (required)
+      - content: message text (required)
+      - reply_to: message ID to reply to (optional)
+      - metadata: optional key-value pairs (optional)
+
+    check_messages(limit?)
+      Poll for unread messages mentioning this agent, auto-marks read.
+      - limit: max messages to return (optional, default: 50)
+
+    wait_for_message(timeout?)
+      Block until a message arrives (WebSocket push) or timeout.
+      - timeout: max seconds to wait (optional, default: 300, max: 600)
+
+    list_agents(include_offline?)
+      List registered agents with active/offline status.
+      - include_offline: include inactive agents (optional, default: true)
+
+    broadcast_message(content)
+      Send to all agents (convenience wrapper around send_message to @everyone).
+
+## Daemon
+
+  Socket:     .thrum/var/thrum.sock (Unix socket, JSON-RPC 2.0)
+  WebSocket:  ws://localhost:9999/ (or THRUM_WS_PORT env var)
+  PID file:   .thrum/var/thrum.pid (JSON format: PID, RepoPath, StartedAt, SocketPath)
+  Port file:  .thrum/var/ws.port (actual WebSocket port)
+  Lock:       Socket flock for SIGKILL resilience (auto-released on process death)
+
+  Start:      thrum daemon start (pre-startup duplicate detection via repo affinity)
+  Stop:       thrum daemon stop
+  Health:     thrum daemon status (shows repo path, JSON PID info)
+
+## Environment Variables
+
+  THRUM_NAME          Agent name (highest priority for identity file selection)
+  THRUM_ROLE          Agent role (overrides identity file)
+  THRUM_MODULE        Agent module (overrides identity file)
+  THRUM_DISPLAY       Display name (overrides identity file)
+  THRUM_LOCAL         Enable local-only mode (disables remote sync) -- set to "1"
+  THRUM_WS_PORT       WebSocket port (default: auto)
+  THRUM_HOME          Pin repo path for all commands (set by thrum-startup.sh)
+  THRUM_AGENT_ID      Pin caller identity for daemon RPC
+  THRUM_SOCKET        Unix socket path override
+  THRUM_TS_AUTHKEY    Tailscale auth key for peering
+  THRUM_TS_PORT       Tailscale listener port (default: auto)
+  THRUM_TS_HOSTNAME   tsnet hostname override
+  THRUM_TS_STATE_DIR  tsnet state directory
+  THRUM_TS_ENABLED    (deprecated) Tailscale auto-starts when peers are configured
+  THRUM_NO_HINTS=1    Suppress CLI hints (Shape B stderr trailers). Truthy: any non-empty value except "0" or "false". Also suppressed by --quiet and --json.
+
+## Local-Only Mode
+
+  Disables all git push/fetch in the sync loop. Use for public repos where
+  you don't want to expose agent messages to origin.
+
+  thrum daemon start --local             # Via CLI flag
+  THRUM_LOCAL=1 thrum daemon start       # Via environment variable
+
+  Persists in .thrum/config.json: { "daemon": { "local_only": true } }
+  Priority: CLI flag > env var > config file > default false (but `thrum init` writes true on a fresh no-remote install)
+  Check status: thrum sync status (shows "Mode: local-only" or "Mode: normal")
+
+## Configuration Reference (.thrum/config.json)
+
+  Full schema for .thrum/config.json. Most fields are optional — omit a block
+  to use defaults. View the effective configuration with `thrum config show`.
+
+  {
+    "runtime": {
+      "primary": "claude"                   // claude | codex | cursor | gemini | opencode | cli-only
+    },
+    "daemon": {
+      "local_only": true,                    // disable remote git sync
+      "sync_interval": 60,                   // seconds between syncs (default 60)
+      "ws_port": "auto",                     // "auto" or specific port like "9999"
+      "peer_port": "auto",                   // Tailscale listener port
+      "single_agent_mode": true,             // skip messaging infrastructure
+      "log_level": "info"                    // v0.8.0: debug | info | warn | error (default: info)
+    },
+    "peers": {
+      "auto_connect": true,                  // auto-connect to known peers on daemon start
+      "pairing_code_length": 16              // length of generated pairing codes
+    },
+    "worktrees": {                           // v0.8.0: used by `thrum worktree create/teardown`
+      "base_path": "~/.thrum/worktrees/myproj",   // absolute path where new worktrees are created
+      "beads_enabled": true,                 // create .beads/redirect in new worktrees
+      "thrum_enabled": true                  // create .thrum/redirect + identities/ in new worktrees
+    },
+    "orchestration": {                       // v0.8.0: used by the orchestrator role
+      "merge_target": "main",                // branch for final merge after all epics complete
+      "default_autonomy": "end_only"         // "per_epic" (approve each epic) | "end_only"
+    },
+    "restart": {
+      "max_lines": 200,                      // max lines in restart snapshot (default 200)
+      "auto_threshold": 0,                   // 0-100 context % trigger for auto-restart; 0 = off
+      "graceful_timeout": 30                 // seconds to wait for graceful save before JSONL fallback
+    },
+    "backup": {
+      "dir": ".thrum/backup",                // backup directory (relative or absolute)
+      "schedule": "24h",                     // Go duration format; omit or set to "off" to disable
+      "retention": {
+        "daily": 5,                          // -1 keeps all; 0 keeps none
+        "weekly": 4,
+        "monthly": -1
+      },
+      "post_backup": "",                     // shell command to run after each backup
+      "plugins": []                          // third-party backup plugin definitions
+    },
+    "identity_guard": {                      // v0.9.0: named enforcement checkpoints; 3 modes each
+      "cross_worktree": "strict",            // PID from wrong worktree
+      "quickstart_self_rename": "strict",    // caller re-registering under new name
+      "quickstart_name_collision": "strict", // requested name held by live foreign PID
+      "non_git_bootstrap": "strict",         // thrum init / daemon start outside git repo
+      "unauthenticated_rpc": "strict",       // mutating RPC with no resolvable identity
+      "daemon_writer_liveness": "strict",    // daemon writing to dead agent's identity file
+      "prime_ownership": "strict",           // thrum prime called from sub-agent
+      "dead_pid_auto_reclaim": "warn"        // informational; dead PID reclaimed automatically
+    }
+    // Modes: "strict" (hard error) | "warn" (log + allow) | "off" (skip)
+    // unauthenticated_rpc/identity_mismatch (forgery) ignores mode config.
+    // Narrow exception (v0.9.0): shared-worktree claim trust. If peercred picks agent Y but
+    // client claims X, and X is also registered in the peercred-resolved worktree
+    // (state.IsAgentInWorktree), the claim is honored. Cross-worktree claims still fail.
+    // Runtime override (no repo commit): .thrum/var/guard-daemon.json (same keys; daemon-level wins).
+    // v0.9.1 (thrum-ndtw): anonymous-caller rejection scoped to PROVABLY anonymous
+    // callers only (git-root-missing or no-worktree-match). Peercred introspection
+    // failures (kernel peer-creds or gopsutil.Cwd errored) fall through to legacy
+    // client-asserted identity — server.go never treats them as anonymous. slog.Warn
+    // at step=pid failed / step=cwd failed is the diagnostic path.
+  }
+
+  Config key for worktree base directory: `worktrees.base_path` (NOT `worktree_dir`).
+
+## Worktree Setup Scripts
+
+  Scripts for batch-configuring redirect files across all worktrees:
+
+  ./scripts/setup-worktree-thrum.sh              # Auto-detect all worktrees
+  ./scripts/setup-worktree-thrum.sh PATH          # Single worktree
+  ./scripts/setup-worktree-beads.sh              # Auto-detect all worktrees
+  ./scripts/setup-worktree-beads.sh PATH          # Single worktree
+
+  Creates .thrum/redirect and .beads/redirect pointing to the main repo.
+  Idempotent -- skips already-configured worktrees.
+
+## Toolkit
+
+  Ready-to-use agent configurations and workflow templates in toolkit/:
+
+  toolkit/agents/           Claude Code agent definitions
+    thrum-agent.md          Thrum messaging coordination guide
+    (Beads plugin)          Install via /install-plugin beads
+    message-listener.md     Background message polling agent (Haiku model)
+
+  toolkit/templates/        Agent development workflow patterns
+    agent-dev-workflow/     Four-phase skill pipeline (Design/Plan/Setup/Implement)
+      implementation-agent.md   Active: prompt template for implementation agents
+      philosophy-template.md    Active: anti-patterns template for implementation standards
+      planning-agent.md         Reference: superseded by skill pipeline
+    README.md               Documentation for using templates
+
+  Install: cp toolkit/agents/*.md your-project/.claude/agents/
+
+## Beads + Thrum Integration
+
+  Beads (task tracking) and Thrum (messaging) together provide complete agent
+  memory and coordination:
+
+  Beads: what agents were doing -- tasks, status, dependencies, context recovery
+  Thrum: what agents said -- messages, presence, notifications, session tracking
+
+  Both use Git as persistence layer. State survives session boundaries,
+  context compaction, and machine changes.
+
+## Identity Resolution Order
+
+  File selection (which .thrum/identities/*.json gets loaded):
+  1. THRUM_NAME env var → load {name}.json directly
+  2. Solo-agent auto-select → only one .json file exists
+  3. PID match (v0.7.0) → walk process tree to find runtime PID, match `agent_pid` field
+     (v0.8.0 renamed `claude_pid` to `agent_pid` for multi-runtime support)
+  4. Worktree match (v0.7.0) → filter by current git worktree name
+  5. Error if no unambiguous selection
+
+  Field value overrides (after file is loaded):
+  CLI flags (--role, --module) > env vars (THRUM_ROLE, THRUM_MODULE) > identity file
+
+  Note: THRUM_NAME env var takes highest priority for file selection,
+  overriding even the --name CLI flag.
+
+  Identity file format (v5, since v0.8.0):
+  {
+    "version": 5,
+    "repo_id": "r_...",
+    "agent": { "name": "...", "role": "...", "module": "...", "display": "..." },
+    "worktree": "main",
+    "agent_pid": 12345,              // v0.8.0 (renamed from claude_pid)
+    "preferred_runtime": "claude",   // v0.8.0: set by `thrum quickstart --runtime`
+    "runtime": "claude",             // v0.7.1: auto-detected runtime
+    "tmux_session": "name:0.0",      // v0.7.1
+    "agent_status": "working",       // v0.8.0: working | idle | blocked
+    "agent_status_updated_at": "...",// v0.8.0
+    "updated_at": "..."
+  }
+
+  `thrum prime` refreshes `tmux_session`, `preferred_runtime`, and `branch` on
+  every run — matters when agents relaunch under a different runtime or move
+  between branches.

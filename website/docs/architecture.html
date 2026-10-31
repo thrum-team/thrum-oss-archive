@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Architecture — Thrum</title>
+  <meta name="description" content="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Architecture — Thrum">
+  <meta property="og:description" content="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">
+  <meta property="og:url" content="https://thrum.team/docs/architecture.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Architecture — Thrum">
+  <meta name="twitter:description" content="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/architecture.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Architecture","description":"Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages","url":"https://thrum.team/docs/architecture.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link active" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>System Architecture</h2>
+<p><img src="../img/architecture.svg" alt="Thrum architecture: Clients (CLI, Web UI, MCP Server) connect to the Daemon via JSON-RPC/WebSocket, which reads and writes to JSONL Logs, SQLite Index, and Git Sync, which push/pull to the remote a-sync branch"></p>
+<h2>The Daemon: Central Coordinator</h2>
+<p>The daemon is the one process that everything else talks to. Start it once and
+it handles messaging, sync, and state for all your agents — CLI, Web UI, and MCP
+server all go through it.</p>
+<h3>Core Services</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Purpose</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RPC Server</strong></td>
+<td>JSON-RPC 2.0 API over Unix socket</td>
+<td>CLI and programmatic access</td>
+</tr>
+<tr>
+<td><strong>WebSocket Server</strong></td>
+<td>Real-time bidirectional communication</td>
+<td>Web UI and live updates</td>
+</tr>
+<tr>
+<td><strong>Sync Loop</strong></td>
+<td>Notify-driven Git fetch/merge/push (+ periodic safety-net)</td>
+<td>Cross-machine synchronization</td>
+</tr>
+<tr>
+<td><strong>Subscription Dispatcher</strong></td>
+<td>Route notifications to interested clients</td>
+<td>Targeted communication</td>
+</tr>
+<tr>
+<td><strong>State Management</strong></td>
+<td>JSONL log + SQLite projection</td>
+<td>Persistence + fast queries</td>
+</tr>
+</tbody></table>
+<h3>RPC Accept Loop</h3>
+<p>When a client connects to the Unix socket, the daemon&#39;s accept loop runs these
+steps before dispatching to any handler:</p>
+<ol>
+<li><strong>Peercred PID extraction</strong> — the kernel provides the connecting process&#39;s
+PID via <code>SO_PEERCRED</code> (Linux) or <code>LOCAL_PEERCRED</code> (macOS). No trust is placed
+in any client-supplied identity at this stage.</li>
+<li><strong>DaemonResolve — 3-priority chain</strong> — the daemon resolves the caller&#39;s agent
+identity in priority order:<ul>
+<li>PID match: walk the process tree from the peercred PID; if it matches an
+<code>agent_pid</code> in a registered identity file, that agent is the caller.</li>
+<li>Worktree match: derive the calling process&#39;s worktree from its CWD; if
+exactly one identity file belongs to that worktree, use it.</li>
+<li><code>caller_agent_id</code> field: fall back to the agent ID supplied in the JSON-RPC
+request (honored only when peercred resolution is unavailable, e.g., in
+tests or non-Unix-socket contexts). <strong>Since v0.9.1 (thrum-ndtw):</strong> the
+resolver distinguishes introspection failure from provable anonymity. When
+the kernel refuses peer credentials or gopsutil can&#39;t read the PID&#39;s CWD,
+the resolver returns a raw error and the daemon falls through to the
+<code>caller_agent_id</code> field (legacy pre-v0.9.0 path) rather than treating the
+caller as anonymous. Only a successful introspection that resolves to a git
+root with no matching <code>session_refs</code> entry counts as &quot;provably anonymous.&quot;</li>
+</ul>
+</li>
+<li><strong>Guard enforcement</strong> — before the handler runs, the identity guard layer
+checks whether the resolved caller is permitted to execute the requested
+method. Mutating RPCs require a resolved, registered identity. Anonymous
+methods (health, agent.whoami, and ~28 others) pass through without
+resolution.</li>
+</ol>
+<h3>Everything Depends on the Daemon</h3>
+<pre><code class="language-text hljs">┌─────────────────────────────────────────────────────────────┐
+│                     CLIENTS (Depend on Daemon)               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐       │
+│   │    CLI      │   │   Web UI    │   │  MCP Server │       │
+│   │  (thrum)    │   │  (React)    │   │  (stdio)    │       │
+│   └──────┬──────┘   └──────┬──────┘   └──────┬──────┘       │
+│          │                 │                  │              │
+│          │ Unix Socket     │ WebSocket        │ Unix Socket  │
+│          │ JSON-RPC 2.0    │ JSON-RPC 2.0     │ JSON-RPC 2.0 │
+│          │                 │                  │              │
+└──────────┼─────────────────┼──────────────────┼──────────────┘
+           │                 │                  │
+           ▼                 ▼                  ▼
+    ┌─────────────────────────────────────────────────┐
+    │                    DAEMON                        │
+    │  (Single source of truth for all clients)        │
+    └─────────────────────────────────────────────────┘</code></pre>
+<p><strong>CLI</strong> (<code>thrum</code> command): Sends messages, checks inbox, manages sessions. All
+commands go through the daemon via Unix socket.</p>
+<p><strong>Web UI</strong> (Embedded React SPA): Provides a graphical interface for viewing
+messages and agent activity. Served from the same port as WebSocket (default
+9999). Browser users are auto-registered via git config.</p>
+<p><strong>MCP Server</strong> (<code>thrum mcp serve</code>): Exposes Thrum functionality as native MCP
+tools over stdio, enabling LLM agents (e.g., Claude Code) to communicate
+directly through MCP protocol without CLI shell-outs. Connects to the daemon via
+Unix socket for RPC. It gives you 4 core messaging tools: <code>send_message</code>,
+<code>check_messages</code>, <code>wait_for_message</code>, and <code>list_agents</code>.</p>
+<h2>Key Features</h2>
+<h3>1. Persistent Messaging</h3>
+<p>Messages are stored in append-only JSONL logs on a dedicated <code>a-sync</code> orphan
+branch, accessed via a sync worktree at <code>.git/thrum-sync/a-sync/</code>:</p>
+<pre><code class="language-go hljs">.git/thrum-sync/a-sync/   ← Sync worktree on a-sync branch
+├── events.jsonl          ← Agent lifecycle events
+└── messages/
+    └── *.jsonl           ← Per-agent message logs
+
+.thrum/                   ← Gitignored entirely
+├── <span class="hljs-keyword">var</span>/
+│   ├── messages.db       ← SQLite query cache
+│   ├── thrum.sock        ← Unix socket
+│   ├── thrum.pid         ← Process ID (JSON: PID, RepoPath, StartedAt, SocketPath)
+│   ├── thrum.lock        ← flock <span class="hljs-keyword">for</span> SIGKILL resilience
+│   ├── ws.port           ← WebSocket port number
+│   └── sync.lock         ← Sync lock
+├── identities/           ← Per-worktree agent identities
+│   └── {agent_name}.json
+├── context/              ← Per-agent context storage
+│   └── {agent_name}.md
+└── redirect              ← (feature worktrees only) points to main .thrum/</code></pre>
+<p>Messages survive session restarts, machine reboots, context window compaction,
+and agent replacement.</p>
+<h3>2. Git-Based Synchronization</h3>
+<p>The daemon syncs messages via the sync worktree at <code>.git/thrum-sync/a-sync/</code>,
+checked out on the <code>a-sync</code> orphan branch. No branch switching needed — all git
+operations happen within the worktree:</p>
+<pre><code class="language-text hljs">┌─────────────────────────────────────────────────────────────┐
+│    Sync Loop (notify-driven) in .git/thrum-sync/a-sync/     │
+├─────────────────────────────────────────────────────────────┤
+│  1. Acquire lock (.thrum/var/sync.lock)                     │
+│  2. Fetch remote in worktree                                 │
+│  3. Merge JSONL (append-only dedup by event ID)             │
+│  4. Project new events into SQLite                           │
+│  5. Notify subscribers of new events                         │
+│  6. Commit &amp; push local changes in worktree                  │
+│  7. Release lock                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>Why Git?</strong> Works offline (changes accumulate locally), uses your existing
+authentication (SSH keys, HTTPS), gives a natural audit trail, and needs no
+additional infrastructure.</p>
+<h3>3. Agent &amp; Session Management</h3>
+<p>Agents register with a human-readable name, role, and module:</p>
+<pre><code class="language-bash hljs">thrum agent register --name furiosa --role=implementer --module=auth</code></pre>
+<p>Agent names follow the pattern <code>[a-z0-9_]+</code>. Reserved names: <code>daemon</code>, <code>system</code>,
+<code>thrum</code>, <code>all</code>, <code>broadcast</code>. Identity resolves in this order: <code>THRUM_NAME</code> env
+var &gt; <code>--name</code> flag &gt; solo-agent auto-select.</p>
+<p>Each agent gets an identity file at <code>.thrum/identities/{name}.json</code>. Multiple
+agents can coexist in a single worktree.</p>
+<p>Sessions track active work periods:</p>
+<pre><code class="language-bash hljs">thrum session start   <span class="hljs-comment"># Begin working</span>
+<span class="hljs-comment"># ... do work ...</span>
+thrum session end     <span class="hljs-comment"># Finish</span></code></pre>
+<p>Agents can be deleted and orphaned agents cleaned up:</p>
+<pre><code class="language-bash hljs">thrum agent delete furiosa           <span class="hljs-comment"># Delete a specific agent</span>
+thrum agent cleanup --dry-run        <span class="hljs-comment"># Preview orphaned agents</span>
+thrum agent cleanup --force          <span class="hljs-comment"># Delete all orphaned agents</span></code></pre>
+<h3>4. Subscription-Based Notifications</h3>
+<p>The daemon pushes real-time notifications to connected clients when messages
+match an active subscription. From the CLI, use <code>thrum wait</code> to block until a
+message arrives:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Block until a message arrives (30s default timeout)</span>
+thrum <span class="hljs-built_in">wait</span>
+
+<span class="hljs-comment"># Block up to 5 minutes, include messages from the last 30s</span>
+thrum <span class="hljs-built_in">wait</span> --<span class="hljs-built_in">timeout</span> 5m --after -30s</code></pre>
+<p>The underlying <code>subscribe</code>, <code>unsubscribe</code>, and <code>subscriptions.list</code> RPC methods
+are internal — used by the MCP server and WebSocket clients, not the CLI.</p>
+<p>When matching messages arrive, subscribers receive real-time notifications:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;method&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;notification.message&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;params&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;message_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;msg_01HXE...&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Auth implementation complete...&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;matched_subscription&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;match_type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;scope&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>5. Live Git State Tracking</h3>
+<p>The daemon tracks what each agent is working on in real-time:</p>
+<pre><code class="language-sql hljs"><span class="hljs-comment">-- agent_work_contexts table</span>
+session_id        <span class="hljs-operator">|</span> agent_id        <span class="hljs-operator">|</span> branch      <span class="hljs-operator">|</span> unmerged_commits <span class="hljs-operator">|</span> uncommitted_files
+ses_01HXE...      <span class="hljs-operator">|</span> furiosa         <span class="hljs-operator">|</span> feature<span class="hljs-operator">/</span>auth<span class="hljs-operator">|</span> <span class="hljs-number">3</span>                <span class="hljs-operator">|</span> [&quot;src/auth.go&quot;]
+ses_02HXF...      <span class="hljs-operator">|</span> maximus         <span class="hljs-operator">|</span> feature<span class="hljs-operator">/</span>db  <span class="hljs-operator">|</span> <span class="hljs-number">1</span>                <span class="hljs-operator">|</span> []</code></pre>
+<p>It tracks current branch, unmerged commits vs main, changed files, uncommitted
+modifications, and agent-set task and intent. Agent2 can see &quot;furiosa is working
+on auth.go with 3 unmerged commits&quot; — no manual investigation, no duplicate
+work, intelligent handoffs.</p>
+<h3>6. Dual-Transport API (Single Port)</h3>
+<p>The daemon serves the WebSocket API and embedded Web UI SPA on the same port
+(default 9999, configurable via <code>THRUM_WS_PORT</code>). The WebSocket endpoint is at
+<code>/ws</code>; all other paths serve the React SPA.</p>
+<table>
+<thead>
+<tr>
+<th>Transport</th>
+<th>Endpoint</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Unix Socket</strong></td>
+<td><code>.thrum/var/thrum.sock</code></td>
+<td>CLI, MCP server, scripts</td>
+</tr>
+<tr>
+<td><strong>WebSocket</strong></td>
+<td><code>ws://localhost:9999/ws</code></td>
+<td>Web UI, MCP waiter, real-time apps</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong></td>
+<td><code>http://localhost:9999/</code></td>
+<td>Embedded React SPA (Web UI)</td>
+</tr>
+</tbody></table>
+<p>40+ registered RPC methods on Unix socket. Key methods:</p>
+<ul>
+<li><code>health</code> - Daemon status</li>
+<li><code>agent.register</code>, <code>agent.list</code>, <code>agent.whoami</code>, <code>agent.listContext</code>,
+<code>agent.delete</code>, <code>agent.cleanup</code></li>
+<li><code>session.start</code>, <code>session.end</code>, <code>session.list</code>, <code>session.heartbeat</code>,
+<code>session.setIntent</code>, <code>session.setTask</code></li>
+<li><code>message.send</code>, <code>message.get</code>, <code>message.list</code>, <code>message.edit</code>,
+<code>message.delete</code>, <code>message.markRead</code></li>
+<li><code>subscribe</code>, <code>unsubscribe</code>, <code>subscriptions.list</code> (internal — used by MCP
+server and WebSocket clients)</li>
+<li><code>sync.force</code>, <code>sync.status</code></li>
+<li><code>peer.start_pairing</code>, <code>peer.wait_pairing</code>, <code>peer.join</code>, <code>peer.list</code>,
+<code>peer.status</code>, <code>peer.remove</code>, <code>peer.configure</code>, <code>peer.address_changed</code></li>
+<li><code>user.register</code>, <code>user.identify</code> (user.register is WebSocket-only)</li>
+</ul>
+<h3>7. Message Lifecycle</h3>
+<p>Full message lifecycle management beyond send/receive:</p>
+<pre><code class="language-bash hljs">thrum message get MSG_ID        <span class="hljs-comment"># Retrieve a message with full details</span>
+thrum message edit MSG_ID TEXT   <span class="hljs-comment"># Edit your own messages (full replacement)</span>
+thrum message delete MSG_ID     <span class="hljs-comment"># Delete a message (requires --force)</span></code></pre>
+<p>Messages are automatically marked as read when viewed via <code>thrum inbox</code> or
+<code>thrum message get</code>. Explicit mark-read is also available via the
+<code>message.markRead</code> RPC method.</p>
+<h3>8. Coordination Commands</h3>
+<p>Lightweight commands for checking team activity:</p>
+<pre><code class="language-bash hljs">thrum who-has auth.go           <span class="hljs-comment"># Which agents are editing a file?</span>
+thrum ping @reviewer            <span class="hljs-comment"># Is an agent online? Show last-seen time</span></code></pre>
+<p>These query agent work contexts to provide quick answers without full status
+output.</p>
+<h3>9. Agent Context Management</h3>
+<p>Agents save and retrieve volatile project state that doesn&#39;t belong in git
+commits but needs to survive session boundaries:</p>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Save context from a file or stdin</span>
+thrum context save --file continuation-notes.md
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Next steps: finish JWT implementation&quot;</span> | thrum context save
+
+<span class="hljs-comment"># View saved context</span>
+thrum context show
+
+<span class="hljs-comment"># Share context across worktrees (manual sync)</span>
+thrum context <span class="hljs-built_in">sync</span></code></pre>
+<p>Context files live at <code>.thrum/context/{agent-name}.md</code> and appear in
+<code>thrum overview</code> output. Use the <code>/thrum:update-project</code> skill in Claude Code
+for guided context updates.</p>
+<h2>Storage Architecture</h2>
+<p>Thrum uses event sourcing with CQRS:</p>
+<pre><code class="language-text hljs">┌─────────────────────────────────────────────────────────────┐
+│                    Event Sourcing + CQRS                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────┐     ┌─────────────────────────┐    │
+│  │   JSONL Event Logs  │     │   SQLite Projection     │    │
+│  │   (Source of Truth) │────▶│   (Query Model)         │    │
+│  │   in sync worktree  │     │   in .thrum/var/        │    │
+│  └─────────────────────┘     └─────────────────────────┘    │
+│        │                              │                      │
+│        │ On a-sync branch             │ Gitignored           │
+│        │ Append-only                  │ Rebuildable          │
+│        │ Conflict-free merge          │ Fast queries         │
+│        │                              │                      │
+└────────┼──────────────────────────────┼──────────────────────┘
+         │                              │
+         ▼                              ▼
+    Sync via worktree           Local CLI/UI queries</code></pre>
+<p>JSONL merges conflict-free (immutable events with unique IDs). SQLite provides
+fast indexed queries. SQLite can be rebuilt from JSONL anytime. Offline-first:
+works without network.</p>
+<h2>What the Daemon Enables</h2>
+<h3>For the CLI</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Daemon Feature Used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>thrum send &quot;Hello&quot;</code></td>
+<td><code>message.send</code> RPC + auto-sync</td>
+</tr>
+<tr>
+<td><code>thrum inbox</code></td>
+<td><code>message.list</code> RPC with filtering</td>
+</tr>
+<tr>
+<td><code>thrum wait</code></td>
+<td><code>subscribe</code> RPC + push notifications (internal RPC)</td>
+</tr>
+<tr>
+<td><code>thrum agent list --context</code></td>
+<td><code>agent.listContext</code> RPC (live git state)</td>
+</tr>
+<tr>
+<td><code>thrum who-has FILE</code></td>
+<td><code>agent.listContext</code> RPC filtered by file</td>
+</tr>
+<tr>
+<td><code>thrum ping @role</code></td>
+<td><code>agent.list</code> + <code>agent.listContext</code> RPCs</td>
+</tr>
+<tr>
+<td><code>thrum quickstart --name NAME</code></td>
+<td><code>agent.register</code> + <code>session.start</code> + <code>session.setIntent</code> RPCs</td>
+</tr>
+<tr>
+<td><code>thrum overview</code></td>
+<td>Multiple RPCs combined into one view</td>
+</tr>
+<tr>
+<td><code>thrum sync force</code></td>
+<td><code>sync.force</code> RPC</td>
+</tr>
+<tr>
+<td><code>thrum sync status</code></td>
+<td><code>sync.status</code> RPC</td>
+</tr>
+<tr>
+<td><code>thrum agent delete NAME</code></td>
+<td><code>agent.delete</code> RPC</td>
+</tr>
+<tr>
+<td><code>thrum agent cleanup</code></td>
+<td><code>agent.cleanup</code> RPC</td>
+</tr>
+<tr>
+<td><code>thrum monitor start/list/show/stop/logs/restart</code></td>
+<td><code>monitor.*</code> RPCs (Unix socket only)</td>
+</tr>
+</tbody></table>
+<h3>For the Web UI</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Daemon Feature Used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Real-time message feed</td>
+<td>WebSocket + <code>notification.message</code></td>
+</tr>
+<tr>
+<td>Agent activity</td>
+<td><code>agent.listContext</code> RPC</td>
+</tr>
+<tr>
+<td>Unread counts</td>
+<td><code>message.list</code> with <code>unread: true</code></td>
+</tr>
+<tr>
+<td>Live updates</td>
+<td>WebSocket notifications</td>
+</tr>
+</tbody></table>
+<h3>For MCP Integration</h3>
+<p><code>thrum mcp serve</code> runs an MCP server on stdio (JSON-RPC over stdin/stdout),
+enabling LLM agents to communicate via native MCP tools. It provides 4 core
+messaging tools: <code>send_message</code>, <code>check_messages</code>, <code>wait_for_message</code>, and
+<code>list_agents</code>.</p>
+<p>See <a href="mcp-server.html">MCP Server</a> for the complete tools reference, configuration,
+and setup instructions.</p>
+<hr>
+<h2>Foundation Packages</h2>
+<p>The sections below describe the internal packages that implement the
+architecture above.</p>
+<h3>Package Structure</h3>
+<pre><code class="language-text hljs">internal/
+├── bridge/      # Cross-repo communication (v0.7.0)
+│   ├── bridge.go    # TransportBridge interface, Notification type
+│   ├── msgmap.go    # Local↔remote message ID mapping (LRU, max 10k)
+│   ├── relay.go     # Common inbound/outbound relay with proxy registration
+│   ├── wsclient.go  # Shared WebSocket client with loopback validation
+│   └── peer/        # PeerTransport, PeerBridge, address validation
+├── tmux/        # Tmux session operations, nudge delivery, per-session mutex (v0.7.1)
+├── restart/     # JSONL conversation extraction, snapshot formatting (v0.7.1)
+├── daemon/
+│   ├── monitor/     # Monitor job supervisor: spawn, line-read, debounce, delivery
+│   ├── permission/  # Permission-prompt detection, poller, nudge state (v0.9.0)
+│   └── reconcile/   # Peer drift auto-reconciliation engine (v0.9.0)
+├── cli/
+│   ├── worktree.go  # ensureWorktreeRedirects, enforceOneIdentity, buildQuickstartCmd
+│   └── hints/       # Hint pipeline: HintSource, StateAccessor, Shape B/C rendering (v0.9.0)
+├── identity/
+│   └── guard/       # Identity guard enforcement: 8 guards, 3 modes, WritePID (v0.9.0)
+├── config/      # Configuration loading, identity files, agent naming
+├── jsonl/       # JSONL reader/writer with file locking
+├── projection/  # SQLite projection engine (multi-file rebuild)
+├── schema/      # SQLite schema, migrations, JSONL sharding migration
+├── paths/       # Path resolution, redirect, sync worktree path
+├── gitctx/      # Git-derived work context extraction
+└── types/       # Shared event types</code></pre>
+<h2>Configuration (<code>internal/config</code>)</h2>
+<h3>Identity File Selection (v0.7.0)</h3>
+<p>Which identity file to load (in priority order):</p>
+<ol>
+<li><code>THRUM_NAME</code> env var → load <code>{name}.json</code> directly</li>
+<li>Solo-agent auto-select → only one <code>.json</code> file in <code>identities/</code></li>
+<li>PID match → walk process tree to find runtime PID, match against <code>agent_pid</code>
+field in identity files</li>
+<li>Worktree match → filter by current git worktree name</li>
+<li>Error if no unambiguous selection</li>
+</ol>
+<p>After file selection, field values can be overridden:</p>
+<ul>
+<li>CLI flags (<code>--role</code>, <code>--module</code>) override env vars override identity file</li>
+</ul>
+<p>See <a href="identity.html">Identity System</a> for full details on PID resolution and
+adoption logic.</p>
+<h3>Identity File Format</h3>
+<p>Identity files are stored at <code>.thrum/identities/{agent_name}.json</code>
+(per-worktree):</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;repo_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;r_7K2Q1X9M3P0B&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;agent&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;kind&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;agent&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;furiosa&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;role&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;implementer&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;sync-daemon&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;display&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Sync Implementer&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;worktree&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;daemon&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;agent_pid&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12345</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;preferred_runtime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;claude&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;runtime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;claude&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;tmux_session&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;implementer-daemon:0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;agent_status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;working&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;agent_status_updated_at&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-02-03T18:05:00.000Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;confirmed_by&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;human:leon&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;updated_at&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-02-03T18:02:10.000Z&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p>Reserved pseudo-agents (such as <code>@supervisor_&lt;project&gt;</code>) use the same format
+with a <code>reserved: true</code> field (omitempty — absent on normal agents). Reserved
+agents are hidden from <code>thrum team</code> output by default.</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;repo_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;r_7K2Q1X9M3P0B&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;agent&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;kind&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;agent&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;supervisor_thrum&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;role&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;supervisor&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;display&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Thrum Supervisor&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;reserved&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;worktree&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;main&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;updated_at&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-04-19T10:00:00.000Z&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<h3>Agent Naming</h3>
+<p>Agents support human-readable names:</p>
+<ul>
+<li><code>--name furiosa</code> on <code>quickstart</code> or <code>agent register</code></li>
+<li><code>THRUM_NAME</code> env var (highest priority)</li>
+<li>Names: <code>[a-z0-9_]+</code> (lowercase alphanumeric + underscores)</li>
+<li>Reserved: <code>daemon</code>, <code>system</code>, <code>thrum</code>, <code>all</code>, <code>broadcast</code></li>
+<li>When name is provided, it becomes the agent ID directly (e.g., <code>furiosa</code>)</li>
+<li>When omitted, falls back to <code>{role}_{hash10}</code> format (e.g.,
+<code>coordinator_1B9K33T6RK</code>)</li>
+</ul>
+<h3>Config Struct</h3>
+<pre><code class="language-go hljs"><span class="hljs-keyword">type</span> Config <span class="hljs-keyword">struct</span> {
+    RepoID  <span class="hljs-type">string</span>      <span class="hljs-comment">// Repository ID</span>
+    Agent   AgentConfig <span class="hljs-comment">// Agent identity</span>
+    Display <span class="hljs-type">string</span>      <span class="hljs-comment">// Display name</span>
+}
+
+<span class="hljs-keyword">type</span> AgentConfig <span class="hljs-keyword">struct</span> {
+    Kind    <span class="hljs-type">string</span> <span class="hljs-comment">// &quot;agent&quot; or &quot;human&quot;</span>
+    Name    <span class="hljs-type">string</span> <span class="hljs-comment">// Agent name (e.g., &quot;furiosa&quot;)</span>
+    Role    <span class="hljs-type">string</span> <span class="hljs-comment">// Agent role (e.g., &quot;implementer&quot;)</span>
+    Module  <span class="hljs-type">string</span> <span class="hljs-comment">// Module/component responsibility</span>
+    Display <span class="hljs-type">string</span> <span class="hljs-comment">// Display name</span>
+}</code></pre>
+<h3>Loading</h3>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Load from current directory</span>
+cfg, err := config.Load(flagRole, flagModule)
+
+<span class="hljs-comment">// Load from specific repo path</span>
+cfg, err := config.LoadWithPath(repoPath, flagRole, flagModule)</code></pre>
+<h2>Identity (<code>internal/identity</code>)</h2>
+<h3>ID Formats</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Format</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Daemon ID</strong></td>
+<td><code>d_</code> + 26-char ULID</td>
+<td><code>d_01HXE8Z7R9K3Q6M2W8F4VY</code></td>
+</tr>
+<tr>
+<td><strong>Repo ID</strong></td>
+<td><code>r_</code> + base32(sha256(url))[:12]</td>
+<td><code>r_7K2Q1X9M3P0B</code></td>
+</tr>
+<tr>
+<td><strong>Agent ID (named)</strong></td>
+<td>name directly</td>
+<td><code>furiosa</code></td>
+</tr>
+<tr>
+<td><strong>Agent ID (unnamed)</strong></td>
+<td>role + <code>_</code> + base32(hash)[:10]</td>
+<td><code>implementer_9F2K3M1Q8Z</code></td>
+</tr>
+<tr>
+<td><strong>User ID</strong></td>
+<td><code>user:</code> + username</td>
+<td><code>user:leon</code></td>
+</tr>
+<tr>
+<td><strong>Session ID</strong></td>
+<td><code>ses_</code> + ulid()</td>
+<td><code>ses_01HXF2A9Y1Q0P8...</code></td>
+</tr>
+<tr>
+<td><strong>Session Token</strong></td>
+<td><code>tok_</code> + ulid()</td>
+<td><code>tok_01HXF2A9Y1Q0P8...</code></td>
+</tr>
+<tr>
+<td><strong>Message ID</strong></td>
+<td><code>msg_</code> + ulid()</td>
+<td><code>msg_01HXF2A9Y1Q0P8...</code></td>
+</tr>
+<tr>
+<td><strong>Event ID</strong></td>
+<td><code>evt_</code> + ulid()</td>
+<td><code>evt_01HXF2A9Y1Q0P8...</code></td>
+</tr>
+</tbody></table>
+<h3>Deterministic IDs</h3>
+<ul>
+<li><strong>Repo ID</strong>: Derived from Git origin URL (normalized to https, lowercased,
+<code>.git</code> suffix stripped)</li>
+<li><strong>Agent ID (unnamed)</strong>: Derived from repo_id + role + module (sha256 +
+Crockford base32)</li>
+<li>Same inputs always produce the same ID</li>
+</ul>
+<h3>Unique IDs</h3>
+<ul>
+<li><strong>Session, Message, Event IDs</strong>: Use ULID (time-ordered, unique)</li>
+<li>ULID format: 26 characters, sortable by time, 128-bit random</li>
+<li>Thread-safe generation with mutex-protected monotonic entropy</li>
+</ul>
+<p>Agent IDs are generated internally from the role and a hash. See
+<a href="development.html">Development Guide</a> for implementation details.</p>
+<h2>Paths (<code>internal/paths</code>)</h2>
+<h3>Path Resolution</h3>
+<p>The <code>paths</code> package handles path resolution for multi-worktree setups and sync
+worktree location.</p>
+<p><strong>Key functions:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Returns</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ResolveThrumDir(repoPath)</code></td>
+<td><code>.thrum/</code> path</td>
+<td>Follows <code>.thrum/redirect</code> if present</td>
+</tr>
+<tr>
+<td><code>SyncWorktreePath(repoPath)</code></td>
+<td><code>.git/thrum-sync/a-sync/</code> path</td>
+<td>Uses <code>git-common-dir</code> for nested worktree support</td>
+</tr>
+<tr>
+<td><code>VarDir(thrumDir)</code></td>
+<td><code>.thrum/var/</code> path</td>
+<td>Runtime files directory</td>
+</tr>
+<tr>
+<td><code>IdentitiesDir(repoPath)</code></td>
+<td><code>.thrum/identities/</code> path</td>
+<td>Per-worktree agent identity files</td>
+</tr>
+</tbody></table>
+<h3>Redirect File</h3>
+<p>Feature worktrees share the main worktree&#39;s daemon and state via a redirect
+file:</p>
+<pre><code class="language-text hljs">.thrum/redirect    -&gt; /path/to/main/worktree/.thrum</code></pre>
+<p><strong>Resolution rules:</strong></p>
+<ul>
+<li>If <code>.thrum/redirect</code> exists, read target path and use it as the effective
+<code>.thrum/</code> directory</li>
+<li>Target must be an absolute path</li>
+<li>Redirect chains (A -&gt; B -&gt; C) are detected and rejected</li>
+<li>Self-referencing redirects are rejected</li>
+<li>If no redirect file, use local <code>.thrum/</code> (this is the main worktree)</li>
+</ul>
+<p><strong>Note:</strong> <code>IdentitiesDir()</code> always uses the LOCAL <code>.thrum/identities/</code> (not the
+redirect target), because agent identities are per-worktree.</p>
+<h3>Sync Worktree Path</h3>
+<p>The sync worktree lives at <code>.git/thrum-sync/a-sync/</code>:</p>
+<pre><code class="language-go hljs">syncDir, err := paths.SyncWorktreePath(repoPath)
+<span class="hljs-comment">// Returns: /path/to/repo/.git/thrum-sync/a-sync</span></code></pre>
+<p>Uses <code>git rev-parse --git-common-dir</code> to find the correct <code>.git/</code> directory,
+which handles nested worktrees correctly (where <code>.git</code> is a file pointing to the
+parent repo&#39;s <code>.git/worktrees/</code> directory).</p>
+<h2>Git Context (<code>internal/gitctx</code>)</h2>
+<h3>Work Context Extraction</h3>
+<p>The <code>gitctx</code> package extracts live Git state for agent work context tracking.
+Called during <code>session.heartbeat</code> to provide real-time visibility into what each
+agent is working on.</p>
+<p><strong>Exported types:</strong></p>
+<pre><code class="language-go hljs"><span class="hljs-keyword">type</span> WorkContext <span class="hljs-keyword">struct</span> {
+    Branch           <span class="hljs-type">string</span>          <span class="hljs-string">`json:&quot;branch&quot;`</span>
+    WorktreePath     <span class="hljs-type">string</span>          <span class="hljs-string">`json:&quot;worktree_path&quot;`</span>
+    UnmergedCommits  []CommitSummary <span class="hljs-string">`json:&quot;unmerged_commits&quot;`</span>
+    UncommittedFiles []<span class="hljs-type">string</span>        <span class="hljs-string">`json:&quot;uncommitted_files&quot;`</span>
+    ChangedFiles     []<span class="hljs-type">string</span>        <span class="hljs-string">`json:&quot;changed_files&quot;`</span>
+    ExtractedAt      time.Time       <span class="hljs-string">`json:&quot;extracted_at&quot;`</span>
+}
+
+<span class="hljs-keyword">type</span> CommitSummary <span class="hljs-keyword">struct</span> {
+    SHA     <span class="hljs-type">string</span>   <span class="hljs-string">`json:&quot;sha&quot;`</span>
+    Message <span class="hljs-type">string</span>   <span class="hljs-string">`json:&quot;message&quot;`</span> <span class="hljs-comment">// First line only</span>
+    Files   []<span class="hljs-type">string</span> <span class="hljs-string">`json:&quot;files&quot;`</span>
+}</code></pre>
+<p><strong><code>ExtractWorkContext(worktreePath)</code>:</strong></p>
+<ul>
+<li>Returns empty context (not error) if path is not a git repo</li>
+<li>Determines base branch automatically (<code>origin/main</code>, <code>origin/master</code>, or
+<code>HEAD~10</code>)</li>
+<li>Extracts unmerged commits with per-commit file lists</li>
+<li>Runs in ~80ms typically</li>
+</ul>
+<h2>JSONL (<code>internal/jsonl</code>)</h2>
+<h3>Append-Only Log</h3>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Writing</span>
+writer, _ := jsonl.NewWriter(<span class="hljs-string">&quot;events.jsonl&quot;</span>)
+writer.Append(event)
+writer.Close()
+
+<span class="hljs-comment">// Reading all</span>
+reader, _ := jsonl.NewReader(<span class="hljs-string">&quot;events.jsonl&quot;</span>)
+messages, _ := reader.ReadAll()
+
+<span class="hljs-comment">// Streaming</span>
+ctx := context.Background()
+ch := reader.Stream(ctx)
+<span class="hljs-keyword">for</span> msg := <span class="hljs-keyword">range</span> ch {
+    <span class="hljs-comment">// Process message</span>
+}</code></pre>
+<h3>Safety Features</h3>
+<ul>
+<li><strong>File locking</strong>: Uses <code>syscall.Flock()</code> to prevent concurrent writes</li>
+<li><strong>Atomic appends</strong>: Write to temp file, then append to main file, fsync</li>
+<li><strong>Auto-create</strong>: Creates parent directories and file if needed</li>
+<li><strong>In-process mutex</strong>: <code>sync.Mutex</code> for thread safety within the same process</li>
+</ul>
+<h3>Sharded File Layout</h3>
+<p>JSONL files are sharded by type and agent (in the sync worktree at
+<code>.git/thrum-sync/a-sync/</code>):</p>
+<pre><code class="language-text hljs">events.jsonl              # Agent lifecycle, sessions, threads
+messages/
+  furiosa.jsonl           # Messages authored by agent &quot;furiosa&quot;
+  coordinator_1B9K.jsonl  # Messages authored by unnamed agent</code></pre>
+<p>Event routing is handled by <code>internal/daemon/state/</code> which directs <code>message.*</code>
+events to per-agent files and all other events to <code>events.jsonl</code>.</p>
+<h2>Schema (<code>internal/schema</code>)</h2>
+<h3>Database Tables</h3>
+<pre><code class="language-text hljs">messages            # All messages (create/edit/delete)
+message_scopes      # Routing scopes (many-to-many)
+message_refs        # References (many-to-many)
+message_reads       # Per-session read tracking (local-only, no git sync)
+message_edits       # Edit history tracking
+agents              # Registered agents (kind: &quot;agent&quot; or &quot;user&quot;)
+sessions            # Agent work periods
+session_scopes      # Session context scopes
+session_refs        # Session context references
+subscriptions       # Push notification subscriptions
+agent_work_contexts # Live git state per session
+groups              # Named collections for targeted messaging
+group_members       # Group membership (agents and roles)
+events              # Sequence-ordered, deduplicated event log (for sync)
+sync_checkpoints    # Per-peer sync progress tracking
+command_queue       # Queue dispatch for tmux sessions
+monitors            # Persisted monitor job specs (v20)
+permission_nudges   # Pending permission-prompt nudges (v21)
+daemon_identity     # Local daemon identity cache (v23)
+telegram_msg_map    # Telegram ↔ Thrum message ID map (v24)
+schema_version      # Migration tracking</code></pre>
+<h3>Schema Version</h3>
+<p>Current version: <strong>51</strong></p>
+<blockquote>
+<p><strong>v0.10.6 note:</strong> migrations 25-51 are dead-end DDL forward-ported from a
+newer development line so the v0.10.6 binary can open AND co-reside on DBs
+previously touched by a newer-schema binary on multi-binary worktree machines.
+The new tables/columns (scheduler, agent lifecycle, reminders, email,
+memories, graph, API-error remediation, <code>pending_route_resolution</code>, and
+others) are intentionally <strong>dead-end on v0.10.6</strong> — no consumer code reads
+from them. <code>createTables</code>/<code>createIndexes</code> carry full v51 parity, so a fresh DB
+created by a v0.10.6 binary stamps v51 with every table present (a co-resident
+newer binary then runs no migration and must not crash on a missing table).
+v29 is a deliberate gap, and v42/v43/v46 are no-op version markers;
+<code>runMigrations</code> handles gapped sequences naturally.</p>
+</blockquote>
+<p>Key migrations:</p>
+<ul>
+<li>v3 -&gt; v4: Impersonation support (<code>authored_by</code>, <code>disclosed</code> columns)</li>
+<li>v5 -&gt; v6: Agent work contexts table, message reads, session scopes/refs</li>
+<li>v6 -&gt; v7: Event ID backfill (ULID <code>event_id</code> on all JSONL events), JSONL
+sharding migration</li>
+<li>v7 -&gt; v8: Groups feature (<code>groups</code> and <code>group_members</code> tables), <code>@everyone</code>
+built-in group</li>
+<li>v8 -&gt; v9: <code>events</code> and <code>sync_checkpoints</code> tables added for Tailscale-style
+daemon-to-daemon sync (sequence-ordered deduplicated event log)</li>
+<li>v9 -&gt; v10: <code>file_changes</code> column added to <code>agent_work_contexts</code></li>
+<li>v10 -&gt; v11: <code>hostname</code> column added to <code>agents</code> table</li>
+<li>v11 -&gt; v12: <code>threads</code> table dropped (threads are now implicit — every message
+with a <code>thread_id</code> forms a thread automatically, removing the need for
+explicit thread creation events)</li>
+<li>v12 -&gt; v13: Backfill NULL <code>display</code>, <code>hostname</code>, and <code>last_seen_at</code> values in
+<code>agents</code> table to empty strings (ensures NOT NULL invariants on existing rows)</li>
+<li>v13 -&gt; v14: <code>message_deliveries</code> table (durable delivery/seen/read tracking
+per recipient)</li>
+<li>v14 -&gt; v15: <code>purge_metadata</code> table (stores latest purge cutoff for sync-aware
+filtering)</li>
+<li>v15 -&gt; v16: <code>claude_pid INTEGER NOT NULL DEFAULT 0</code> added to <code>agents</code> table
+(PID-first identity resolution)</li>
+<li>v16 -&gt; v17: <code>claude_pid</code> renamed to <code>agent_pid</code> in <code>agents</code> table
+(multi-runtime support)</li>
+<li>v17 -&gt; v18: <code>command_queue</code> table added (queue dispatch for tmux sessions)</li>
+<li>v18 -&gt; v19: <code>silence_ms</code> and <code>notify_on_complete</code> columns added to
+<code>command_queue</code></li>
+<li>v19 -&gt; v20: <code>monitors</code> table added (monitor job specs for supervisor respawn)</li>
+<li>v20 -&gt; v21: <code>permission_nudges</code> table added (persistent permission-prompt
+nudge state for restart resilience)</li>
+<li>v21 -&gt; v22: <code>origin_daemon TEXT</code> column added to <code>agents</code> table with backfill
+(cross-daemon registration scoping; see <code>thrum-mm3l</code>)</li>
+<li>v22 -&gt; v23: <code>daemon_identity</code> table added (single-row local cache of the
+daemon&#39;s identity block, mirrored from <code>.thrum/config.json</code>)</li>
+<li>v23 -&gt; v24: <code>telegram_msg_map</code> table added (durable Telegram message ID ↔
+Thrum message ID mapping; survives daemon restart so in-flight permission
+approvals route correctly)</li>
+<li>v24 -&gt; v25: <code>scheduler_job_state</code> + <code>scheduler_job_events</code> tables added
+(forward-ported; dead-end on v0.10.x)</li>
+<li>v25 -&gt; v26: agents table extended with <code>mode</code>, <code>identity</code>, and 4 runtime
+columns (<code>auto_respawn_enabled</code>, <code>auto_respawn_disabled_at</code>,
+<code>state_md_parse_failed_at</code>, <code>last_pane_alive_at</code>) (forward-ported)</li>
+<li>v26 -&gt; v27: <code>agent_lifecycle_events</code> append-only journal (forward-ported)</li>
+<li>v27 -&gt; v28: <code>reminders</code> polymorphic table (time-triggered + condition-
+triggered reminder substrate; forward-ported)</li>
+<li>v28 -&gt; v29: deliberate gap (reserved for future migrations)</li>
+<li>v29 -&gt; v30: <code>email_msg_seen</code> table (forward-ported)</li>
+<li>v30 -&gt; v31: <code>email_outbound_queue</code> table (forward-ported)</li>
+<li>v31 -&gt; v32: <code>email_peer_rate_state</code> table with partial index on <code>paused_at</code>
+(forward-ported)</li>
+<li>v32 -&gt; v33: <code>pending_route_resolution</code> column added to <code>messages</code> table
+(<code>thrum-s6os</code> sync re-architecture forward-port; dead-end on v0.10.6)</li>
+<li>v33 -&gt; v34: <code>memories</code> + <code>memory_scopes</code> tables and six indexes
+(forward-ported; dead-end on v0.10.6)</li>
+<li>v34 -&gt; v35: <code>agent_lifecycle_events.event_kind</code> CHECK constraint added via an
+existence-guarded table rebuild (SQLite cannot <code>ALTER ... ADD CHECK</code>;
+forward-ported; dead-end on v0.10.6)</li>
+<li>v35 -&gt; v36: <code>agent_api_error_remediation</code> table (per-agent API-error
+auto-remediation state; forward-ported; dead-end on v0.10.6)</li>
+<li>v36 -&gt; v37: memory dummy tables (<code>memory_record</code>, <code>memory_tag</code>, <code>memory_edge</code>,
+<code>memory_fts</code>, <code>memory_embeddings</code>, <code>memory_embed_queue</code> + indexes) — DDL-only
+forward-port for co-residence with newer binaries; dead-end on v0.10.6</li>
+<li>v37 -&gt; v38: <code>idx_events_timestamp</code> index on <code>events(timestamp)</code> so the
+compactor&#39;s timestamp-range delete is a seek instead of a full scan</li>
+<li>v38 -&gt; v39: <code>schedule TEXT</code> column added to <code>monitors</code> (empty = continuous
+mode; a cron expression switches the runner to scheduled one-shot fires)</li>
+<li>v39 -&gt; v40: read-state unification marker (no DDL; the version stamp triggers
+a one-time, data-only read-state backfill that clears historically-stuck
+unread)</li>
+<li>v40 -&gt; v51: dead-end DDL forward-port for on-disk parity with a v51
+(newer-schema) database — schema-on-disk only, no feature availability. The
+real migrations are v41 (<code>agents.agent_pid_start_time</code>), v44
+(<code>permission_nudges.prompt_fingerprint</code>), v45 (<code>alert_deliveries</code>), v47
+(<code>messages.visibility_class</code>/<code>retarget_fill_order</code>), v48 (<code>agents.phase</code>,
+<code>messages.priority</code>, <code>message_deliveries.addressed_via</code>), v49
+(<code>telegram_outbound_queue</code>), v50 (graph substrate tables), and v51
+(<code>memory_satellite</code>). v42/v43/v46 are no-op version markers; all are dead-end
+on v0.10.6</li>
+</ul>
+<h3>Initialization</h3>
+<pre><code class="language-go hljs">db, _ := schema.OpenDB(<span class="hljs-string">&quot;thrum.db&quot;</span>)
+schema.InitDB(db)  <span class="hljs-comment">// Create tables and indexes</span>
+
+<span class="hljs-comment">// Or use migration (checks version first, runs incremental migrations)</span>
+schema.Migrate(db)</code></pre>
+<h3>JSONL Migrations</h3>
+<p>The schema package also handles JSONL structure migrations:</p>
+<pre><code class="language-go hljs"><span class="hljs-comment">// Migrate monolithic messages.jsonl -&gt; per-agent sharded files</span>
+schema.MigrateJSONLSharding(syncDir)
+
+<span class="hljs-comment">// Backfill event_id (ULID) for events that lack it</span>
+schema.BackfillEventID(syncDir)</code></pre>
+<h3>Features</h3>
+<ul>
+<li><strong>Pure Go SQLite</strong>: Uses <code>modernc.org/sqlite</code> (no CGO)</li>
+<li><strong>WAL mode</strong>: Better concurrency</li>
+<li><strong>Foreign keys</strong>: Enabled with <code>ON DELETE CASCADE</code></li>
+<li><strong>Indexes</strong>: Optimized for common queries</li>
+</ul>
+<h2>Projection (<code>internal/projection</code>)</h2>
+<h3>Event Replay</h3>
+<p>The projector exposes a <code>Rebuild(syncDir)</code> API that rebuilds SQLite from sharded
+JSONL event logs. <strong>NOTE (thrum-1gar):</strong> as of v0.10.x the daemon&#39;s startup path
+(<code>NewState</code> in <code>internal/daemon/state</code>) does NOT call <code>Rebuild()</code> — the API is
+available for explicit invocation but the daemon treats SQLite as
+authoritative-but-backed-up on startup, not as a projection that gets
+re-derived. See thrum-rtlt for the event-sourcing rework that would make
+startup-rebuild a first-class recovery path.</p>
+<pre><code class="language-go hljs">db, _ := schema.OpenDB(<span class="hljs-string">&quot;thrum.db&quot;</span>)
+schema.InitDB(db)
+
+projector := projection.NewProjector(db)
+
+<span class="hljs-comment">// Rebuild from sync worktree (reads events.jsonl + messages/*.jsonl)</span>
+projector.Rebuild(syncDir)
+
+<span class="hljs-comment">// Or apply a single event</span>
+projector.Apply(eventJSON)</code></pre>
+<h3>Multi-File Rebuild</h3>
+<p><code>Rebuild(syncDir)</code> handles the sharded JSONL structure:</p>
+<ol>
+<li>Read <code>events.jsonl</code> (agent lifecycle, sessions)</li>
+<li>Glob <code>messages/*.jsonl</code> (per-agent message files)</li>
+<li>Sort ALL events globally by <code>(timestamp, event_id)</code> for deterministic
+ordering</li>
+<li>Apply to SQLite in order</li>
+</ol>
+<p>File boundaries are transparent to the projector — it only cares about event
+ordering.</p>
+<h3>Event Types</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>message.create</code></td>
+<td>Insert into messages, scopes, refs</td>
+</tr>
+<tr>
+<td><code>message.edit</code></td>
+<td>Update body_content, updated_at, record edit history</td>
+</tr>
+<tr>
+<td><code>message.delete</code></td>
+<td>Set deleted=1, deleted_at, delete_reason</td>
+</tr>
+<tr>
+<td><code>thread.updated</code></td>
+<td>Notify subscribers of thread activity (UI push)</td>
+</tr>
+<tr>
+<td><code>group.create</code></td>
+<td>Insert into groups</td>
+</tr>
+<tr>
+<td><code>group.delete</code></td>
+<td>Delete group and members</td>
+</tr>
+<tr>
+<td><code>agent.register</code></td>
+<td>Insert/replace agent</td>
+</tr>
+<tr>
+<td><code>agent.update</code></td>
+<td>Merge work contexts for agent</td>
+</tr>
+<tr>
+<td><code>agent.session.start</code></td>
+<td>Insert session</td>
+</tr>
+<tr>
+<td><code>agent.session.end</code></td>
+<td>Update ended_at, end_reason</td>
+</tr>
+</tbody></table>
+<h3>Forward Compatibility</h3>
+<p>Unknown event types are silently ignored, allowing older projectors to process
+logs with newer event types.</p>
+<h2>Types (<code>internal/types</code>)</h2>
+<p>Shared Go structs for all event types:</p>
+<ul>
+<li><code>BaseEvent</code> - Common fields: <code>type</code>, <code>timestamp</code>, <code>event_id</code>, <code>v</code> (version)</li>
+<li><code>MessageCreateEvent</code> - Message creation with body, scopes, refs</li>
+<li><code>MessageEditEvent</code> - Message body edit</li>
+<li><code>MessageDeleteEvent</code> - Soft delete with reason</li>
+<li><code>GroupCreateEvent</code> - Group creation with name and description</li>
+<li><code>GroupDeleteEvent</code> - Group deletion</li>
+<li><code>AgentRegisterEvent</code> - Agent registration (kind: &quot;agent&quot; or &quot;user&quot;)</li>
+<li><code>AgentUpdateEvent</code> - Agent work context updates</li>
+<li><code>AgentCleanupEvent</code> - Agent cleanup/deletion</li>
+<li><code>AgentSessionStartEvent</code> - Session start</li>
+<li><code>AgentSessionEndEvent</code> - Session end with reason</li>
+<li><code>SessionWorkContext</code> - Work context data for sync</li>
+</ul>
+<p>Each event includes:</p>
+<ul>
+<li><code>type</code>: Event type string (e.g., <code>&quot;message.create&quot;</code>)</li>
+<li><code>timestamp</code>: ISO 8601 timestamp</li>
+<li><code>event_id</code>: ULID for deduplication (auto-generated by <code>State.WriteEvent()</code>)</li>
+<li><code>v</code>: Schema version (currently <code>1</code>)</li>
+<li>Event-specific fields</li>
+</ul>
+<h2>Design Principles</h2>
+<h3>1. Append-Only Events</h3>
+<p>JSONL is the source of truth. SQLite is a rebuildable projection for fast
+queries. The projection can be deleted and rebuilt from JSONL at any time.</p>
+<h3>2. Per-Agent Sharding</h3>
+<p>Message events are sharded into per-agent JSONL files
+(<code>messages/{agent}.jsonl</code>). This reduces merge conflicts, improves sync
+performance, and enables per-agent file tracking in Git.</p>
+<h3>3. Deterministic Hashing</h3>
+<p>Repo and agent IDs are deterministic (SHA256-based), enabling identity
+verification across machines without central coordination.</p>
+<h3>4. Time-Ordered IDs</h3>
+<p>ULID format ensures IDs (messages, sessions, events) are sortable by creation
+time and globally unique.</p>
+<h3>5. Offline-First</h3>
+<p>No network required for local operation. Git handles replication via the sync
+loop.</p>
+<h3>6. Low-Conflict</h3>
+<p>Immutable events + ULID timestamps + per-agent sharding minimize merge conflicts
+during Git sync.</p>
+<h3>7. Path Indirection</h3>
+<p>The <code>.thrum/redirect</code> pattern allows multiple worktrees to share a single daemon
+and state directory without hardcoding paths.</p>
+<h3>8. Timeout Enforcement (v0.4.3)</h3>
+<p>All I/O paths enforce timeouts to prevent indefinite hangs:</p>
+<ul>
+<li><strong>5s</strong> CLI dial timeout (net.DialTimeout)</li>
+<li><strong>10s</strong> RPC call timeout (context.WithTimeout)</li>
+<li><strong>10s</strong> server per-request timeout (http.TimeoutHandler)</li>
+<li><strong>10s</strong> WebSocket handshake timeout</li>
+<li><strong>5s/10s</strong> git command timeouts (via <code>safecmd</code> wrapper)</li>
+<li><strong>Context-scoped</strong> SQLite queries (via <code>safedb</code> wrapper)</li>
+</ul>
+<p>Lock scope has been reduced — no mutex is held during I/O, git, or WebSocket
+dispatch operations.</p>
+<h2>Backup &amp; Restore</h2>
+<p>Thrum provides built-in backup and restore via <code>thrum backup</code> /
+<code>thrum backup restore</code>.</p>
+<p><strong>What gets backed up:</strong></p>
+<ul>
+<li><strong>JSONL event logs</strong> — <code>events.jsonl</code> and <code>messages/*.jsonl</code> copied from the
+sync worktree (source of truth)</li>
+<li><strong>Local-only SQLite tables</strong> — <code>message_reads</code>, <code>subscriptions</code>, and
+<code>sync_checkpoints</code> exported as JSONL (these are not in the git-synced JSONL
+logs)</li>
+<li><strong>Config files</strong> — <code>.thrum/config.json</code> and related runtime config</li>
+</ul>
+<p><strong>Backup layout</strong> (<code>~/.thrum-backups/&lt;repo&gt;/</code>):</p>
+<ul>
+<li><code>current/</code> — most recent backup (JSONL + local tables + config)</li>
+<li><code>archives/</code> — compressed <code>.zip</code> snapshots of previous <code>current/</code> runs</li>
+<li>GFS (Grandfather-Father-Son) rotation trims archives by daily/weekly/monthly
+retention windows</li>
+</ul>
+<p><strong>Plugin hooks</strong> — third-party data (e.g., Beads task DB) can register a backup
+plugin via <code>thrum backup plugin add</code>. The plugin&#39;s command runs after the core
+backup and receives <code>THRUM_BACKUP_DIR</code>, <code>THRUM_BACKUP_REPO</code>, and
+<code>THRUM_BACKUP_CURRENT</code> env vars.</p>
+<p><strong>Restore</strong> creates a safety backup of existing data first, then copies JSONL
+back to the sync worktree, imports local tables into SQLite, and removes
+<code>messages.db</code>. <strong>NOTE (thrum-1gar):</strong> the daemon&#39;s <code>NewState</code> does NOT call
+<code>Projector.Rebuild()</code> on startup today — the removed <code>messages.db</code> comes up
+BLANK on the next daemon start and only fills as NEW events arrive. Restore is
+only useful for the local-tables + JSONL files it replaces; historical
+SQLite-projected state (messages, agents, groups) is not recovered until the
+event-sourcing rework lands (thrum-rtlt). Plugin restore commands run after the
+core restore.</p>
+<h2>Upgrade Safety</h2>
+<p>Starting with v0.9.0, the daemon writes defensive backup files automatically on
+the first start after an upgrade. No user action needed — the files are silent
+safety nets.</p>
+<h3>Automatic Backup Files</h3>
+<p>Backup files are written before destructive operations. The identity and peers
+backups use a backup-once pattern (never overwritten after the first). The
+schema-migration backup is <strong>timestamped and always-fresh</strong> (since v0.10.6):
+each migration event writes a distinct, UTC-sortable snapshot, so repeated
+migrations keep separate, time-ordered recovery points rather than a single
+file. A migration backup failure now <strong>halts the migration</strong> — <code>Migrate()</code>
+returns an error and the daemon refuses to start until disk space / permissions
+are fixed, rather than logging and proceeding without a recovery snapshot.</p>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Backup file</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>identity.Bootstrap</code> detects a daemon_id rotation (e.g., legacy hostname-derived ID)</td>
+<td><code>config.json.pre-identity-bak</code></td>
+<td><code>.thrum/config.json.pre-identity-bak</code></td>
+</tr>
+<tr>
+<td><code>PeerRegistry</code> detects a stale daemon_id in peers.json</td>
+<td><code>peers.json.pre-rotation-bak</code></td>
+<td><code>.thrum/var/peers.json.pre-rotation-bak</code></td>
+</tr>
+<tr>
+<td><code>schema.Migrate</code> runs any migration step</td>
+<td><code>thrum.db.pre-migration-v&lt;N&gt;-&lt;UTC&gt;.bak</code> (plus <code>-shm</code> and <code>-wal</code> sidecars)</td>
+<td>same directory as <code>thrum.db</code></td>
+</tr>
+</tbody></table>
+<p>The UTC timestamp form is <code>YYYYMMDDTHHMMSSZ</code> (e.g.
+<code>thrum.db.pre-migration-v32-20260522T181600Z.bak</code>). You can delete these files
+after a successful upgrade. If something goes wrong mid-migration, they&#39;re how
+you get back.</p>
+<h3>Downgrade Guard</h3>
+<p><code>Migrate()</code> refuses to start if the database schema version exceeds the binary&#39;s
+<code>CurrentVersion</code>. Error text (v0.10.5+ — see &quot;Multi-Binary Worktree Footgun&quot;
+below for the why):</p>
+<pre><code class="language-text hljs">database schema is version N, this binary supports up to M — cannot downgrade.
+
+Recovery options:
+  1. Re-install a newer binary that supports schema vN or above:
+       cd &lt;worktree-with-newer-branch&gt; &amp;&amp; make install
+  2. Delete the database to start fresh (LOSES local message history + spool):
+       thrum daemon stop   # release file locks first
+       rm &lt;ABS_PATH&gt;
+       rm &lt;ABS_PATH&gt;-wal &lt;ABS_PATH&gt;-shm    # if present
+  3. See CLAUDE.md § &quot;Multi-binary worktree footgun&quot; for prevention</code></pre>
+<p>This is the first hard stop Thrum has ever had for schema mismatches.
+Previously, running an older binary against a migrated database would silently
+corrupt state. Now it fails loudly before touching anything — and the expanded
+recovery hints give operators an actionable path forward without hunting through
+code.</p>
+<h3>Multi-Binary Worktree Footgun</h3>
+<p>Each Thrum worktree builds its own <code>bin/thrum</code>, and each build can support a
+different DB schema range. The shared daemon binary at <code>~/.local/bin/thrum</code> gets
+replaced by whichever worktree most recently ran <code>make install</code>. When a
+<code>make install</code> from a worktree on a newer-schema branch (e.g. a branch ahead of
+<code>release/v0.10.x</code>) migrates the on-disk DB up, a later <code>make install</code> from a
+worktree on an older-schema branch (e.g. <code>release/v0.10.x</code>) ships a binary that
+fails the Downgrade Guard above.</p>
+<p><strong>Why it happens:</strong> the DB lives under <code>&lt;repo-root&gt;/.thrum/var/messages.db</code> and
+is shared across every worktree&#39;s binary (worktrees redirect their <code>.thrum/</code> to
+the main repo&#39;s <code>.thrum/</code> via the <code>.thrum/redirect</code> file). Schema migrations are
+one-way: newer binaries can migrate up; older binaries cannot migrate down.</p>
+<p><strong>Avoid:</strong> Only <code>make install</code> from a worktree whose schema <code>CurrentVersion</code> is
+at least the on-disk DB&#39;s schema. For local-iteration inside a single worktree,
+prefer <code>make dev</code> (per-worktree <code>./bin/thrum</code> + restart of that worktree&#39;s
+daemon) over <code>make install</code>.</p>
+<p><strong>Recover:</strong> the Downgrade Guard error walks you through it; the in-repo
+CLAUDE.md § &quot;Multi-binary worktree footgun&quot; carries the dev-facing expansion.</p>
+<h3>Recovering from a Failed Upgrade</h3>
+<p>If a migration goes wrong:</p>
+<ol>
+<li>Stop the daemon.</li>
+<li>Rename the most recent <code>thrum.db.pre-migration-v&lt;N&gt;-&lt;UTC&gt;.bak</code> snapshot back
+to <code>thrum.db</code> (and the <code>-shm</code> and <code>-wal</code> sidecars if they exist). The UTC
+suffix sorts lexically, so the highest-sorting name is the newest backup.</li>
+<li>Run the older binary.</li>
+</ol>
+<p>The downgrade guard will fire on the older binary if the migration already
+partially ran and bumped the version. In that case, delete <code>thrum.db</code> entirely
+(the JSONL source of truth is unaffected) and let the older daemon rebuild the
+projection from scratch.</p>
+<hr>
+<h2>Cross-Repo Peer System (v0.7.0)</h2>
+<p>Two Thrum daemons — different repos, different machines, same machine in
+different worktrees — can exchange messages bidirectionally via Tailscale. Pair
+them once, and messages route automatically from then on.</p>
+<h3>Architecture Layers</h3>
+<pre><code class="language-text hljs">┌──────────────────────────────────────────────────────┐
+│  PeerManager         — Lifecycle of all bridges      │
+│    ├─ ConnectAll()   — Connect to all dialer-role    │
+│    ├─ AcceptPeer()   — Handle listener-side connects │
+│    └─ NotifyAddressChange() — Propagate IP changes   │
+├──────────────────────────────────────────────────────┤
+│  PeerBridge          — One per connected peer        │
+│    ├─ runOutbound    — Local → Remote relay          │
+│    ├─ runInbound     — Remote → Local relay          │
+│    └─ heartbeatLoop  — 30s keepalive                 │
+├──────────────────────────────────────────────────────┤
+│  PeerTransport       — TransportBridge implementation│
+│    ├─ Remote (IP:port + token auth)                  │
+│    └─ Local  (reads ws.port from .thrum/var/)        │
+├──────────────────────────────────────────────────────┤
+│  PeerRegistry        — On-disk peer records          │
+│    └─ .thrum/peers.json                              │
+└──────────────────────────────────────────────────────┘</code></pre>
+<h3>Pairing Flow</h3>
+<ol>
+<li><strong>Machine A</strong> runs <code>thrum peer add</code>, which generates a 16-digit pairing code
+and a 32-byte shared token, then blocks waiting.</li>
+<li><strong>Machine B</strong> runs <code>thrum peer join --peercode &lt;code&gt;</code>, validates the code,
+stores the peer record (role=<code>&quot;dialer&quot;</code>), receives the token.</li>
+<li>Machine A stores the peer record (role=<code>&quot;listener&quot;</code>), and both sides start
+bridge goroutines.</li>
+<li>On subsequent daemon restarts, peers with <code>auto_connect: true</code> reconnect
+automatically via <code>PeerManager.ConnectAll()</code>.</li>
+</ol>
+<h3>Message Routing</h3>
+<p><strong>Outbound</strong> (local → remote): The bridge subscribes to <code>notification.message</code>
+events. Messages addressed to proxy agents (format <code>prefix:name</code>) are relayed to
+the remote daemon after stripping the prefix. A <code>MessageMap</code> (max 10k entries,
+LRU) stores local↔remote message ID mappings for reply threading.</p>
+<p><strong>Inbound</strong> (remote → local): Messages from the remote daemon are wrapped as
+<code>InboundMessage</code> with <code>source: &quot;peer&quot;</code> metadata and injected into the local
+daemon via <code>relay.RelayInbound()</code>.</p>
+<h3>Proxy Agents</h3>
+<p>Remote agents are registered locally as <code>{prefix}:{name}</code> (e.g.,
+<code>sf:coordinator_main</code>). These proxy names are addressable via <code>@sf:coordinator</code>
+and appear in <code>thrum team</code>. Configure with <code>thrum peer configure</code>.</p>
+<h3>Address Validation</h3>
+<p><code>ValidateAddressChange()</code> enforces transport-appropriate addressing:</p>
+<ul>
+<li><strong>Local</strong> peers must be on loopback</li>
+<li><strong>Tailscale</strong> peers must be in <code>100.64.0.0/10</code> (CGNAT)</li>
+<li><strong>Network</strong> peers must stay on the same <code>/24</code> subnet</li>
+</ul>
+<p>See <a href="configuration.html">Configuration</a> for the <code>peers</code> config block and
+<a href="cli.html">CLI Reference</a> for the <code>thrum peer</code> commands.</p>
+<h2>References</h2>
+<ul>
+<li>Design document: <code>dev-docs/2026-02-03-thrum-design.md</code></li>
+<li>Sharding design: <code>dev-docs/2026-02-06-jsonl-sharding-and-agent-naming.md</code></li>
+<li>Daemon architecture: <a href="daemon.html">Daemon Architecture</a></li>
+<li>Sync protocol: <a href="sync.html">Sync Protocol</a></li>
+</ul>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="daemon.html">Daemon Architecture</a> — deeper dive into the daemon&#39;s lifecycle,
+RPC handlers, sync loop, and WebSocket server internals</li>
+<li><a href="sync.html">Sync Protocol</a> — how the <code>a-sync</code> orphan branch, JSONL dedup, and
+conflict-free merging work in detail</li>
+<li><a href="rpc-api.html">RPC API Reference</a> — all RPC methods (40+) that the CLI and Web
+UI call into</li>
+<li><a href="development.html">Development Guide</a> — how to build, test, and extend Thrum</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

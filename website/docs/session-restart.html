@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Session Restart &amp; Context Recovery — Thrum</title>
+  <meta name="description" content="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Session Restart &amp; Context Recovery — Thrum">
+  <meta property="og:description" content="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">
+  <meta property="og:url" content="https://thrum.team/docs/session-restart.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Session Restart &amp; Context Recovery — Thrum">
+  <meta name="twitter:description" content="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/session-restart.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Session Restart & Context Recovery","description":"Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts","url":"https://thrum.team/docs/session-restart.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link active" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Two Ways to Use This</h2>
+<p><strong>If you&#39;re a developer using Thrum with one or two agents,</strong> the only thing you
+need from this page is the first section. Run <code>/thrum:update-project</code> before you
+close your laptop. Come back tomorrow. Your agent remembers where it was.</p>
+<p><strong>If you&#39;re running agent teams</strong> and agents need to restart mid-task without
+losing their place — context exhaustion, rate limits, stuck state — the rest of
+this page covers how the daemon extracts conversation history, saves a snapshot,
+and relaunches the agent automatically.</p>
+<hr>
+<h2>Everyday Use: Save and Resume</h2>
+<p>The <code>/thrum:update-project</code> skill is the thing most people need. It saves your
+project state and session context so your agent can pick up where it left off
+next time.</p>
+<p>Run it:</p>
+<ul>
+<li>Before you shut down for the day</li>
+<li>Before compaction hits</li>
+<li>Whenever you want your agent to remember what you were working on</li>
+</ul>
+<p>Next session, <code>thrum prime</code> loads everything back — project state, session
+history, role instructions. The agent is oriented and ready to work immediately.</p>
+<p>If you&#39;re using <a href="beads-and-thrum.html">Beads</a> for task tracking, that state
+survives too — it&#39;s in git. Your agent knows which tasks are open, which are
+blocked, and what it was working on.</p>
+<p>That&#39;s the &quot;close your laptop&quot; workflow. Simple, works everywhere, no tmux
+required.</p>
+<h3>How This Differs from Restart Snapshots</h3>
+<p><code>/thrum:update-project</code> saves to <code>.thrum/context/&lt;agent&gt;.md</code> and persists
+indefinitely. It&#39;s your agent&#39;s long-term memory of the project — architecture
+decisions, open epics, session history. It accumulates over time.</p>
+<p>Restart snapshots (the rest of this page) save to <code>.thrum/restart/&lt;agent&gt;.md</code>
+and are consumed once — <code>thrum prime</code> loads the snapshot and deletes it. They&#39;re
+a one-time context transfer between sessions, carrying the raw conversation so
+the new session can pick up mid-task.</p>
+<p>Different tools, different purposes. Use <code>/thrum:update-project</code> for daily
+saves. Restart snapshots happen automatically when an agent needs a fresh
+session.</p>
+<hr>
+<h2>How Restart Snapshots Work</h2>
+<p>Claude Code stores full session transcripts as append-only JSONL files. The
+restart system reads these transcripts and extracts just the conversation — what
+the user said and what the assistant said back. No tool calls, no thinking
+blocks, no subagent sidechains. Just the conversation you&#39;d see in the terminal.</p>
+<p>The pipeline:</p>
+<ol>
+<li>Find the agent&#39;s Claude PID from the identity file</li>
+<li>Read <code>~/.claude/sessions/&lt;pid&gt;.json</code> for the session ID and cwd, then locate
+the JSONL transcript at <code>~/.claude/projects/&lt;encoded-cwd&gt;/&lt;session-id&gt;.jsonl</code></li>
+<li>Parse the JSONL and extract <code>user</code> + <code>assistant</code> text entries</li>
+<li>Skip <code>isSidechain: true</code> entries (subagent transcripts)</li>
+<li>Skip <code>tool_use</code>, <code>tool_result</code>, and <code>thinking</code> content blocks</li>
+<li>Truncate to the configured line limit (default 200 lines, oldest removed
+first)</li>
+<li>Save to <code>.thrum/restart/&lt;agent&gt;.md</code></li>
+</ol>
+<p>On the next session start, <code>thrum prime</code> detects the snapshot file and includes
+it in the session briefing. The agent gets its conversation history and picks up
+where it left off. The file is deleted after loading — it&#39;s a one-time transfer.</p>
+<p>The snapshot is framed as a directive, not background reading. As of v0.9.2,
+<code>thrum prime</code> introduces the section as
+<code>🛑 ACTION REQUIRED — this is YOUR message-to-self</code> and lists numbered required
+steps: read the Resume Plan, execute it, only then continue. The Claude Code and
+Cursor SessionStart hooks add another layer on top — when the briefing carries a
+snapshot, the hook prepends an <code>ACTION REQUIRED</code> block at the very top of
+<code>additionalContext</code> pointing at the section below. Two surfaces, the same
+directive, so it can&#39;t be compressed away or skimmed past.</p>
+<h3>Snapshot Format</h3>
+<pre><code class="language-markdown hljs"><span class="hljs-section"># Restart Snapshot — impl<span class="hljs-emphasis">_api
+
+<span class="hljs-strong">**Session:**</span> ses_</span>abc123 <span class="hljs-strong">**Saved:**</span> 2026-04-07T14:30:00Z <span class="hljs-strong">**Reason:**</span> external</span>
+
+[Conversation continued from earlier — truncated to last 847 lines]
+
+=== USER === Implement the rate limiter for the /api/submit endpoint...
+
+=== ASSISTANT === I&#x27;ll add the rate limiter using the token bucket pattern...
+
+=== USER === Looks good. Now add the Redis backend for distributed rate
+limiting.
+
+=== ASSISTANT === I&#x27;ll modify the rate limiter to use Redis...</code></pre>
+<p>The truncation is boundary-aligned — it always starts on a <code>=== USER ===</code> marker
+and ends with assistant text. No partial exchanges.</p>
+<hr>
+<h2>Three Restart Triggers</h2>
+<h3>Self-Initiated</h3>
+<p>The agent recognizes it needs a fresh session — context is getting full, it hit
+rate limits, or it&#39;s stuck. It runs the <code>/thrum:restart</code> skill, which:</p>
+<ol>
+<li>Saves the conversation snapshot via <code>thrum tmux snapshot save</code></li>
+<li>If in a tmux session, notifies the coordinator to handle the relaunch</li>
+<li>If not in tmux, prints instructions for the operator</li>
+</ol>
+<p>The agent doesn&#39;t kill itself. It lets the coordinator (or operator) orchestrate
+the restart.</p>
+<h4>Resume Plan</h4>
+<p>The <code>/thrum:restart</code> skill appends a structured <code>## Resume Plan</code> block to the
+snapshot file as its final step. This block is the deterministic tail anchor —
+when the next session loads the snapshot via <code>thrum prime</code>, it can locate the
+Resume Plan reliably regardless of how much conversation was truncated.</p>
+<p>The format:</p>
+<pre><code class="language-markdown hljs"><span class="hljs-section">## Resume Plan</span>
+
+<span class="hljs-strong">**Shipped this session:**</span>
+
+<span class="hljs-bullet">-</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">brief</span> <span class="hljs-attr">bullet</span> <span class="hljs-attr">per</span> <span class="hljs-attr">merged</span>/<span class="hljs-attr">closed</span> <span class="hljs-attr">item</span>, <span class="hljs-attr">with</span> <span class="hljs-attr">bead</span>/<span class="hljs-attr">PR</span>/<span class="hljs-attr">SHA</span> <span class="hljs-attr">where</span> <span class="hljs-attr">relevant</span>&gt;</span></span>
+
+<span class="hljs-strong">**In-flight work:**</span>
+
+<span class="hljs-bullet">-</span> Branch: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">branch</span> <span class="hljs-attr">name</span>&gt;</span></span>
+<span class="hljs-bullet">-</span> Last commit: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">short</span> <span class="hljs-attr">SHA</span> + <span class="hljs-attr">subject</span>&gt;</span></span>
+<span class="hljs-bullet">-</span> Uncommitted files: <span class="language-xml">&lt;paths, or &quot;none&quot;&gt;</span>
+<span class="hljs-bullet">-</span> Next concrete step: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">one</span> <span class="hljs-attr">sentence</span>&gt;</span></span>
+
+<span class="hljs-strong">**Blockers / open questions:**</span>
+
+<span class="hljs-bullet">-</span> <span class="language-xml">&lt;bullets, or &quot;none&quot;&gt;</span>
+
+<span class="hljs-strong">**Resume plan:**</span>
+
+<span class="hljs-bullet">1.</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">first</span> <span class="hljs-attr">step</span> <span class="hljs-attr">the</span> <span class="hljs-attr">next</span> <span class="hljs-attr">session</span> <span class="hljs-attr">should</span> <span class="hljs-attr">take</span>&gt;</span></span>
+<span class="hljs-bullet">2.</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">second</span> <span class="hljs-attr">step</span>&gt;</span></span>
+<span class="hljs-bullet">3.</span> ... (4–8 numbered steps total)</code></pre>
+<p><strong>Single source of truth via mktemp</strong>: the skill writes the Resume Plan once to
+a temp file (<code>mktemp -t resume_plan.XXXXXX</code>), then <code>cat</code>s it twice — once to the
+terminal for the operator to read, once appended to the snapshot file. This
+guarantees the printed copy and the snapshot copy cannot drift from each other.
+The 4-step flow is: write to temp file → print to terminal → save snapshot →
+append to snapshot → remove temp file.</p>
+<h3>External</h3>
+<p>The coordinator decides an agent needs a fresh session:</p>
+<pre><code class="language-bash hljs">thrum tmux restart implementer-api</code></pre>
+<p>There are two flows — graceful (default) and force. The daemon picks based on
+the <code>--force</code> flag:</p>
+<p><strong>Graceful flow (default)</strong> — the daemon asks the agent to save its own snapshot
+before killing the session. The flow:</p>
+<ol>
+<li>Daemon sends an <code>@system</code> message asking the agent to save a snapshot</li>
+<li>Daemon nudges the pane to wake the agent</li>
+<li>Daemon polls for the snapshot file up to <code>restart.graceful_timeout</code> seconds
+(default 30)</li>
+<li>If the snapshot appears, the daemon uses it</li>
+<li>If the timeout expires, the daemon falls back to JSONL extraction</li>
+</ol>
+<p>Use the graceful flow when possible — the agent&#39;s own snapshot tends to be more
+useful than the raw JSONL extraction (the agent can synthesize what matters
+rather than dumping the whole conversation).</p>
+<p><strong>Force flow (<code>--force</code>)</strong> — the daemon skips the graceful prompt and extracts
+directly from the JSONL conversation file. This is faster but only works for
+Claude Code (other runtimes don&#39;t use the same JSONL format). Use <code>--force</code> when
+the agent is unresponsive or you know it can&#39;t save.</p>
+<pre><code class="language-bash hljs">thrum tmux restart implementer-api --force</code></pre>
+<p>Either way, the daemon kills the session, creates a new one, and relaunches. The
+new session loads the snapshot via <code>thrum prime</code>.</p>
+<p>Use <code>--runtime</code> to switch runtimes on relaunch:</p>
+<pre><code class="language-bash hljs">thrum tmux restart implementer-api --runtime opencode</code></pre>
+<h3>Automatic</h3>
+<p>A Claude Code plugin hook monitors context usage. When <code>used_percentage</code> exceeds
+the configured threshold, it triggers automatically:</p>
+<ol>
+<li>Saves the conversation snapshot</li>
+<li>If in a tmux session, calls <code>thrum tmux restart</code> to handle the full cycle</li>
+<li>If not in tmux, only saves the snapshot — manual restart required</li>
+</ol>
+<p>Auto-restart is <strong>disabled by default</strong>. Enable it by setting a threshold:</p>
+<pre><code class="language-bash hljs">thrum config <span class="hljs-built_in">set</span> restart.auto_threshold 80</code></pre>
+<hr>
+<h2>CLI Commands</h2>
+<h3><code>thrum tmux snapshot save</code></h3>
+<p>Save a conversation snapshot for the current agent.</p>
+<pre><code class="language-bash hljs">thrum tmux snapshot save
+thrum tmux snapshot save --reason context-threshold</code></pre>
+<p>The <code>--reason</code> flag sets the reason in the snapshot header. Values:
+<code>self-initiated</code> (default), <code>external</code>, <code>context-threshold</code>.</p>
+<h3><code>thrum tmux snapshot restore</code></h3>
+<p>Manual escape hatch for non-tmux agents. Outputs the snapshot to stdout and
+deletes the file.</p>
+<pre><code class="language-bash hljs">thrum tmux snapshot restore</code></pre>
+<p>If no snapshot exists, exits with code 1.</p>
+<h3><code>thrum tmux snapshot check</code></h3>
+<p>Check if a restart snapshot exists. Exits 0 if yes, 1 if no. No output — for
+scripting.</p>
+<pre><code class="language-bash hljs"><span class="hljs-keyword">if</span> thrum tmux snapshot check; <span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Snapshot ready&quot;</span>
+<span class="hljs-keyword">fi</span></code></pre>
+<h3><code>thrum tmux restart</code></h3>
+<p>Full restart cycle for tmux-managed agents. See
+<a href="tmux-sessions.html">Tmux-Managed Sessions</a> for context.</p>
+<pre><code class="language-bash hljs">thrum tmux restart implementer-api
+thrum tmux restart implementer-api --force
+thrum tmux restart implementer-api --runtime opencode</code></pre>
+<hr>
+<h2>Configuration</h2>
+<pre><code class="language-yaml hljs"><span class="hljs-attr">restart:</span>
+  <span class="hljs-attr">max_lines:</span> <span class="hljs-number">200</span> <span class="hljs-comment"># Max lines in snapshot (default: 200)</span>
+  <span class="hljs-attr">auto_threshold:</span> <span class="hljs-number">0</span> <span class="hljs-comment"># Context % trigger, 0 = disabled (default: 0)</span>
+  <span class="hljs-attr">graceful_timeout:</span> <span class="hljs-number">30</span> <span class="hljs-comment"># Seconds to wait for graceful save (default: 30)</span>
+  <span class="hljs-attr">silence_watchdog_seconds:</span> <span class="hljs-number">30</span> <span class="hljs-comment"># Post-launch silence threshold (default: 30)</span></code></pre>
+<p><code>max_lines</code> controls how much conversation history to keep. 200 lines captures
+the recent conversation tail; older context is covered by the appended git and
+Thrum hints (<code>git log</code>, <code>git status</code>, <code>bd ready</code>, <code>thrum inbox</code>) that the
+snapshot now includes at the tail. Increase it if your agents have long
+conversations and need more raw history.</p>
+<p><code>auto_threshold</code> is the percentage of context window usage that triggers an
+automatic restart. Set to 0 to disable (the default). A value like 80 means
+&quot;restart when 80% of the context window is used.&quot;</p>
+<p><code>graceful_timeout</code> is how long <code>thrum tmux restart</code> waits for the agent to save
+its own snapshot before falling back to force extraction.</p>
+<p><code>silence_watchdog_seconds</code> controls the post-launch silence watchdog. After
+<code>thrum tmux launch</code> or <code>thrum tmux restart</code>, the daemon monitors the agent pane
+for this many seconds. If the pane produces no output, a contextual nudge is
+sent so the agent doesn&#39;t sit idle having missed the prime output. An
+actively-producing pane is never interrupted. Set to a negative value to
+disable.</p>
+<hr>
+<h2>How It Fits Together</h2>
+<p>The context preservation story has layers:</p>
+<ul>
+<li><strong><code>/thrum:update-project</code></strong> — your everyday tool. Saves project state and
+session context. Persists indefinitely. Run it before shutdown, before
+compaction, whenever you want your agent to remember.</li>
+<li><strong>Restart snapshots</strong> — automated mid-task recovery. Extracts raw conversation
+history, consumed once on next session start. Happens when agents restart.</li>
+<li><strong><code>thrum prime</code></strong> — loads everything on session start. Project state, session
+context, restart snapshot (if present), role instructions.</li>
+<li><strong>Beads</strong> — task state is in git. Survives everything. Your agent knows which
+tasks are open regardless of how the session started.</li>
+</ul>
+<p>For the full technical details on context files, see
+<a href="context.html">Context Management</a>.</p>
+<hr>
+<h2>Next Steps</h2>
+<ul>
+<li><a href="tmux-sessions.html">Tmux-Managed Sessions</a> — the daemon-managed session system
+that makes automated restarts possible</li>
+<li><a href="context.html">Context Management</a> — the three-tier context model and how
+<code>/thrum:update-project</code> works under the hood</li>
+<li><a href="beads-and-thrum.html">Beads and Thrum</a> — how task tracking and messaging work
+together for persistent state across sessions</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

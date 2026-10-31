@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Permission Prompts — Thrum</title>
+  <meta name="description" content="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Permission Prompts — Thrum">
+  <meta property="og:description" content="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">
+  <meta property="og:url" content="https://thrum.team/docs/permission-prompts.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Permission Prompts — Thrum">
+  <meta name="twitter:description" content="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/permission-prompts.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Permission Prompts","description":"How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience","url":"https://thrum.team/docs/permission-prompts.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link active" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>What This Does</h2>
+<p>Your agent hits a permission prompt in the middle of a long run. You&#39;re not
+watching the pane. The agent sits there silently — blocked — until you notice.
+Depending on when you check, that could be minutes or hours of wasted time.</p>
+<p>Thrum detects this. The daemon watches every enrolled tmux session, notices when
+the pane content stops changing in a way that looks like a stuck prompt, and
+sends you an actionable message: here&#39;s what the agent is waiting on, here&#39;s the
+session, here are the commands to approve or deny. You reply <code>y</code> or <code>n</code> from
+wherever you are — CLI, web UI, or Telegram on your phone — and Thrum replays
+the correct keystroke directly into the pane.</p>
+<hr>
+<h2>How Detection Works</h2>
+<h3>Why we replaced the alert-silence hook</h3>
+<p>The first version of this feature used tmux&#39;s <code>alert-silence</code> hook as the
+trigger. That turned out to be the wrong approach. tmux documents this in issue
+1384: alerts are processed per-session-per-client, and detached sessions
+(sessions with no currently attached client) typically don&#39;t fire the hook at
+all. Thrum agents run detached by design. So <code>alert-silence</code> was unreliable
+exactly when you most needed it.</p>
+<p>We replaced it with a daemon-side poller that doesn&#39;t depend on tmux hooks.</p>
+<h3>The silence-hash poller</h3>
+<p>The daemon runs a <code>SessionPoller</code> (<code>internal/daemon/permission/poller.go</code>) that
+polls every enrolled session every 10 seconds. Each poll captures the pane
+content, strips runtime-specific volatile lines (more on that below), and hashes
+the result with SHA-256. Two consecutive polls with the same hash — stable for
+~20 seconds — trigger <code>HandleCheckPane</code>, which runs the runtime-specific pattern
+library against the raw pane content and, on a match, calls <code>OnDetection</code> to
+start the nudge flow.</p>
+<p>Pattern matching and the stability hash both run against the <strong>bottom 15 lines</strong>
+of the capture — not the whole 30-line window. An active prompt sits at the
+bottom of the terminal by definition; a prompt still visible in the upper
+scrollback has either been resolved or is being pushed out by newer output, and
+either way isn&#39;t actionable. Scoping detection to the bottom of the pane stops
+the scheduler from re-firing <code>firstDetect</code> every ~60s on resolved prompts that
+haven&#39;t yet scrolled off the capture window.</p>
+<p>Detection latency is about 20 seconds from when the prompt appears to when the
+first nudge goes out.</p>
+<p>Sessions are enrolled automatically when the daemon launches or restarts a
+session. <code>ReconcilePoller</code> runs at daemon boot and re-enrolls every active
+session, so sessions that were tracked before a daemon restart resume polling
+without re-registration.</p>
+<h3>Restart safety</h3>
+<p>The <code>permission_nudges</code> SQLite table (schema v21) persists in-flight nudges
+across daemon restarts. <code>ReloadOnBoot</code> reads all non-expired rows at startup and
+resumes the reminder cadence at the right step. If there are any, you&#39;ll see
+this in the daemon log:</p>
+<pre><code class="language-text hljs">permission found N pending nudge(s) still in flight</code></pre>
+<p>The Telegram message-ID mapping is also persisted — in <code>telegram_msg_map</code>
+(schema v24) — so a supervisor&#39;s reply to a nudge that was sent before the
+daemon restarted still routes correctly. Before this, the mapping lived in an
+in-memory LRU cache and a restart between sending the nudge and receiving the
+reply silently broke the routing.</p>
+<hr>
+<h2>Volatile-Line Catalog</h2>
+<p>Before hashing, the poller strips runtime-specific lines that change every few
+seconds for cosmetic reasons — spinners, timers, statuslines. Without stripping,
+the hash never stabilizes on an unchanged pane, so the poller never fires.</p>
+<table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>Stripped lines</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>codex</code></td>
+<td><code>• Working (Ns • esc to interrupt)</code> progress line</td>
+<td>Per-second activity timer</td>
+</tr>
+<tr>
+<td><code>claude</code></td>
+<td>Cogitation spinner lines (<code>✻ Cogitated for Ns</code>, etc.)</td>
+<td>Animated spinner</td>
+</tr>
+<tr>
+<td><code>claude</code></td>
+<td>ccstatusline <code>Ctx: ... | Block: ...</code> markers</td>
+<td>Context size and block countdown drift every 30–60s</td>
+</tr>
+</tbody></table>
+<p>The ccstatusline strip was added after observing three spurious nudges in ~80
+seconds for a single unchanged Claude Code prompt. The Ctx counter and Block
+countdown were resetting the hash on every drift.</p>
+<p>Unknown runtimes pass through unstripped. That&#39;s the conservative default:
+better to have the poller not fire (false-not-stable) than to fire on a pane
+that&#39;s still actively running (false-stable).</p>
+<p>To add stripping for a new runtime, add patterns to
+<code>internal/daemon/permission/poller.go</code> in the <code>volatileLinePatterns</code> map. The
+key is the canonical runtime name from the agent identity file.</p>
+<hr>
+<h2>Supported Runtimes</h2>
+<p>The pattern library covers five runtimes. Each has one or more patterns with an
+<code>approve_key</code> and an optional <code>deny_key</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>Pattern</th>
+<th>Approve key</th>
+<th>Deny key (runtime default)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>claude</code></td>
+<td><code>Do you want to proceed?</code> tool confirmation</td>
+<td><code>1</code> (Yes, once)</td>
+<td>per-shape — see below</td>
+</tr>
+<tr>
+<td><code>codex</code></td>
+<td><code>Would you like to run the following command?</code></td>
+<td><code>1</code> (Yes, proceed)</td>
+<td><code>3</code> (No)</td>
+</tr>
+<tr>
+<td><code>cursor</code></td>
+<td><code>Not in allowlist:</code></td>
+<td><code>y</code> (Run once)</td>
+<td><code>Escape</code></td>
+</tr>
+<tr>
+<td><code>opencode</code></td>
+<td><code>△ Permission required</code></td>
+<td><code>Enter</code> (Allow once, default)</td>
+<td><code>End,Enter</code> (Reject)</td>
+</tr>
+<tr>
+<td><code>kiro-cli</code></td>
+<td><code>shell requires approval</code></td>
+<td><code>Enter</code> (Yes, single permission)</td>
+<td><code>Escape</code></td>
+</tr>
+</tbody></table>
+<p><strong>Per-shape deny key for claude.</strong> The <code>claude.tool_confirmation</code> pattern
+matches three observable prompt shapes under one regex anchor, and each shape
+has a different &quot;No&quot; key. When the scheduler fires a nudge for a claude prompt,
+<code>DisambiguateClaudeDeny</code> inspects the captured pane (ANSI-stripped) and picks
+the right deny key:</p>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Example</th>
+<th>Deny key stored on the nudge</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Variant A — 3-option Write/Exec</td>
+<td><code>1. Yes</code> / <code>2. Yes, and don&#39;t ask again</code> / <code>3. No, …</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td>Variant B-Bash — 2-option Bash picker</td>
+<td><code>1. Yes</code> / <code>2. No, …</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td>Variant B-Read — 2-option Read picker (or unknown 2-)</td>
+<td><code>1. Yes</code> / <code>2. Yes, and don&#39;t ask again for session</code></td>
+<td><code>Escape</code></td>
+</tr>
+<tr>
+<td>No 1/2/3 lines detected at all</td>
+<td>—</td>
+<td><code>Escape</code></td>
+</tr>
+</tbody></table>
+<p>The Variant B-Read case falls back to <code>Escape</code> on purpose: option 2 in that
+shape is a session-scoped &quot;don&#39;t ask again&quot; — sending <code>&quot;2&quot;</code> as a deny would
+grant a forever-allow. Without positive evidence that option 2 says &quot;No&quot;, the
+safe default is to cancel the dialog. The disambiguated key is written onto
+<code>NudgeRow.DenyKey</code> at first detection so every reminder in the thread carries
+the same keystroke without re-inspecting the pane.</p>
+<p>The CI guard <code>TestApproveKeyNeverForeverAllow</code> enforces a safety invariant: no
+runtime&#39;s <code>approve_key</code> can ever map to a &quot;don&#39;t ask again&quot;, &quot;add to allowlist&quot;,
+or &quot;auto-run everything&quot; option. A supervisor&#39;s approval must always grant
+single-invocation permission only.</p>
+<hr>
+<h2>Configuration</h2>
+<p>Two new keys in <code>.thrum/config.json</code> control the feature:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;project_name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;thrum&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;permission_supervisors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;coordinator&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;@leon-letto&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<p><strong><code>project_name</code></strong> — used to name the <code>@supervisor_&lt;project&gt;</code> pseudo-agent that
+authors nudges. Defaults to <code>filepath.Base</code> of the repo root if unset.</p>
+<p><strong><code>permission_supervisors</code></strong> — list of recipients for nudges. Accepts:</p>
+<ul>
+<li>A role name (<code>&quot;coordinator&quot;</code>) — broadcasts to all active agents with that role</li>
+<li>An agent name (<code>&quot;@implementer_api&quot;</code>) — delivers to a specific agent</li>
+<li>A user name (<code>&quot;@leon-letto&quot;</code>) — auto-forwards to Telegram if the bridge is
+configured for that user</li>
+</ul>
+<p>Defaults to <code>[&quot;coordinator&quot;]</code> when the key is absent.</p>
+<p>The config is re-read on every nudge, so you can change the supervisor list
+without a daemon restart.</p>
+<p>At daemon boot, Thrum registers <code>@supervisor_&lt;project&gt;</code> as a reserved
+pseudo-agent. It&#39;s the canonical author of all permission nudges. Unlike
+<code>@system</code>, it accepts replies — that&#39;s the entire point. You can see it with:</p>
+<pre><code class="language-bash hljs">thrum team --system</code></pre>
+<p>Reserved agents show with the <code>⊙</code> glyph in compact output. Regular agents use
+<code>●</code> (active) or <code>○</code> (offline).</p>
+<hr>
+<h2>What a Nudge Looks Like</h2>
+<p>The first time a prompt is detected, you receive a message like this:</p>
+<pre><code class="language-text hljs">⚠ Permission prompt — @implementer_api (thrum-main)
+
+Repo:    thrum
+Runtime: claude
+Pattern: claude.tool_confirmation
+First detected: 2026-04-16 14:32:11 (0s ago)
+Reminder #1 of 6
+
+Pane tail (last 15 lines):
+  ...
+  ╭──────────────────────────────────────────╮
+  │ Do you want to proceed?                  │
+  │                                          │
+  │ 1. Yes                                   │
+  │ 2. Yes, and don&#x27;t ask again for ...      │
+  │ 3. No, and tell Claude what to ...       │
+  ╰──────────────────────────────────────────╯
+
+─────────────────────────
+To approve:  thrum tmux send thrum-main &quot;1&quot;
+To deny:     thrum tmux send thrum-main &quot;3&quot;
+
+Or reply to this message with `y` / `n` — works from CLI, web UI, and Telegram.</code></pre>
+<p>Reminder messages have the same body but with <code>Reminder #N of 6</code> incremented.</p>
+<p><strong>Reminder cadence</strong> — all offsets are measured from when the prompt was first
+detected:</p>
+<table>
+<thead>
+<tr>
+<th>Reminder</th>
+<th>Sent at (from first detection)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>immediately</td>
+</tr>
+<tr>
+<td>2</td>
+<td>+5m</td>
+</tr>
+<tr>
+<td>3</td>
+<td>+15m</td>
+</tr>
+<tr>
+<td>4</td>
+<td>+45m</td>
+</tr>
+<tr>
+<td>5</td>
+<td>+2h</td>
+</tr>
+<tr>
+<td>6</td>
+<td>+4h</td>
+</tr>
+</tbody></table>
+<p>After 6 reminders with no supervisor response, the scheduler marks the agent
+<code>stuck</code> (see below) and stops sending.</p>
+<hr>
+<h2>Stuck State</h2>
+<p>When the 6-nudge cadence runs out, the agent&#39;s identity file gets
+<code>agent_status: stuck</code>. This is visible in <code>thrum team</code> output and the web UI&#39;s
+agent list.</p>
+<p>Stuck clears automatically. When the poller next sees the pane return to a
+healthy state — any state that isn&#39;t a recognized permission prompt —
+<code>OnRecovery</code> runs, deletes the nudge row, and resets <code>agent_status</code>.</p>
+<p>If you manually resolve the prompt in the pane (by attaching to the session and
+pressing a key yourself), the next poll cycle will see the changed pane content
+and trigger recovery automatically. You don&#39;t need to do anything else.</p>
+<hr>
+<h2>Replying to a Nudge</h2>
+<h3>From the CLI</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Reply to the nudge message directly</span>
+thrum reply &lt;msg_id&gt; y
+
+<span class="hljs-comment"># Or send the keystroke directly into the pane</span>
+thrum tmux send &lt;session&gt; <span class="hljs-string">&quot;1&quot;</span></code></pre>
+<p>Both work. The <code>thrum reply</code> path goes through <code>TryResolve</code> and fires the
+correct runtime-specific keystroke. The <code>thrum tmux send</code> path sends a literal
+keystroke to the pane and bypasses the nudge system — use it if the pattern
+matching got something wrong and you want to type a different key.</p>
+<h3>From the web UI</h3>
+<p>Open the inbox, find the nudge message, and use the reply button. Typing <code>y</code> or
+<code>n</code> in the reply field routes through the same <code>TryResolve</code> path.</p>
+<h3>From Telegram</h3>
+<p>Two ways to reply:</p>
+<p><strong>Threaded reply</strong> — tap Reply on the nudge message in your Telegram DM with the
+bot, type a token, send it. The bot&#39;s <code>InboundRelay</code> reads the <code>ReplyToMsgID</code>,
+looks up the corresponding Thrum message ID, and routes the reply through
+<code>TryResolve</code>. This is the most explicit path — you&#39;re replying to the specific
+nudge.</p>
+<p><strong>Fresh DM</strong> — if you dismissed the notification or can&#39;t find the thread, send
+a new DM to the bot with just the approval token. The bot looks up your
+most-recent non-expired pending nudge and routes the reply there. This only
+works if the body is an exact match for one of the accepted tokens.</p>
+<p>Token sets by path:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Approve tokens</th>
+<th>Deny tokens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CLI, web UI, threaded Telegram reply</td>
+<td><code>y</code>, <code>yes</code>, <code>approve</code>, <code>a</code></td>
+<td><code>n</code>, <code>no</code>, <code>deny</code>, <code>d</code></td>
+</tr>
+<tr>
+<td>Telegram fresh DM</td>
+<td><code>y</code>, <code>yes</code>, <code>allow</code></td>
+<td><code>n</code>, <code>no</code>, <code>deny</code></td>
+</tr>
+</tbody></table>
+<p>The fresh-DM set is intentionally narrower. <code>approve</code> and <code>a</code> aren&#39;t in it —
+they&#39;re unlikely to be a fresh-DM typo and excluding them keeps the trigger
+tight. If you need to send <code>approve</code>, use a threaded reply.</p>
+<p>Prose messages (<code>&quot;yeah sure&quot;</code>, <code>&quot;y please&quot;</code>) don&#39;t trigger either path — both
+require an exact match after lowercasing and trimming whitespace.</p>
+<p>You can reply to any message in the reminder thread, not just the first nudge.
+The <code>TryResolve</code> thread-ID fallback walks reminder messages back to their root
+nudge row, so replying to Reminder #4 works the same as replying to Reminder #1.</p>
+<hr>
+<h2>Surviving Daemon Restart</h2>
+<p>Two tables keep in-flight approvals alive across a daemon restart:</p>
+<p><strong><code>permission_nudges</code></strong> (schema v21) — stores the pending nudge state: session,
+tmux target, agent name, pattern key, approve/deny keys, detected time, nudge
+count, last pane hash, and an 8-hour expiry. <code>ReloadOnBoot</code> reads all
+non-expired rows at startup and resumes the reminder cadence automatically.</p>
+<p><strong><code>telegram_msg_map</code></strong> (schema v24) — maps Telegram message IDs to Thrum message
+IDs. Without this, a supervisor&#39;s reply to a nudge sent before a daemon restart
+would arrive as an unrouted DM with no <code>reply_to</code> reference, and <code>TryResolve</code>
+would never fire. The table persists the mapping with SQLite write-through and
+falls back to it on a cache miss.</p>
+<p>Together, these two tables mean a daemon restart mid-flow is invisible to the
+supervisor. They reply <code>y</code>, the keystroke fires, the agent unblocks.</p>
+<hr>
+<h2>Cross-Repo Workflow via Telegram</h2>
+<p>Here&#39;s what the full end-to-end looks like when the supervisor is on their
+phone:</p>
+<ol>
+<li>Agent in repo-A hits a permission prompt.</li>
+<li>Daemon-A&#39;s poller detects stable pane content matching a pattern.</li>
+<li>Daemon-A sends a nudge to <code>@supervisor_thrum</code>, which is configured with
+<code>@leon-letto</code> as a recipient.</li>
+<li>The <code>wsBroadcaster</code> fires a <code>notification.message</code> WebSocket event.</li>
+<li><code>OutboundRelay</code> picks it up and forwards it to the Telegram bridge.</li>
+<li>The supervisor&#39;s phone receives a DM from the bot.</li>
+<li>Supervisor taps Reply, types <code>y</code>, sends.</li>
+<li><code>InboundRelay</code> reads <code>ReplyToMsgID</code>, looks up the Thrum message ID in
+<code>telegram_msg_map</code>, fires a <code>message.send</code> RPC with <code>reply_to</code>.</li>
+<li><code>AfterMessageCreate</code> fires → <code>TryResolve</code> → atomic <code>DELETE ... RETURNING</code>
+claims the nudge row → <code>sendKeystroke</code> fires <code>&quot;1&quot;</code> into the pane.</li>
+<li>Agent proceeds.</li>
+</ol>
+<p>This works automatically when the Telegram bridge user is listed in
+<code>permission_supervisors</code>. No additional routing config is needed.</p>
+<hr>
+<h2>Observability</h2>
+<p><strong>Daemon log traces</strong> — the <code>firstDetect</code> path logs at <code>INFO</code> level:</p>
+<pre><code class="language-text hljs">[permission] firstDetect  session=thrum-main runtime=claude pattern=tool_confirmation supers_count=2 agent_name=implementer_api
+[permission] nudge sent   to=coordinator msg_id=perm_abc123 session=thrum-main</code></pre>
+<p>On restart with in-flight nudges:</p>
+<pre><code class="language-text hljs">permission found 2 pending nudge(s) still in flight</code></pre>
+<p><strong><code>[nudge]</code> dispatch tag</strong> — the nudge fan-out emits structured <code>slog.Info</code>
+events at four points, tagged <code>[nudge]</code>, for routing visibility:</p>
+<pre><code class="language-text hljs">[nudge] dispatch         msg_id=... sender=... recipients=[...] origin_daemon=... session_id=...
+[nudge] spool.write      msg_id=... recipient=... target=...
+[nudge] spool.skip       msg_id=... recipient=... reason=non_local
+[nudge] DispatchTmux     msg_id=... recipient=... target=thrum-main:0.0 session=thrum-main self_echo=false
+[nudge] telegram.forward msg_id=... bridge_user=... self_echo_candidate=false</code></pre>
+<p><code>self_echo</code> is the coordinator&#39;s phantom-nudge guardrail — if the dispatch
+target resolves to the sender&#39;s own pane, the daemon refuses the write and logs
+the skip. These events are at <code>INFO</code> level and gated behind the daemon&#39;s
+configured log level.</p>
+<p><strong>Identity guard G4</strong> — permission writes (marking an agent stuck, clearing
+stuck) are blocked if the agent process is not running. This prevents the
+scheduler from labeling a dead agent&#39;s identity file during race conditions
+between agent crash and reminder cadence.</p>
+<p><strong><code>thrum team --system</code></strong> — shows the <code>@supervisor_&lt;project&gt;</code> pseudo-agent with
+the <code>⊙</code> glyph. If it&#39;s missing, the daemon didn&#39;t register it at boot, which
+means permission nudges won&#39;t have a sender identity and will fail silently.</p>
+<hr>
+<h2>Safety Invariant</h2>
+<p><code>TestApproveKeyNeverForeverAllow</code> is a CI test in
+<code>internal/daemon/permission/patterns_test.go</code> that iterates every pattern in the
+library and asserts that the <code>ApproveKey</code> is not any of the known forever-allow
+tokens (<code>2</code>, <code>Tab</code>, etc.).</p>
+<p>This prevents a class of bug where approving a permission prompt from Thrum
+would actually grant the agent permanent or session-wide permission for an
+action class — broader than the human consented to. If you&#39;re adding a new
+runtime pattern and the CI guard rejects your <code>ApproveKey</code>, the fix is to change
+the key to the single-invocation option, not to relax the test.</p>
+<hr>
+<h2>Trust-Gate Detection</h2>
+<p>On first launch, codex and claude display a trust dialog before the normal
+session starts. Thrum&#39;s permission-prompt detector recognizes these first-launch
+trust dialogs as a distinct class. When one is detected, keystroke injection —
+banner delivery, prime nudge, watchdog nudge — is skipped so the user can answer
+the trust prompt manually without interference. Normal permission-prompt
+detection and the supervisor notify flow are unchanged; this only affects the
+injection paths that fire during session startup.</p>
+<hr>
+<h2>See Also</h2>
+<ul>
+<li><a href="tmux-sessions.html">tmux Sessions</a> — pane lifecycle, session enrollment</li>
+<li><a href="multi-runtime.html">Multi-Runtime</a> — supported runtimes and their capabilities</li>
+<li><a href="telegram-bridge.html">Telegram Bridge</a> — supervisor reply via Telegram</li>
+<li><a href="configuration.html">Configuration</a> — <code>permission_supervisors</code> and
+<code>project_name</code> schema</li>
+</ul>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Telegram Bridge — Thrum</title>
+  <meta name="description" content="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Telegram Bridge — Thrum">
+  <meta property="og:description" content="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">
+  <meta property="og:url" content="https://thrum.team/docs/telegram-bridge.html">
+  <meta property="og:site_name" content="Thrum">
+  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Telegram Bridge — Thrum">
+  <meta name="twitter:description" content="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">
+  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://thrum.team/docs/telegram-bridge.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Telegram Bridge","description":"One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author","url":"https://thrum.team/docs/telegram-bridge.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/docs.css">
+  <script>
+    (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="/index.html" class="logo">
+          <span class="logo-glyph">&gt;_</span>
+          <span class="logo-text">thrum</span>
+        </a>
+        <div class="nav-links">
+          <a href="/index.html" class="nav-link">Home</a>
+          <a href="/docs/overview.html" class="nav-link nav-link-active">Docs</a>
+          <a href="/blog.html" class="nav-link">Blog</a>
+          <a href="/about.html" class="nav-link">About</a>
+          <a href="https://github.com/leonletto/thrum" class="nav-link nav-link-external" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="icon-sun">&#x2600;</span>
+            <span class="icon-moon">&#x263E;</span>
+          </button>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="search-input" placeholder="Search docs... (Ctrl+K)" autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-category" data-category="overview">
+          <span class="sidebar-category-label">Overview</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/philosophy.html" data-path="philosophy.html" data-category="overview" title="Why Thrum exists — a messaging system designed for human-centric AI agent coordination, not another orchestration engine">Philosophy</a>
+          <a class="sidebar-link" href="/docs/overview.html" data-path="overview.html" data-category="overview" title="Thrum — coordinate AI coding agents across worktrees, repos, and machines">Overview</a>
+          <a class="sidebar-link" href="/docs/whats-new.html" data-path="whats-new.html" data-category="overview" title="Release-by-release highlights, breaking changes, and migration notes for recent Thrum versions.">What's New</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="onboarding">
+          <span class="sidebar-category-label">Onboarding</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/scenarios/solo-dev.html" data-path="scenarios/solo-dev.html" data-category="onboarding" title="Use Thrum as a single-developer tool: one agent, one machine, no hand-holding">Solo Dev with One Agent</a>
+          <a class="sidebar-link" href="/docs/scenarios/team.html" data-path="scenarios/team.html" data-category="onboarding" title="Run multiple agents in parallel worktrees with Thrum as the coordination layer">Team on Your Machine</a>
+          <a class="sidebar-link" href="/docs/scenarios/across-boundaries.html" data-path="scenarios/across-boundaries.html" data-category="onboarding" title="Connect Thrum daemons in different repos or on different machines via peers">Agents Across Repos/Machines</a>
+          <a class="sidebar-link" href="/docs/scenarios/orchestration.html" data-path="scenarios/orchestration.html" data-category="onboarding" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Automated Plan Execution</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="quickstart">
+          <span class="sidebar-category-label">Getting Started</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/quickstart.html" data-path="quickstart.html" data-category="quickstart" title="Get up and running with Thrum in 5 minutes - initialization, daemon setup, agent registration, and first message">Quickstart Guide</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="tools">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Recommended Tools</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/recommended-tools.html" data-path="guides/recommended-tools.html" data-category="tools" title="Tools, extensions, and integrations that work well with Thrum for AI agent coordination workflows">Recommended Tools</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-setup.html" data-path="guides/beads-setup.html" data-category="tools" title="Set up Beads for git-backed task tracking alongside Thrum — installation, initialization, agent workflow, and worktree configuration">Beads Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-ui-setup.html" data-path="guides/beads-ui-setup.html" data-category="tools" title="Set up Beads UI for a live web dashboard of your agent task board — installation, usage, and multi-project support">Beads UI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/beads-migration-to-embedded.html" data-path="guides/beads-migration-to-embedded.html" data-category="tools" title="Field report on migrating beads from any pre-1.0 source state (SQLite-era, transitional, or server-mode Dolt) to bd 1.0 embedded mode. Two recovery paths, schema-drift fixes, sync re-establishment, and the full troubleshooting checklist.">Beads Migration to Embedded Mode (bd 1.0+)</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/playwright-cli-setup.html" data-path="guides/playwright-cli-setup.html" data-category="tools" title="Set up Playwright CLI for browser automation in Claude Code agent workflows — screenshots, page context, form filling, and web testing">Playwright CLI Setup Guide</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/guides/superpowers.html" data-path="guides/superpowers.html" data-category="tools" title="Obra Superpowers is the upstream skills library Thrum's coordination workflows build on — brainstorming, writing-plans, TDD, and code review. Install it to run the brainstorm and project-setup pipelines.">Superpowers</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="orchestration">
+          <span class="sidebar-category-label">Orchestration</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/orchestrator-role.html" data-path="orchestrator-role.html" data-category="orchestration" title="Hand off a plan you wrote and let the orchestrator run the execution phase">Orchestrator Role</a>
+          <a class="sidebar-link" href="/docs/tmux-sessions.html" data-path="tmux-sessions.html" data-category="orchestration" title="Run agent teams in daemon-managed tmux sessions with instant message delivery, zero background listeners, and coordinator-managed lifecycle">Tmux-Managed Sessions</a>
+          <a class="sidebar-link" href="/docs/monitor-jobs.html" data-path="monitor-jobs.html" data-category="orchestration" title="Watch any process output for pattern matches and deliver results as synthetic Thrum messages — no polling, no shell, no manual piping">Monitor Jobs</a>
+          <a class="sidebar-link" href="/docs/multi-runtime.html" data-path="multi-runtime.html" data-category="orchestration" title="Run Claude, Codex, Aider, Gemini, and other agent runtimes in tmux-managed sessions">Multi-Runtime Support</a>
+          <a class="sidebar-link" href="/docs/single-agent-mode.html" data-path="single-agent-mode.html" data-category="orchestration" title="Use Thrum's context management without the messaging layer — single-agent mode as default, three-tier context, and when to switch to multi-agent">Single-Agent Mode</a>
+          <a class="sidebar-link" href="/docs/workflow-templates.html" data-path="workflow-templates.html" data-category="orchestration" title="Four-phase skill pipeline for designing, planning, setting up, and implementing features with AI agents">Workflow Templates</a>
+          <a class="sidebar-link" href="/docs/permission-prompts.html" data-path="permission-prompts.html" data-category="orchestration" title="How Thrum detects when an agent is stuck on a permission prompt and routes it to a supervisor — silence-hash poller, supervisor reply paths (CLI, web UI, Telegram), reminder cadence, restart resilience">Permission Prompts</a>
+          <a class="sidebar-link" href="/docs/session-restart.html" data-path="session-restart.html" data-category="orchestration" title="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">Session Restart &amp; Context Recovery</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="identity">
+          <span class="sidebar-category-label">Identity &amp; Agents</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/identity.html" data-path="identity.html" data-category="identity" title="Named agents, deterministic IDs, identity resolution, registration, conflicts, cleanup, and multi-agent worktrees">Agent Identity &amp; Registration</a>
+          <a class="sidebar-link" href="/docs/agent-configs.html" data-path="agent-configs.html" data-category="identity" title="Ready-to-use Claude Code agent definitions for Thrum messaging and Beads task tracking">Agent Configurations</a>
+          <a class="sidebar-link" href="/docs/claude-agent-integration.html" data-path="claude-agent-integration.html" data-category="identity" title="Agent definitions for multi-agent coordination in Claude Code — thrum-agent and message-listener setup">Claude Code Agent Integration</a>
+          <a class="sidebar-link" href="/docs/role-templates.html" data-path="role-templates.html" data-category="identity" title="Auto-generate agent preambles from role templates with scope boundaries, task protocol, communication patterns, and behavioral directives">Role-Based Preamble Templates</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="messaging">
+          <span class="sidebar-category-label">Messaging</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/peers.html" data-path="peers.html" data-category="messaging" title="Cross-repo and cross-machine messaging between Thrum daemons">Peers</a>
+          <a class="sidebar-link" href="/docs/inbox-query-methods.html" data-path="inbox-query-methods.html" data-category="messaging" title="RPC methods for querying messages, agents, and managing read state with filtering and pagination">Inbox Query Methods</a>
+          <a class="sidebar-link active" href="/docs/telegram-bridge.html" data-path="telegram-bridge.html" data-category="messaging" title="One Telegram connection, unified inbox for your whole team of agents — any agent can ping you, replies route back to the original author">Telegram Bridge</a>
+          <a class="sidebar-link" href="/docs/telegram-groups.html" data-path="telegram-groups.html" data-category="messaging" title="Share a Telegram group with your team so everyone can interact with the same Thrum agent — send instructions, see responses, and coordinate through one chat">Telegram Groups</a>
+          <a class="sidebar-link" href="/docs/messaging.html" data-path="messaging.html" data-category="messaging" title="Thrum messaging system — sending, receiving, replies, priorities, scopes, mentions, and inbox filtering">Messaging</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="substrate">
+          <span class="sidebar-category-label">Personal Agent Substrate</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/substrate/overview.html" data-path="substrate/overview.html" data-category="substrate" title="v0.11 turns thrum into the substrate beneath personal-agent harnesses (scheduling, scheduled-agent lifecycle, skill registration, email transport, reminders). What it is, why it exists, and how the pieces fit together.">Personal Agent Substrate</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="coordination">
+          <span class="sidebar-category-label">Coordination</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/agent-coordination.html" data-path="agent-coordination.html" data-category="coordination" title="Multi-agent workflows, Beads integration, session templates, and coordination patterns for AI agent teams">Agent Coordination</a>
+          <a class="sidebar-link" href="/docs/multi-agent.html" data-path="multi-agent.html" data-category="coordination" title="Runtime presets, thrum prime, and coordination patterns for running multiple AI agents across worktrees and platforms">Multi-Agent Support</a>
+          <a class="sidebar-link" href="/docs/context.html" data-path="context.html" data-category="coordination" title="Per-agent context storage for persisting volatile project state across sessions and machines">Agent Context Management</a>
+          <a class="sidebar-link" href="/docs/guides/coordinate-two-agents.html" data-path="guides/coordinate-two-agents.html" data-category="coordination" title="Walk through registering two agents, sending messages between them, and seeing what everyone is working on — the most common Thrum use case">Coordinate Two Agents</a>
+          <a class="sidebar-link" href="/docs/guides/review-workflow.html" data-path="guides/review-workflow.html" data-category="coordination" title="Walk through the implement-then-review cycle: one agent writes code on a feature branch, another reviews it, Thrum handles the communication">Code Review Workflow</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="integrations">
+          <span class="sidebar-category-label">Integrations</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/web-ui.html" data-path="web-ui.html" data-category="integrations" title="Browser-based dashboard for monitoring agents and reading messages — served from the daemon on a single port">Web UI</a>
+          <a class="sidebar-link" href="/docs/claude-code-plugin.html" data-path="claude-code-plugin.html" data-category="integrations" title="Install and use the Thrum plugin for Claude Code — slash commands, automatic context injection, and multi-agent coordination without manual configuration">Claude Code Plugin</a>
+          <a class="sidebar-link" href="/docs/beads-and-thrum.html" data-path="beads-and-thrum.html" data-category="integrations" title="How persistent task tracking and agent messaging work together for multi-agent development">Beads and Thrum</a>
+          <a class="sidebar-link" href="/docs/codex-plugin.html" data-path="codex-plugin.html" data-category="integrations" title="Install and use Thrum's Codex skill bundle — the Claude thrum skill surface, mirrored as top-level Codex skills">Codex Plugin</a>
+          <a class="sidebar-link" href="/docs/cursor-plugin.html" data-path="cursor-plugin.html" data-category="integrations" title="Install and use Thrum's Cursor plugin — rules, hooks, skills, commands, and MCP configuration for multi-agent coordination in Cursor">Cursor Plugin</a>
+          <a class="sidebar-link" href="/docs/mcp-server.html" data-path="mcp-server.html" data-category="integrations" title="Thrum MCP server for native AI agent integration — tools, identity, message handling, and Claude Code setup">MCP Server</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="infrastructure">
+          <span class="sidebar-category-label">Infrastructure</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/daemon.html" data-path="daemon.html" data-category="infrastructure" title="Background service managing state, RPC handlers, sync loop, WebSocket server, and embedded UI on single port">Daemon Architecture</a>
+          <a class="sidebar-link" href="/docs/sync.html" data-path="sync.html" data-category="infrastructure" title="Git-based message synchronization using orphan branch, sync worktree, conflict-free merging, and offline-first design">Sync Protocol</a>
+          <a class="sidebar-link" href="/docs/configuration.html" data-path="configuration.html" data-category="infrastructure" title="Thrum configuration model — config.json schema, runtime tiers, priority chain, and the config show command">Configuration</a>
+          <a class="sidebar-link" href="/docs/guides/cross-machine-sync.html" data-path="guides/cross-machine-sync.html" data-category="infrastructure" title="Walk through enabling cross-machine sync, sending a message from one machine and receiving it on another, and verifying sync status">Sync Across Machines</a>
+          <a class="sidebar-link" href="/docs/tailscale-sync.html" data-path="tailscale-sync.html" data-category="infrastructure" title="Direct machine-to-machine sync via Tailscale — setup, architecture, pairing, and CLI commands">Tailscale Sync</a>
+          <a class="sidebar-link" href="/docs/tailscale-security.html" data-path="tailscale-security.html" data-category="infrastructure" title="Security model for Thrum's Tailscale peer sync — pairing, encryption, access control, and threat mitigations">Tailscale Sync Security</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="reference">
+          <span class="sidebar-category-label">Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/development.html" data-path="development.html" data-category="reference" title="Setup, testing, building, contributing - complete guide for developing and extending Thrum">Development Guide</a>
+          <a class="sidebar-link" href="/docs/cli-hints.html" data-path="cli-hints.html" data-category="reference" title="Inline contextual hints from Thrum CLI commands — pre-action warnings, post-action next steps, and JSON output for tooling. Covers Phase B (thrum send / tmux create / init) and the THRUM_NO_HINTS opt-out.">CLI Hints</a>
+          <a class="sidebar-link" href="/docs/security-cicd.html" data-path="security-cicd.html" data-category="reference" title="Automated security scanning, CI/CD pipelines, and deployment workflows for Thrum">Security &amp; CI/CD</a>
+          <a class="sidebar-link" href="/docs/security-model.html" data-path="security-model.html" data-category="reference" title="How Thrum's daemon decides who's calling — kernel-verified peer credentials, anonymous-caller read-only allowlist, author-only message operations, and WebSocket origin restriction. Covers the v0.9.0 sec.1–sec.8 hardening.">Local Security Model</a>
+          <a class="sidebar-link" href="/docs/architecture.html" data-path="architecture.html" data-category="reference" title="Thrum architecture — daemon design, storage, sync engine, transport layer, key features, and foundation packages">Architecture</a>
+          <a class="sidebar-link" href="/docs/cli.html" data-path="cli.html" data-category="reference" title="Complete reference for the thrum command-line interface — all commands, flags, and usage examples">CLI Reference</a>
+          <a class="sidebar-link" href="/docs/rpc-api.html" data-path="rpc-api.html" data-category="reference" title="Thrum daemon JSON-RPC 2.0 API reference — all RPC methods, parameters, and response formats">RPC API</a>
+        <div class="sidebar-category sidebar-subcategory" data-category="agent-protocols">
+          <span class="sidebar-category-label sidebar-subcategory-label collapsible"><span class="sidebar-chevron">▸</span><span>Agent Protocols</span></span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/sub-agent-strategy.html" data-path="strategies/sub-agent-strategy.html" data-category="agent-protocols" title="When and how to delegate work to sub-agents for context efficiency">Sub-Agent Strategy</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/thrum-registration.html" data-path="strategies/thrum-registration.html" data-category="agent-protocols" title="How to register with Thrum at session start and communicate with other agents">Thrum Registration</a>
+          <a class="sidebar-link sidebar-sublink" href="/docs/strategies/resume-after-context-loss.html" data-path="strategies/resume-after-context-loss.html" data-category="agent-protocols" title="How to recover and pick up work after compaction, a new session, or a crash">Resume After Context Loss</a>
+          </div>
+        </div>
+
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="api">
+          <span class="sidebar-category-label">API Reference</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/api/authentication.html" data-path="api/authentication.html" data-category="api" title="Authentication and authorization in the Thrum API — agent identity, session tokens, and security model">Authentication</a>
+          <a class="sidebar-link" href="/docs/api/events.html" data-path="api/events.html" data-category="api" title="All events emitted by the Thrum daemon over WebSocket — message, agent, session, sync, and subscription events">Event Reference</a>
+          <a class="sidebar-link" href="/docs/api/websocket.html" data-path="api/websocket.html" data-category="api" title="Thrum WebSocket API — real-time bidirectional communication, JSON-RPC over WebSocket, subscriptions, and events">WebSocket API</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="guides">
+          <span class="sidebar-category-label">Guides</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/beta-channel.html" data-path="beta-channel.html" data-category="guides" title="How to opt into Thrum pre-release builds on the stable-track (v0.10.x), install RCs and their matching plugins, report bugs against them, and roll back to stable">Beta Channel</a>
+          </div>
+        </div>
+        <div class="sidebar-category" data-category="troubleshooting">
+          <span class="sidebar-category-label">troubleshooting</span>
+          <div class="sidebar-category-content">
+          <a class="sidebar-link" href="/docs/troubleshooting-identity.html" data-path="troubleshooting-identity.html" data-category="troubleshooting" title="Identity guard error messages and how to fix them — cross_worktree pid_mismatch, anonymous_mutating_rpc, non_git_bootstrap, and the rest of the v0.9.0 guard catalog with remediation steps.">Troubleshooting Identity Issues</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content" id="docs-content">
+      <div class="docs-content-inner" id="docs-content-inner">
+<h2>Telegram Bridge</h2>
+<p><strong>One connection, one unified inbox for your whole team of agents.</strong></p>
+<p>Configure the Telegram bridge once and Telegram becomes the inbox for every
+agent in your repo. Any agent that needs your input can ping you directly — the
+coordinator asking for a merge approval, an implementer hitting a design
+decision, a tester reporting a failure. You reply from Telegram and your reply
+routes back to whichever agent messaged you, not through a middle layer. Close
+the laptop, put your phone in your pocket, and your team still has a way to
+reach you.</p>
+<p>This isn&#39;t a 1:1 channel to one &quot;target&quot; agent. It&#39;s a shared phone line for the
+entire team. You just configure a default agent for fresh messages you start
+from Telegram — everything else routes by context.</p>
+<h3>What you can do with it</h3>
+<ul>
+<li><strong>Get pinged by any agent, any time.</strong> An implementer hits an ambiguous spec
+and asks for your call without going through the coordinator first.</li>
+<li><strong>Reply threading works by author.</strong> When you reply to a message in Telegram,
+your reply goes back to the agent that sent it — even if that&#39;s five different
+agents in the same day, each in its own thread.</li>
+<li><strong>Start a fresh conversation by typing a new message.</strong> A new message from
+Telegram (no reply-to) lands in the configured default agent&#39;s inbox, so
+you&#39;ve still got a &quot;tell the coordinator&quot; path when you need one.</li>
+<li><strong>Hold concurrent conversations</strong> with multiple agents without them colliding
+— each Telegram thread maps to one Thrum thread with one author.</li>
+<li><strong>Stay off the terminal.</strong> Review, decide, approve, nudge, cancel — all from
+your phone.</li>
+</ul>
+<h3>How It Works</h3>
+<p>The bridge runs as a goroutine inside the Thrum daemon. It connects to the
+daemon&#39;s own WebSocket server as a client (the same way the browser UI does) and
+polls Telegram for inbound messages.</p>
+<pre><code class="language-text hljs">Telegram ←→ Bridge Goroutine ←→ Daemon WebSocket ←→ Agents
+              (inside daemon)    (JSON-RPC 2.0)</code></pre>
+<p><strong>Outbound (Thrum → Telegram):</strong> any agent that sends a message with your bridge
+user as a recipient gets forwarded to Telegram. Your coordinator can ping you,
+an implementer can ping you, a tester can ping you — they all land in the same
+chat.</p>
+<p><strong>Inbound (Telegram → Thrum)</strong> routes by context:</p>
+<table>
+<thead>
+<tr>
+<th>What you send from Telegram</th>
+<th>Where it lands</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fresh message (no Telegram reply-to)</td>
+<td>The configured <code>--target</code> agent</td>
+</tr>
+<tr>
+<td>Reply to a message an agent sent you</td>
+<td>The agent that sent the original message</td>
+</tr>
+<tr>
+<td>Reply to one of your own messages (edge case)</td>
+<td>Falls back to the configured <code>--target</code></td>
+</tr>
+<tr>
+<td>Fresh DM containing only <code>y</code>/<code>n</code>/<code>yes</code>/<code>no</code>/<code>allow</code>/<code>deny</code></td>
+<td>Resolves the most-recent pending permission nudge for the sender</td>
+</tr>
+</tbody></table>
+<p><strong>Threading:</strong> Telegram replies map to Thrum <code>reply_to</code> on the matching thread,
+so the agent sees your reply as a continuation of the original conversation, not
+a new thread.</p>
+<p>The bridge is isolated — it connects via the public WebSocket RPC interface and
+never imports internal daemon packages.</p>
+<h2>Permission Prompt Approvals via Telegram</h2>
+<p>When an agent hits a blocking permission prompt in tmux, the daemon detects it
+and routes a supervisor nudge to your configured <code>permission_supervisors</code>. If
+the Telegram bridge user is one of those supervisors, the nudge lands in your
+Telegram DM automatically — no extra configuration needed. See
+<a href="permission-prompts.html">Permission Prompt Detection</a> for the full feature.</p>
+<h3>Replying from Telegram</h3>
+<p>Two paths work, with different token sets:</p>
+<p><strong>Path 1 — Reply-thread.</strong> Tap Telegram&#39;s Reply on the bot&#39;s nudge message, then
+type one of the approve or deny tokens. The bridge resolves the approval via the
+Telegram reply thread ID.</p>
+<p><strong>Path 2 — Fresh DM (new in v0.9.0).</strong> If the notification was dismissed or the
+thread is buried, open a new DM to the bot and type one of the strict fresh-DM
+tokens. The bridge looks up the sender&#39;s most-recent non-expired pending nudge
+and routes accordingly. One sender&#39;s fresh DM cannot resolve another
+supervisor&#39;s pending nudge — lookups are keyed on Telegram user ID.</p>
+<p>The accepted tokens differ by path:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Approve tokens</th>
+<th>Deny tokens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Reply-thread</td>
+<td><code>y</code>, <code>yes</code>, <code>approve</code>, <code>a</code></td>
+<td><code>n</code>, <code>no</code>, <code>deny</code>, <code>d</code></td>
+</tr>
+<tr>
+<td>Fresh DM</td>
+<td><code>y</code>, <code>yes</code>, <code>allow</code></td>
+<td><code>n</code>, <code>no</code>, <code>deny</code></td>
+</tr>
+</tbody></table>
+<p>Note the asymmetry: <code>approve</code> and <code>a</code> work via threaded reply but do NOT trigger
+fresh-DM resolution. If you want to approve without a thread, use <code>allow</code> or
+<code>yes</code>.</p>
+<p>Prose messages (&quot;yeah go ahead&quot;, &quot;y please&quot;) do not trigger either path — the
+match requires an exact token after whitespace-trimming. A non-matching fresh DM
+routes normally to the configured <code>--target</code> agent.</p>
+<h3>Restart Resilience</h3>
+<p>Before v0.9.0, the Telegram↔Thrum message-ID mapping lived in an in-memory
+cache. A daemon restart between sending a nudge and receiving the supervisor&#39;s
+reply dropped the mapping, so the reply had no <code>reply_to</code> reference and could
+never resolve.</p>
+<p>In v0.9.0 the mapping is written through to SQLite (<code>telegram_msg_map</code> table,
+schema v24) as a durable fallback. If the cache misses on reply, the daemon
+reads the SQLite row and routing continues as normal. Daemon restarts during an
+in-flight approval flow no longer silently fail.</p>
+<hr>
+<h3>Setup</h3>
+<h4>1. Create a Telegram Bot</h4>
+<ol>
+<li>Open Telegram and message <a href="https://t.me/BotFather">@BotFather</a></li>
+<li>Send <code>/newbot</code> and follow the prompts</li>
+<li>Copy the bot token (looks like <code>123456789:AAH...</code>)</li>
+</ol>
+<h4>2. Configure and Pair</h4>
+<p>Run <code>configure</code> with your bot token. The command writes the config, restarts the
+daemon, and enters a pairing flow that captures your Telegram user ID
+automatically:</p>
+<pre><code class="language-bash hljs">thrum telegram configure \
+  --token <span class="hljs-string">&quot;123456789:AAHyour-token-here&quot;</span> \
+  --target <span class="hljs-string">&quot;@coordinator_main&quot;</span> \
+  --user <span class="hljs-string">&quot;your-username&quot;</span></code></pre>
+<p>After writing the config, it prompts you to send a message from Telegram:</p>
+<pre><code class="language-text hljs">Pairing — send any message to your bot from Telegram (timeout: 60s)...
+
+Message from: Jane Doe (ID: 123456789)
+  Allow this user? [y/n]: y
+
+Paired! Allowed users: [123456789]
+  Bridge is live — no further restart needed.</code></pre>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--token</code></td>
+<td>Bot token from BotFather</td>
+</tr>
+<tr>
+<td><code>--target</code></td>
+<td>Default agent for fresh messages you start from Telegram (with <code>@</code>). Replies route to the author of the message being replied to.</td>
+</tr>
+<tr>
+<td><code>--user</code></td>
+<td>Your Thrum username (e.g., <code>your-username</code>)</td>
+</tr>
+<tr>
+<td><code>--allow-from</code></td>
+<td>Skip pairing — set Telegram user ID directly</td>
+</tr>
+<tr>
+<td><code>--chat-id</code></td>
+<td>Telegram chat ID for outbound (defaults to --allow-from)</td>
+</tr>
+<tr>
+<td><code>--pair-timeout</code></td>
+<td>How long to wait for pairing message (default: 60s)</td>
+</tr>
+<tr>
+<td><code>--skip-pair</code></td>
+<td>Write config only, don&#39;t pair</td>
+</tr>
+</tbody></table>
+<h4>Re-pairing</h4>
+<p>If you need to pair again (e.g., after resetting the allow list), use the
+standalone pair command:</p>
+<pre><code class="language-bash hljs">thrum telegram pair</code></pre>
+<p>This connects to the running daemon and waits for a Telegram message to capture
+your user ID.</p>
+<h4>Manual Setup (alternative)</h4>
+<p>If you already know your Telegram user ID, skip the interactive pairing:</p>
+<pre><code class="language-bash hljs">thrum telegram configure \
+  --token <span class="hljs-string">&quot;123456789:AAHyour-token-here&quot;</span> \
+  --target <span class="hljs-string">&quot;@coordinator_main&quot;</span> \
+  --user <span class="hljs-string">&quot;your-username&quot;</span> \
+  --allow-from 123456789</code></pre>
+<p>Then restart the daemon:</p>
+<pre><code class="language-bash hljs">thrum daemon restart</code></pre>
+<h4>3. Test It</h4>
+<p>Send a fresh message from Telegram to your bot. It lands in the configured
+default agent&#39;s inbox:</p>
+<pre><code class="language-bash hljs">thrum inbox --unread</code></pre>
+<p>Now have any agent in the team send you a message:</p>
+<pre><code class="language-bash hljs">thrum send <span class="hljs-string">&quot;Hello from the terminal!&quot;</span> --to @your-username</code></pre>
+<p>It should appear in your Telegram chat. Reply to that Telegram message and your
+reply goes back to the sending agent — not the default target. That&#39;s the
+reply-aware routing doing its job.</p>
+<p>You can repeat this with a different agent and each thread stays independent:
+fresh message → default agent, reply → original author.</p>
+<h3>Configuration Reference</h3>
+<p>The full configuration lives in <code>.thrum/config.json</code> under the <code>telegram</code> key:</p>
+<pre><code class="language-json hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;telegram&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;token&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;123456789:AAH...&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;target&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@coordinator_main&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;user_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;leon-letto&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;chat_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123456789</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;allow_from&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-number">123456789</span><span class="hljs-punctuation">,</span> <span class="hljs-number">412587349</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;allow_all&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;enabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>token</code></td>
+<td>string</td>
+<td>Telegram bot token from BotFather. Required.</td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td>string</td>
+<td>Default agent mention (e.g., <code>@coordinator_main</code>) for fresh messages you start from Telegram. Replies route to the original author. Required.</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>string</td>
+<td>Your Thrum username. Required.</td>
+</tr>
+<tr>
+<td><code>chat_id</code></td>
+<td>int</td>
+<td>Telegram chat ID for outbound messages. For DMs, same as your user ID.</td>
+</tr>
+<tr>
+<td><code>allow_from</code></td>
+<td>int[]</td>
+<td>Telegram user IDs allowed to send messages. Empty = block all.</td>
+</tr>
+<tr>
+<td><code>allow_all</code></td>
+<td>bool</td>
+<td>If true, allow all Telegram users (overrides <code>allow_from</code>). Default: false.</td>
+</tr>
+<tr>
+<td><code>enabled</code></td>
+<td>bool</td>
+<td>Explicit enable/disable. Default: true when token is set.</td>
+</tr>
+</tbody></table>
+<h3>CLI Commands</h3>
+<pre><code class="language-bash hljs"><span class="hljs-comment"># Configure the bridge (interactive pairing)</span>
+thrum telegram configure --token &lt;token&gt; --target &lt;agent&gt; --user &lt;username&gt;
+
+<span class="hljs-comment"># Configure with known user ID (skip pairing)</span>
+thrum telegram configure --token &lt;token&gt; --target &lt;agent&gt; --user &lt;username&gt; --allow-from &lt;<span class="hljs-built_in">id</span>&gt;
+
+<span class="hljs-comment"># Pair your Telegram account (bridge must be configured and daemon running)</span>
+thrum telegram pair
+
+<span class="hljs-comment"># Check bridge status</span>
+thrum telegram status
+
+<span class="hljs-comment"># Status as JSON</span>
+thrum telegram status --json</code></pre>
+<h3>Security</h3>
+<p>The bridge follows a defense-in-depth security model:</p>
+<p><strong>Access control:</strong></p>
+<ul>
+<li><strong>Fail-closed:</strong> Empty <code>allow_from</code> with <code>allow_all: false</code> blocks all inbound
+messages. You must explicitly add Telegram user IDs.</li>
+<li><strong>Gate ordering:</strong> The access check runs before any message processing — a
+blocked sender produces zero observable side effects (no error reply, no
+typing indicator).</li>
+<li><strong>Bot blocking:</strong> Messages from other Telegram bots (<code>from.is_bot</code>) are always
+dropped, even if the bot&#39;s ID is in <code>allow_from</code>.</li>
+<li><strong>Rate limiting:</strong> Allowed users have per-user rate limits to prevent abuse.</li>
+</ul>
+<p><strong>Pairing security:</strong></p>
+<ul>
+<li>During pairing, the bridge temporarily accepts messages from any Telegram user
+for up to 60 seconds (configurable, max 5 minutes).</li>
+<li>The user must explicitly confirm the sender via a <code>[y/n]</code> prompt.</li>
+<li>Only one pairing session can be active at a time.</li>
+<li>The pairing message is consumed and never relayed to Thrum agents.</li>
+<li>No persistent state changes occur during pairing — a crash reverts to the
+prior access control state (block all).</li>
+</ul>
+<p><strong>Token hygiene:</strong></p>
+<ul>
+<li>The bot token is never logged, printed in error messages, or included in
+message metadata.</li>
+<li>The bridge struct does not store the token as a field — it passes through to
+the Telegram API at startup and is not retained.</li>
+<li>CLI and web UI display only the first 10 characters (masked).</li>
+</ul>
+<p><strong>Isolation:</strong></p>
+<ul>
+<li>The bridge connects via the daemon&#39;s WebSocket RPC — it never imports internal
+daemon packages.</li>
+<li>The WebSocket client validates the URL is a loopback address before
+connecting.</li>
+<li>Outbound messages are restricted to the configured <code>chat_id</code> only.</li>
+</ul>
+<p><strong>Data flow:</strong></p>
+<ul>
+<li>Only message content is sent to Telegram — no internal metadata (agent IDs,
+session IDs, structured data).</li>
+<li>Telegram metadata (chat ID, message ID, username) is stored in the Thrum
+message&#39;s <code>structured</code> field, never in the content text.</li>
+</ul>
+<h3>Web UI</h3>
+<p>The Telegram bridge can also be configured from the web UI settings panel.
+Navigate to Settings → Telegram to set the token, target agent, and view bridge
+status.</p>
+<p>The web UI&#39;s inbox has been redesigned as a conversation-style chat timeline
+(similar to Slack or Telegram). Select an agent from the conversation list to
+see the full bidirectional message history.</p>
+<h3>Troubleshooting</h3>
+<p><strong>Bridge not starting:</strong></p>
+<pre><code class="language-bash hljs">thrum telegram status
+<span class="hljs-comment"># Check: is the token set? Is enabled = yes?</span>
+<span class="hljs-comment"># Check daemon logs for &quot;telegram bridge:&quot; messages</span></code></pre>
+<p><strong>Messages not arriving from Telegram:</strong></p>
+<ul>
+<li>Verify your Telegram user ID is in <code>allow_from</code></li>
+<li>Check that no other process is polling the same bot (only one poller per bot
+token)</li>
+<li>Make sure <code>allow_all</code> is not false with an empty <code>allow_from</code> (fail-closed)</li>
+</ul>
+<p><strong>Messages not forwarding to Telegram:</strong></p>
+<ul>
+<li>Verify <code>chat_id</code> is set (for DMs, same as your user ID)</li>
+<li>Check that the sending agent addressed you by username
+(<code>--to @your-username</code>). Any agent can DM you this way — not just the
+configured default target.</li>
+</ul>
+<p><strong>Reply from Telegram went to the wrong agent:</strong></p>
+<ul>
+<li>Confirm you used Telegram&#39;s &quot;reply&quot; feature on the agent&#39;s message, not a
+fresh message in the chat.</li>
+<li>Fresh messages always route to the configured default (<code>--target</code>). Only
+replies use the reply-aware routing.</li>
+<li>If you replied to one of your own past messages, the bridge falls back to the
+default target to avoid a self-mention loop.</li>
+</ul>
+<p><strong>Connection drops after idle:</strong></p>
+<ul>
+<li>The bridge handles WebSocket keep-alive automatically via ping/pong. If you
+see <code>client closed</code> errors in logs, ensure you&#39;re running the latest version.</li>
+</ul>
+<p><strong>&quot;Existing token will be replaced&quot; prompt:</strong></p>
+<ul>
+<li>This confirmation appears when reconfiguring with a different token. Use
+<code>--yes</code> to bypass in scripts.</li>
+</ul>
+<h3>Next: Telegram Groups</h3>
+<p>Once your DM bridge is working, you can set up a shared Telegram group so your
+whole team can interact with the same agent. See
+<a href="telegram-groups.html">Telegram Groups</a> for setup.</p>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/vendor/minisearch.js"></script>
+  <script src="/js/search.js" data-docs-base="/docs/" data-search-index="/assets/docs/search-index.json"></script>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('thrum-theme', next);
+    });
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('docs-sidebar').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>
