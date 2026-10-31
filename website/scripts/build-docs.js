@@ -380,7 +380,7 @@ function spaTemplate(doc, contentHtml, sidebarHtml, canonicalUrl) {
   </script>
 </head>
 <body>
-  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
+  <div class="archive-banner"><span>This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</span></div>
 
   <!-- Header -->
   <header class="site-header">

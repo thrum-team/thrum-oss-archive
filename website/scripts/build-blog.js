@@ -262,7 +262,7 @@ function renderPostPage(post) {
   </script>
 </head>
 <body>
-  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
+  <div class="archive-banner"><span>This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</span></div>
   <header class="site-header">
     <div class="container">
       <nav class="header-nav">
@@ -437,7 +437,7 @@ function renderIndexPage(posts) {
   </script>
 </head>
 <body>
-  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
+  <div class="archive-banner"><span>This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</span></div>
   <header class="site-header">
     <div class="container">
       <nav class="header-nav">
