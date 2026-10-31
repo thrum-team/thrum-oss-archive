@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark light">
   <title>Session Restart &amp; Context Recovery — Thrum</title>
@@ -10,18 +11,18 @@
   <meta property="og:type" content="article">
   <meta property="og:title" content="Session Restart &amp; Context Recovery — Thrum">
   <meta property="og:description" content="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">
-  <meta property="og:url" content="https://thrum.team/docs/session-restart.html">
+  <meta property="og:url" content="https://oss.thrum.team/docs/session-restart.html">
   <meta property="og:site_name" content="Thrum">
-  <meta property="og:image" content="https://thrum.team/img/social-card.png">
+  <meta property="og:image" content="https://oss.thrum.team/img/social-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Session Restart &amp; Context Recovery — Thrum">
   <meta name="twitter:description" content="Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts">
-  <meta name="twitter:image" content="https://thrum.team/img/social-card.png">
-  <link rel="canonical" href="https://thrum.team/docs/session-restart.html">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Session Restart & Context Recovery","description":"Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts","url":"https://thrum.team/docs/session-restart.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://thrum.team/docs/overview.html"}}</script>
+  <meta name="twitter:image" content="https://oss.thrum.team/img/social-card.png">
+  <link rel="canonical" href="https://oss.thrum.team/docs/session-restart.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Session Restart & Context Recovery","description":"Save conversation history and resume where you left off — from daily shutdown to automated mid-task restarts","url":"https://oss.thrum.team/docs/session-restart.html","author":{"@type":"Person","name":"Leon Letto"},"publisher":{"@type":"Organization","name":"Thrum","url":"https://oss.thrum.team/"},"isPartOf":{"@type":"TechArticle","name":"Thrum Documentation","url":"https://oss.thrum.team/docs/overview.html"}}</script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/ibm-plex-mono-regular.woff2" crossorigin>
@@ -30,14 +31,9 @@
   <script>
     (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
   </script>
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
-  <script>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
 </head>
 <body>
+  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
 
   <!-- Header -->
   <header class="site-header">

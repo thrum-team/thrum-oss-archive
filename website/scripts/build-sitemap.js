@@ -15,7 +15,7 @@ const path = require('path');
 
 const CONFIG = {
   websiteDir: path.join(__dirname, '..'),
-  siteUrl: 'https://thrum.team',
+  siteUrl: 'https://oss.thrum.team',
   // Top-level HTML files to include. 404.html and the like are excluded.
   // docs.html intentionally omitted — it's a redirect to /docs/overview.html;
   // sitemap should only list canonical, indexable URLs.

@@ -833,3 +833,19 @@ tbody tr:hover {
   scrollbar-width: thin;
   scrollbar-color: var(--border) var(--bg-panel-dark);
 }
+
+/* ── OSS archive banner (oss.thrum.team) ── */
+:root { --archive-banner-h: 36px; }
+@media (max-width: 600px) { :root { --archive-banner-h: 52px; } }
+.archive-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: var(--archive-banner-h);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; box-sizing: border-box; text-align: center;
+  font-family: var(--font-sans, system-ui, sans-serif); font-size: 14px; line-height: 1.35;
+  background: #7a4b00; color: #fff;
+}
+.archive-banner a { color: #fff; font-weight: 600; text-decoration: underline; }
+body { padding-top: var(--archive-banner-h); }
+.site-header { top: var(--archive-banner-h) !important; }
+.docs-sidebar { top: calc(48px + var(--archive-banner-h)) !important; }

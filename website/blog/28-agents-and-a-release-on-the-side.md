@@ -142,5 +142,5 @@ I think v0.11 is going to be a much more interesting release because there are a
 lot of features. It's probably going to have many more release candidates before
 it's solid. But that'll be fun.
 
-There's [a page about it here](https://thrum.team/docs/substrate/overview.html)
+There's [a page about it here](https://oss.thrum.team/docs/substrate/overview.html)
 if you want to see what's coming.

@@ -189,7 +189,7 @@ thrum setup claude-md --apply --force
 
 The block is intentionally minimal — what Thrum is, the five essential commands
 (`whoami`, `team`, `inbox`, `send`, `reply`), and a pointer to the full docs at
-<https://thrum.team>. To preview the template without writing to disk, omit
+<https://oss.thrum.team>. To preview the template without writing to disk, omit
 `--apply`:
 
 ```bash

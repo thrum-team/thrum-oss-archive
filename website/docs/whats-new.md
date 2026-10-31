@@ -193,7 +193,7 @@ output, undoing the guard's intent. rc.2 corrected the text and promoted clean.
 messages agents get when they cd into the wrong worktree by accident. Normal
 same-worktree day-to-day use is unaffected. This is UX and safety hardening, not
 a regression fix. Full backstory:
-[Shooting Yourself in Both Feet](https://thrum.team/blog/shooting-yourself-in-both-feet.html).
+[Shooting Yourself in Both Feet](https://oss.thrum.team/blog/shooting-yourself-in-both-feet.html).
 
 The bug was a known footgun in the original identity-guard work (thrum-7b84.6):
 when an agent's CLI command ran from a worktree that didn't match its pane-bound

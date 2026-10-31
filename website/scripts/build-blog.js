@@ -40,7 +40,7 @@ const hljs = require('highlight.js');
 const CONFIG = {
   blogDir: path.join(__dirname, '../blog'),
   websiteDir: path.join(__dirname, '..'),
-  siteUrl: 'https://thrum.team',
+  siteUrl: 'https://oss.thrum.team',
   defaultAuthor: 'Leon Letto',
   defaultAuthorUrl: 'https://leonletto.github.io/',
   // Default timezone offset used to turn a date-only frontmatter date into an
@@ -223,6 +223,7 @@ function renderPostPage(post) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark light">
   <title>${escapeHtml(meta.title)} · Thrum Blog</title>
@@ -253,14 +254,9 @@ function renderPostPage(post) {
   <script>
     (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
   </script>
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
-  <script>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
 </head>
 <body>
+  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
   <header class="site-header">
     <div class="container">
       <nav class="header-nav">
@@ -396,6 +392,7 @@ function renderIndexPage(posts) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark light">
   <title>Thrum Blog</title>
@@ -426,14 +423,9 @@ function renderIndexPage(posts) {
   <script>
     (function(){var t=localStorage.getItem('thrum-theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}else{document.documentElement.setAttribute('data-theme','dark')}})();
   </script>
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-0EO0yjcXim9oq9r4-I2w1.js"></script>
-  <script>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
 </head>
 <body>
+  <div class="archive-banner">This is the archived open-source Thrum site. The current site is <a href="https://thrum.team">thrum.team</a>.</div>
   <header class="site-header">
     <div class="container">
       <nav class="header-nav">

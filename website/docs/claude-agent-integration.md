@@ -193,7 +193,7 @@ mkdir -p .claude/agents
 ```
 
 Or see the full agent definitions in the
-[documentation site](https://thrum.team).
+[documentation site](https://oss.thrum.team).
 
 ## Next Steps
 
