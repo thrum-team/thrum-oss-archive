@@ -144,6 +144,7 @@ async function buildSitemap() {
   const robotsTxt =
     `User-agent: *\n` +
     `Allow: /\n` +
+    `Disallow: /assets/docs/\n` +
     `\n` +
     `Sitemap: ${CONFIG.siteUrl}/sitemap.xml\n`;
   await fs.writeFile(path.join(CONFIG.websiteDir, 'robots.txt'), robotsTxt);
